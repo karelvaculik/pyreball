@@ -29,7 +29,8 @@ def get_version(rel_path):
 setup(
     name='pyreball',
     version=get_version("pyreball/__init__.py"),
-    description='pyreball',
+    description='Python reporting tool.',
+    url="https://github.com/karelvaculik/pyreball",
     author='Karel Vaculik',
     author_email='vaculik.dev@gmail.com',
     packages=find_packages(exclude=('examples', 'tests')),

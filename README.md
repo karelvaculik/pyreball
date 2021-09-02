@@ -64,7 +64,7 @@ pb.plot_graph(fig, caption="The first plot.")
 In this particular example, we use several 3rd party packages so we also need to install them:
 
 ```shell
-pip install numpy matplotlib seaborn
+pip install pandas matplotlib seaborn
 ```
 
 Then generate an HTML report by running:
