@@ -69,10 +69,10 @@ pip install pandas matplotlib seaborn
 Then generate an HTML report by running:
 
 ```shell
-pyreball script.py
+pyreball report.py
 ```
 
-`pyreball` command will generate `script.html` with the final report that should look like this:
+`pyreball` command will generate `report.html` with the final report that should look like this:
 
 ![Pyreball Screenshot](pyreball_result_screenshot.png)
 
