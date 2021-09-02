@@ -19,7 +19,7 @@ pandas DataFrames to tables and plot altair charts, you need to install pandas a
 ## Install
 
 ```shell
-pip install .
+pip install pyreball
 ```
 
 ## Usage
