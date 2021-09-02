@@ -50,7 +50,6 @@ pb.print_div(
 pb.print_h1("Tables and Plots")
 
 # Print a table
-N = 10
 df = pd.DataFrame({'x': [1, 2, 3], 'y': [4, 6, 5]})
 pb.print_table(df, caption="A data table.")
 
