@@ -1,0 +1,5 @@
+include LICENSE
+include *.md
+include requirements*.txt
+include pyreball_result_screenshot.png
+graft pyreball/cfg/
