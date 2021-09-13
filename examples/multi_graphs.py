@@ -37,7 +37,7 @@ fig3 = prepare_altair_barchart(df3)
 pb.print_h2("Three Plots")
 
 pb.print_div(f"The plot below illustrates {pb.code('plot_multi_graph')} function. "
-             f"Note that currently it's only a prototype. For example, it cannot use references.\n")
+             f"Note that currently it's only a prototype. For example, it cannot use references.")
 pb.print_html("<br>")
 
 pb.plot_multi_graph([fig1, fig2, fig3], captions=["Altair barchart 1.", "Altair barchart 2.", "Altair barchart 3."])

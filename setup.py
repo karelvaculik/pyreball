@@ -31,6 +31,7 @@ setup(
     version=get_version("pyreball/__init__.py"),
     description='Python reporting tool.',
     url="https://github.com/karelvaculik/pyreball",
+    license="Apache License 2.0",
     author='Karel Vaculik',
     author_email='vaculik.dev@gmail.com',
     packages=find_packages(exclude=('examples', 'tests')),

@@ -188,11 +188,21 @@ def print_h6(string: str) -> None:
     _print_heading(string, level=6)
 
 
-def print_div(*string: Any, sep: str = "") -> None:
+def print_div(*values: Any, sep: str = "", replace_newlines_with_br: bool = False) -> None:
+    """Print values into a div element.
+
+    Any value that is not a string is converted to a string first.
+
+    :param values: one or more values to be printed into div.
+    :param sep: string separator of the values.
+    :param replace_newlines_with_br: whether to replace newline characters by <br> tag.
+    """
     if not get_parameter_value('html_file_path') or get_parameter_value('keep_stdout'):
-        print(*string, sep=sep)
+        print(*values, sep=sep)
     if get_parameter_value('html_file_path'):
-        html_div = re.sub(r'\n', '<br>', sep.join(map(str, string)))
+        html_div = sep.join(map(str, values))
+        if replace_newlines_with_br:
+            html_div = re.sub(r'\n', '<br>', html_div)
         _write_to_html(f"<div>{html_div}</div>")
 
 
