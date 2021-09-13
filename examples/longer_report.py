@@ -18,8 +18,8 @@ pb.print_div("It is possible to pass several values and optionally a separator."
              "The values will be joined and automatically converted to strings, as with the following number and list.",
              42,
              [11, 13, 19],
-             "Newline characters will be automatically converted to to &lt;br&gt; elements.",
-             sep="\n")
+             "Newline characters can be converted to &lt;br&gt; elements by using replace_newlines_with_br parameter.",
+             sep="\n", replace_newlines_with_br=True)
 
 pb.print_h2("Basic String-wrapping Formatting Functions")
 pb.print_div(f"This is a text with {pb.bold('bold')} word and with {pb.em('emphasised')} word.",

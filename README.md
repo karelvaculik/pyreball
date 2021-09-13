@@ -16,6 +16,9 @@ of *regular* Python scripts is that they are easy to maintain, can be refactored
 Pyreball is designed not to require any dependencies, unless you decide to use them. For example, if you decide to print
 pandas DataFrames to tables and plot altair charts, you need to install pandas and altair.
 
+Note that Pyreball is still in early stages of development, so there can be some breaking changes between released 
+versions.
+
 ## Install
 
 ```shell

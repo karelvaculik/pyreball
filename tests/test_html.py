@@ -335,7 +335,11 @@ def test_print_h1_h6__file_output__with_numbers(keep_stdout, capsys, simple_html
         assert captured.out.strip() == expected_stdout
 
 
-def test_print_div__stdout(capsys):
+@pytest.mark.parametrize("replace_newlines_with_br", [
+    True,
+    False,
+])
+def test_print_div__stdout(replace_newlines_with_br, capsys):
     def fake_get_parameter_value(key):
         return key == 'keep_stdout'
 
@@ -347,22 +351,26 @@ def test_print_div__stdout(capsys):
 
     # when keep_stdout is set on
     with mock.patch('pyreball.html.get_parameter_value', side_effect=fake_get_parameter_value):
-        print_div("arbitrary paragraph")
+        print_div("arbitrary paragraph\nsecond line", replace_newlines_with_br=replace_newlines_with_br)
         captured = capsys.readouterr()
-        assert "arbitrary paragraph" in captured.out
+        assert "arbitrary paragraph\nsecond line" in captured.out
 
     # when keep_stdout is set off, but we don't have html file either
     with mock.patch('pyreball.html.get_parameter_value', side_effect=fake_get_parameter_value_different):
-        print_div("another paragraph")
+        print_div("another paragraph\nsecond line", replace_newlines_with_br=replace_newlines_with_br)
         captured = capsys.readouterr()
-        assert "another paragraph" in captured.out
+        assert "another paragraph\nsecond line" in captured.out
 
 
+@pytest.mark.parametrize("replace_newlines_with_br", [
+    True,
+    False,
+])
 @pytest.mark.parametrize("keep_stdout", [
     False,
     True
 ])
-def test_print_div__file_output(keep_stdout, capsys, simple_html_file):
+def test_print_div__file_output(keep_stdout, replace_newlines_with_br, capsys, simple_html_file):
     def fake_get_parameter_value(key):
         if key == 'html_file_path':
             return simple_html_file
@@ -371,11 +379,13 @@ def test_print_div__file_output(keep_stdout, capsys, simple_html_file):
         else:
             return None
 
+    expected_newline_separator = '<br>' if replace_newlines_with_br else '\n'
+
     with mock.patch('pyreball.html.get_parameter_value', side_effect=fake_get_parameter_value):
-        print_div("new\nparagraph")
+        print_div("new\nparagraph", replace_newlines_with_br=replace_newlines_with_br)
         with open(simple_html_file, 'r') as f:
             result = f.read()
-            assert result == "<html>\n<div>new<br>paragraph</div>\n"
+            assert result == f"<html>\n<div>new{expected_newline_separator}paragraph</div>\n"
 
         captured = capsys.readouterr()
         expected_stdout = "new\nparagraph" if keep_stdout else ""
