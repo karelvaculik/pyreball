@@ -135,6 +135,16 @@ override the settings from config files. If parameters are set via Python functi
 
 Run `pyreball --help` to see the command help. It also shows the possible values for both cli and `config.ini`.
 
+### Custom Script Arguments
+
+Sometimes, we might want to pass custom arguments into our Python script that is used to generate the report.
+To do so, pass `--` and all your arguments after all Pyreball's regular arguments.
+For example, you can try this on `custom_arguments.py` example script by calling:
+
+```shell
+pyreball --page-width=90 custom_arguments.py -- --sum 23 25 24
+```
+
 ## Setting up Pyreball in PyCharm
 
 There is no plugin but you can use it as an "external tool".

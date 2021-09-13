@@ -266,6 +266,7 @@ def parse_arguments() -> Dict[str, Optional[Union[str, int]]]:
         input_param.add_argument_to_parser(parser)
     parser.add_argument('--output-dir', help='Output directory. By default, the directory of the input file.')
     parser.add_argument('filename', help='Input file path.')
+    parser.add_argument('script_args', nargs=argparse.REMAINDER)
     args = parser.parse_args()
     return vars(args)
 
@@ -293,6 +294,7 @@ def get_config_directory() -> Path:
 
 def main() -> None:
     args_dict = parse_arguments()
+    script_args_string = ' '.join(args_dict.pop('script_args'))
     filename = Path(args_dict.pop('filename'))  # type: ignore
     output_dir = cast(Optional[str], args_dict.pop('output_dir'))
     cli_parameters = check_and_fix_parameters(parameters=args_dict, parameter_specifications=parameter_specifications,
@@ -338,7 +340,7 @@ def main() -> None:
         f.write(html_begin)
     try:
         # Use {sys.executable} instead of just "python" command as it may not work correctly as a PyCharm external tool
-        os.system(f"{sys.executable} {filename}")
+        os.system(f"{sys.executable} {filename} {script_args_string}")
     finally:
         with open(html_path, 'a') as f:
             f.write(html_end)
