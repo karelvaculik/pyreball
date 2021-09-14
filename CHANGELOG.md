@@ -1,10 +1,11 @@
 # Changelog
 
 
-## 0.1.1 (2021-09-13)
+## 0.1.1 (2021-09-14)
 
 - Added `replace_newlines_with_br` parameter to `print_div` to control replacement of newline characters.
 - It is newly possible to pass custom script arguments.
+- Replaced `--output-dir` parameter with `--output-path` parameter.
 
 ## 0.1.0 (2021-09-02)
 
