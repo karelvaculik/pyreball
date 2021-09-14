@@ -264,8 +264,11 @@ def parse_arguments() -> Dict[str, Optional[Union[str, int]]]:
     parser = argparse.ArgumentParser(description='Generate Python report.')
     for input_param in parameter_specifications:
         input_param.add_argument_to_parser(parser)
-    parser.add_argument('--output-dir', help='Output directory. By default, the directory of the input file.')
+    parser.add_argument('--output-path', help='Output path. It must contain also the name of the output file with '
+                                              'suffix .html. If not provided, the output file name is derived from '
+                                              'the name of the input script and the same directory is used.')
     parser.add_argument('filename', help='Input file path.')
+    parser.add_argument('script_args', nargs=argparse.REMAINDER)
     args = parser.parse_args()
     return vars(args)
 
@@ -293,8 +296,13 @@ def get_config_directory() -> Path:
 
 def main() -> None:
     args_dict = parse_arguments()
-    filename = Path(args_dict.pop('filename'))  # type: ignore
-    output_dir = cast(Optional[str], args_dict.pop('output_dir'))
+    script_args_string = ' '.join(args_dict.pop('script_args'))
+    input_filename = Path(args_dict.pop('filename'))  # type: ignore
+    output_path = cast(Optional[str], args_dict.pop('output_path'))
+
+    if output_path and not output_path.endswith(".html"):
+        raise ValueError("Value of output path parameter must end with .html suffix.")
+
     cli_parameters = check_and_fix_parameters(parameters=args_dict, parameter_specifications=parameter_specifications,
                                               none_allowed=True)
 
@@ -306,16 +314,20 @@ def main() -> None:
                                               secondary_parameters=file_config_parameters,
                                               parameter_specifications=parameter_specifications)
 
-    if not filename.is_file():
-        raise ValueError(f"File {filename} does not exist.")
+    if not input_filename.is_file():
+        raise ValueError(f"File {input_filename} does not exist.")
 
-    title = filename.stem
-    if not output_dir:
+    if not output_path:
         # use the directory of the input file
-        output_dir_path = filename.resolve().parents[0]
+        output_dir_path = input_filename.resolve().parents[0]
+        title = input_filename.stem
+
     else:
-        output_dir_path = Path(output_dir)
+        output_path = Path(output_path).resolve()
+        title = output_path.stem
+        output_dir_path = output_path.parents[0]
         output_dir_path.mkdir(parents=True, exist_ok=True)
+
     path_str = str(output_dir_path / title)
     os.environ["_TMP_PYREBALL_GENERATOR_PARAMETERS"] = json.dumps({**parameters, 'html_dir_path': path_str})
     html_path = Path(path_str + ".html")
@@ -338,7 +350,7 @@ def main() -> None:
         f.write(html_begin)
     try:
         # Use {sys.executable} instead of just "python" command as it may not work correctly as a PyCharm external tool
-        os.system(f"{sys.executable} {filename}")
+        os.system(f"{sys.executable} {input_filename} {script_args_string}")
     finally:
         with open(html_path, 'a') as f:
             f.write(html_end)
