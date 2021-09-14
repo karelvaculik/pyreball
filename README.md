@@ -133,6 +133,15 @@ To summarize, Pyreball reads settings from its default config file. If a config 
 `pyreball-generate-config`, then this generated config is used instead. If cli parameters are provided, they
 override the settings from config files. If parameters are set via Python function parameters, they override everything.
 
+Pyreball uses the name of the input script and its directory to derive the path of the output file by default.
+In order to change this output path, use `--output-path` option, for example:
+
+```shell
+pyreball --output-path=report_123.html report.py
+pyreball --output-path=mydir/mysubdir/report_456.html report.py
+```
+
+
 Run `pyreball --help` to see the command help. It also shows the possible values for both cli and `config.ini`.
 
 ### Custom Script Arguments
