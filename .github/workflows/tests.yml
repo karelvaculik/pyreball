@@ -5,27 +5,15 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
-
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Python ${{ matrix.python-version }}
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.x'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements_test.txt ]; then pip install -r requirements_test.txt; fi
-          if [ -f requirements_examples.txt ]; then pip install -r requirements_examples.txt; fi
-      - name: Test with pytest
-        run: |
-          pytest --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=experimental_github_project --cov-report=xml --cov-report=html tests/
-      - name: Upload pytest test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: pytest-results-${{ matrix.python-version }}
-          path: junit/test-results-${{ matrix.python-version }}.xml
-        if: ${{ always() }}
+          pip install tox
+      - name: Run tox
+        run: tox
