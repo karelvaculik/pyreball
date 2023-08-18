@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.0 (2023-08-18)
+
+- Updated to newer versions of optional dependencies.
 
 ## 0.1.1 (2021-09-14)
 

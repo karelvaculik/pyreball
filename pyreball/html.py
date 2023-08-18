@@ -420,7 +420,8 @@ def _prepare_image_element(fig: FigType,
         img_element = _prepare_altair_plot_element(fig=fig, l_plot_index=plot_index)
     elif type(fig).__name__ == 'Figure' and type(fig).__module__ == 'plotly.graph_objs._figure':
         img_element = _prepare_plotly_plot_element(fig=fig)
-    elif type(fig).__name__ == 'Figure' and type(fig).__module__ == 'bokeh.plotting.figure':
+    elif type(fig).__name__.lower() == "figure" and type(fig).__module__ in ["bokeh.plotting.figure",
+                                                                             "bokeh.plotting._figure"]:
         img_element = _prepare_bokeh_plot_element(fig=fig)
     else:
         raise ValueError(f"Unknown figure type {type(fig)}.")
@@ -438,7 +439,8 @@ def _plot_graph(fig: FigType,
                 hidden: bool = False) -> None:
     if not get_parameter_value('html_file_path'):
         # only when we don't print to HTML
-        if type(fig).__name__ == 'Figure' and type(fig).__module__ == 'bokeh.plotting.figure':
+        if type(fig).__name__.lower() == "figure" and type(fig).__module__ in ["bokeh.plotting.figure",
+                                                                               "bokeh.plotting._figure"]:
             from bokeh.plotting import show
             show(fig)
         else:

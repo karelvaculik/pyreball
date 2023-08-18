@@ -10,9 +10,11 @@
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.3.0.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.3.0.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.3.0.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-3.2.2.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.2.2.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.2.2.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.2.2.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.2.2.min.js" crossorigin="anonymous"></script>
 <script>
 
     function change_expand(button, table_id){
@@ -372,14 +374,14 @@ Table 3: Data table 3.
 <div id="image-multi-panel-1">
 <div class="image-wrapper"><div align="center"><div style="display: inline-block;"><div id="altairvis1"></div><script type="text/javascript">
 var spec = {
-  "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
   "config": {
     "axisX": {
       "labelAngle": -45
     },
     "view": {
       "continuousHeight": 300,
-      "continuousWidth": 400
+      "continuousWidth": 300
     }
   },
   "data": {
@@ -425,7 +427,9 @@ var spec = {
     }
   },
   "height": 480,
-  "mark": "bar",
+  "mark": {
+    "type": "bar"
+  },
   "width": 800
 };
 var opt = {"renderer": "canvas", "actions": false};
@@ -436,14 +440,14 @@ Figure 1: Altair barchart 1.
 </div></div></div>
 <div class="image-wrapper" style="display: none;"><div align="center"><div style="display: inline-block;"><div id="altairvis2"></div><script type="text/javascript">
 var spec = {
-  "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
   "config": {
     "axisX": {
       "labelAngle": -45
     },
     "view": {
       "continuousHeight": 300,
-      "continuousWidth": 400
+      "continuousWidth": 300
     }
   },
   "data": {
@@ -489,7 +493,9 @@ var spec = {
     }
   },
   "height": 480,
-  "mark": "bar",
+  "mark": {
+    "type": "bar"
+  },
   "width": 800
 };
 var opt = {"renderer": "canvas", "actions": false};
@@ -500,14 +506,14 @@ Figure 2: Altair barchart 2.
 </div></div></div>
 <div class="image-wrapper" style="display: none;"><div align="center"><div style="display: inline-block;"><div id="altairvis3"></div><script type="text/javascript">
 var spec = {
-  "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
   "config": {
     "axisX": {
       "labelAngle": -45
     },
     "view": {
       "continuousHeight": 300,
-      "continuousWidth": 400
+      "continuousWidth": 300
     }
   },
   "data": {
@@ -553,7 +559,9 @@ var spec = {
     }
   },
   "height": 480,
-  "mark": "bar",
+  "mark": {
+    "type": "bar"
+  },
   "width": 800
 };
 var opt = {"renderer": "canvas", "actions": false};
@@ -569,14 +577,14 @@ Figure 3: Altair barchart 3.
 <div id="image-multi-panel-2">
 <div class="image-wrapper"><div align="center"><div style="display: inline-block;"><div id="altairvis4"></div><script type="text/javascript">
 var spec = {
-  "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
   "config": {
     "axisX": {
       "labelAngle": -45
     },
     "view": {
       "continuousHeight": 300,
-      "continuousWidth": 400
+      "continuousWidth": 300
     }
   },
   "data": {
@@ -622,7 +630,9 @@ var spec = {
     }
   },
   "height": 480,
-  "mark": "bar",
+  "mark": {
+    "type": "bar"
+  },
   "width": 800
 };
 var opt = {"renderer": "canvas", "actions": false};
