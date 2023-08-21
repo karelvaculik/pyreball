@@ -5,7 +5,7 @@ import re
 import sys
 import xml
 from pathlib import Path
-from typing import cast, Dict, Optional, Tuple, Union
+from typing import cast, Dict, List, Optional, Tuple, Union
 from xml.dom.minidom import parseString
 
 import pkg_resources
@@ -366,11 +366,11 @@ def get_config_directory() -> Path:
 
 def main() -> None:
     args_dict = parse_arguments()
-    script_args_string = " ".join(args_dict.pop("script_args"))
+    script_args_string = " ".join(cast(List[str], args_dict.pop("script_args")))
     input_filename = Path(args_dict.pop("filename"))  # type: ignore
-    output_path = cast(Optional[str], args_dict.pop("output_path"))
+    output_path_str = cast(Optional[str], args_dict.pop("output_path"))
 
-    if output_path and not output_path.endswith(".html"):
+    if output_path_str and not output_path_str.endswith(".html"):
         raise ValueError("Value of output path parameter must end with .html suffix.")
 
     cli_parameters = check_and_fix_parameters(
@@ -395,13 +395,13 @@ def main() -> None:
     if not input_filename.is_file():
         raise ValueError(f"File {input_filename} does not exist.")
 
-    if not output_path:
+    if not output_path_str:
         # use the directory of the input file
         output_dir_path = input_filename.resolve().parents[0]
         title = input_filename.stem
 
     else:
-        output_path = Path(output_path).resolve()
+        output_path = Path(output_path_str).resolve()
         title = output_path.stem
         output_dir_path = output_path.parents[0]
         output_dir_path.mkdir(parents=True, exist_ok=True)

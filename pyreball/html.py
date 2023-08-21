@@ -3,7 +3,7 @@ import io
 import os
 import random
 import re
-from typing import Any, cast, List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Any, cast, Dict, List, Optional, Set, Tuple, TYPE_CHECKING, Union
 
 from pyreball.utils.utils import get_parameter_value, make_sure_dir_exists, merge_values
 
@@ -46,6 +46,13 @@ FigType = Union[
 ]
 
 
+_references: Set[str] = set()
+_heading_memory: Dict[str, Any] = {}
+_table_memory: Dict[str, Any] = {}
+_graph_memory: Dict[str, Any] = {}
+_multi_graph_memory: Dict[str, Any] = {}
+
+
 class Reference:
     def __init__(self, default_text: Optional[str] = None) -> None:
         self.id = "id" + str(random.getrandbits(64))
@@ -74,15 +81,12 @@ def _check_and_mark_reference(reference: Reference) -> None:
     This function is used when references are added to tables or plots.
     If a table or plot is about to get a reference that was already used for another object, an error is raised.
     """
-    if not hasattr(_check_and_mark_reference, "used_references"):
-        _check_and_mark_reference.used_references = set()
-
-    if reference.id in _check_and_mark_reference.used_references:
+    if reference.id in _references:
         raise ValueError(
             "Reference is used for the second time. You have to create another reference for this object."
         )
     else:
-        _check_and_mark_reference.used_references.add(reference.id)
+        _references.add(reference.id)
 
 
 def set_title(title: str) -> None:
@@ -163,25 +167,26 @@ def _print_heading(string: str, level: int = 1) -> None:
         print("#" * level + " " + str(string))
 
     if get_parameter_value("html_file_path"):
-        if not hasattr(_print_heading, "heading_index"):
-            _print_heading.heading_index = 1
-        heading_index = _print_heading.heading_index
+        if "heading_index" not in _heading_memory:
+            _heading_memory["heading_index"] = 1
+
+        heading_index = _heading_memory["heading_index"]
 
         if get_parameter_value("numbered_headings"):
-            if not hasattr(_print_heading, "heading_counting"):
+            if "heading_counting" not in _heading_memory:
                 # what is the index of current h1, h2, h3, h4, h5, h6?
-                _print_heading.heading_counting = [0, 0, 0, 0, 0, 0]
+                _heading_memory["heading_counting"] = [0, 0, 0, 0, 0, 0]
 
             # increase the number in the level
-            _print_heading.heading_counting[level - 1] = (
-                _print_heading.heading_counting[level - 1] + 1
+            _heading_memory["heading_counting"][level - 1] = (
+                _heading_memory["heading_counting"][level - 1] + 1
             )
             # reset all sub-levels
-            _print_heading.heading_counting[level:] = [0] * (6 - level)
+            _heading_memory["heading_counting"][level:] = [0] * (6 - level)
             # get the string of the numbered section and append non-breakable space
             non_breakable_spaces = "\u00A0\u00A0"
             heading_number_str = (
-                _get_heading_number(level, _print_heading.heading_counting)
+                _get_heading_number(level, _heading_memory["heading_counting"])
                 + non_breakable_spaces
             )
         else:
@@ -195,7 +200,7 @@ def _print_heading(string: str, level: int = 1) -> None:
             string + f'<a class="anchor-link" href="#{tidy_string}">{pilcrow_sign}</a>'
         )
         _write_to_html(f'<h{level} id="{tidy_string}">{string}</h{level}>')
-        _print_heading.heading_index += 1
+        _heading_memory["heading_index"] += 1
 
 
 def print_h1(string: str) -> None:
@@ -411,9 +416,9 @@ def print_table(
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
         print(df)
     if get_parameter_value("html_file_path"):
-        if not hasattr(print_table, "table_index"):
-            print_table.table_index = 1
-        table_index = print_table.table_index
+        if "table_index" not in _table_memory:
+            _table_memory["table_index"] = 1
+        table_index = _table_memory["table_index"]
 
         align = cast(
             str,
@@ -452,7 +457,7 @@ def print_table(
             **kwargs,
         )
         _write_to_html(table_html)
-        print_table.table_index += 1
+        _table_memory["table_index"] += 1
 
 
 def _construct_plot_anchor_link(reference: Optional[Reference], plot_ind: int) -> str:
@@ -608,9 +613,9 @@ def _plot_graph(
         else:
             fig.show()
     else:
-        if not hasattr(_plot_graph, "plot_index"):
-            _plot_graph.plot_index = 1
-        plot_index = _plot_graph.plot_index
+        if "plot_index" not in _graph_memory:
+            _graph_memory["plot_index"] = 1
+        plot_index = _graph_memory["plot_index"]
 
         anchor_link = _construct_plot_anchor_link(
             reference=reference, plot_ind=plot_index
@@ -633,7 +638,7 @@ def _plot_graph(
         )
 
         _write_to_html(img_html)
-        _plot_graph.plot_index += 1
+        _graph_memory["plot_index"] += 1
 
 
 def plot_graph(
@@ -710,9 +715,9 @@ def plot_multi_graph(
     )
 
     if len(figs) > 0:
-        if not hasattr(plot_multi_graph, "multi_plot_index"):
-            plot_multi_graph.multi_plot_index = 1
-        multi_plot_index = plot_multi_graph.multi_plot_index
+        if "multi_plot_index" not in _multi_graph_memory:
+            _multi_graph_memory["multi_plot_index"] = 1
+        multi_plot_index = _multi_graph_memory["multi_plot_index"]
 
         b_prev_id = f"button_prev_{multi_plot_index}"
         b_next_id = f"button_next_{multi_plot_index}"
@@ -738,4 +743,4 @@ def plot_multi_graph(
             )
 
         _write_to_html("</div>")
-        plot_multi_graph.multi_plot_index += 1
+        _multi_graph_memory["multi_plot_index"] += 1

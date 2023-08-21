@@ -16,6 +16,9 @@ from pyreball.html import (
     _check_and_mark_reference,
     _construct_plot_anchor_link,
     _get_heading_number,
+    _graph_memory,
+    _heading_memory,
+    _multi_graph_memory,
     _plot_graph,
     _prepare_altair_plot_element,
     _prepare_bokeh_plot_element,
@@ -26,6 +29,8 @@ from pyreball.html import (
     _prepare_table_html,
     _print_heading,
     _reduce_whitespaces,
+    _references,
+    _table_memory,
     _tidy_title,
     _wrap_plot_element_by_outer_divs,
     _write_to_html,
@@ -70,10 +75,8 @@ def simple_dataframe():
 def pre_test_print_heading_cleanup():
     # _print_heading is meant to be used only in a single session,
     # but test functions don't respect this so we do manual cleanup
-    if hasattr(_print_heading, "heading_index"):
-        delattr(_print_heading, "heading_index")
-    if hasattr(_print_heading, "heading_counting"):
-        delattr(_print_heading, "heading_counting")
+    global _heading_memory
+    _heading_memory.clear()
     yield
 
 
@@ -81,8 +84,8 @@ def pre_test_print_heading_cleanup():
 def pre_test_check_and_mark_reference_cleanup():
     # _check_and_mark_reference is meant to be used only in a single session,
     # but test functions don't respect this so we do manual cleanup
-    if hasattr(_check_and_mark_reference, "used_references"):
-        delattr(_check_and_mark_reference, "used_references")
+    global _references
+    _references.clear()
     yield
 
 
@@ -90,8 +93,8 @@ def pre_test_check_and_mark_reference_cleanup():
 def pre_test_print_table_cleanup():
     # print_table is meant to be used only in a single session,
     # but test functions don't respect this so we do manual cleanup
-    if hasattr(print_table, "table_index"):
-        delattr(print_table, "table_index")
+    global _table_memory
+    _table_memory.clear()
     yield
 
 
@@ -99,8 +102,8 @@ def pre_test_print_table_cleanup():
 def pre_test_plot_graph_cleanup():
     # _plot_graph is meant to be used only in a single session,
     # but test functions don't respect this so we do manual cleanup
-    if hasattr(_plot_graph, "plot_index"):
-        delattr(_plot_graph, "plot_index")
+    global _graph_memory
+    _graph_memory.clear()
     yield
 
 
@@ -108,8 +111,8 @@ def pre_test_plot_graph_cleanup():
 def pre_test_plot_multi_graph_cleanup():
     # plot_multi_graph is meant to be used only in a single session,
     # but test functions don't respect this so we do manual cleanup
-    if hasattr(plot_multi_graph, "multi_plot_index"):
-        delattr(plot_multi_graph, "multi_plot_index")
+    global _multi_graph_memory
+    _multi_graph_memory.clear()
     yield
 
 
@@ -164,9 +167,10 @@ def test__check_and_mark_reference(pre_test_check_and_mark_reference_cleanup):
 
 
 def test_set_title__stdout(capsys):
-    set_title("my title")
-    captured = capsys.readouterr()
-    assert captured.out.strip() == "my title"
+    with mock.patch("pyreball.html.get_parameter_value", return_value=False):
+        set_title("my title")
+        captured = capsys.readouterr()
+        assert captured.out.strip() == "my title"
 
 
 @pytest.mark.parametrize("keep_stdout", [False, True])
@@ -898,7 +902,7 @@ def test_print_table__file_output(
             )
 
             # after writing the first table, the index is already incremented
-            assert print_table.table_index == 2
+            assert _table_memory["table_index"] == 2
 
             captured = capsys.readouterr()
             if keep_stdout:
@@ -908,7 +912,7 @@ def test_print_table__file_output(
 
             # check table index if another table is written to html
             print_table(simple_dataframe)
-            assert print_table.table_index == 3
+            assert _table_memory["table_index"] == 3
 
 
 @pytest.mark.parametrize(
@@ -968,9 +972,10 @@ def test__prepare_matplotlib_plot_element__wrong_format():
 
 
 def test__prepare_matplotlib_plot_element__unsupported_param_values():
-    with pytest.raises(RuntimeError) as excinfo:
-        _prepare_matplotlib_plot_element(mock.Mock(), 0, "png", False)
-    assert "Failed to create a matplotlib image." in str(excinfo.value)
+    with mock.patch("pyreball.html.get_parameter_value", return_value=False):
+        with pytest.raises(RuntimeError) as excinfo:
+            _prepare_matplotlib_plot_element(mock.Mock(), 0, "png", False)
+        assert "Failed to create a matplotlib image." in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
@@ -1247,7 +1252,7 @@ def test__plot_graph__file_output(
             )
 
             _write_to_html_mock.assert_called_once()
-            assert _plot_graph.plot_index == 2
+            assert _graph_memory["plot_index"] == 2
 
             _plot_graph(
                 fig=fig,
@@ -1259,7 +1264,7 @@ def test__plot_graph__file_output(
                 embedded=True,
                 hidden=True,
             )
-            assert _plot_graph.plot_index == 3
+            assert _graph_memory["plot_index"] == 3
 
             # try with the same reference one more time
             with pytest.raises(ValueError) as excinfo:
@@ -1388,5 +1393,4 @@ def test_plot_multi_graph(
                 )
 
                 assert _plot_graph_mock.call_count == 3
-
-                assert plot_multi_graph.multi_plot_index == 2
+                assert _multi_graph_memory["multi_plot_index"] == 2

@@ -15,6 +15,8 @@ ParametersType = Dict[str, Optional[Union[str, int]]]
 
 logger = get_logger()
 
+_parameter_cache = {}
+
 
 class Parameter(ABC):
     @property
@@ -273,21 +275,21 @@ def _map_env_value(value):
 
 
 def get_parameter_value(key: str) -> Any:
-    if not hasattr(get_parameter_value, "data"):
-        get_parameter_value.data = {
+    if not "params" in _parameter_cache:
+        _parameter_cache["params"] = {
             k: _map_env_value(v)
             for k, v in json.loads(
                 os.environ.get("_TMP_PYREBALL_GENERATOR_PARAMETERS", "{}")
             ).items()
         }
-        if "html_dir_path" in get_parameter_value.data:
-            get_parameter_value.data["html_dir_name"] = os.path.basename(
-                get_parameter_value.data.get("html_dir_path")
+        if "html_dir_path" in _parameter_cache["params"]:
+            _parameter_cache["params"]["html_dir_name"] = os.path.basename(
+                _parameter_cache["params"]["html_dir_path"]
             )
-            get_parameter_value.data["html_file_path"] = (
-                get_parameter_value.data.get("html_dir_path") + ".html"
+            _parameter_cache["params"]["html_file_path"] = (
+                _parameter_cache["params"]["html_dir_path"] + ".html"
             )
-    return get_parameter_value.data.get(key)
+    return _parameter_cache["params"].get(key)
 
 
 def make_sure_dir_exists(directory: Optional[str]) -> None:
