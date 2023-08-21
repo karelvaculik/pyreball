@@ -1,19 +1,28 @@
 name: Tests
 
-on: [push]
+on: [ push ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
+
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Python
+      - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install tox
       - name: Run tox
-        run: tox
+        env:
+          TOXENV: "py${{ matrix.python-version }}-core-tests"
+        run: |
+          TOXENV=${{ env.TOXENV }}
+          TOXENV=${TOXENV//.}
+          tox -e $TOXENV,mypy
