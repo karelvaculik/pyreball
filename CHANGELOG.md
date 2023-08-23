@@ -3,6 +3,7 @@
 ## 0.2.0 (2023-08-18)
 
 - Updated to newer versions of optional dependencies.
+- Added new text elements `div` and `span`. Added new parameters to HTML elements - in particular `cl` and `attrs`.
 
 ## 0.1.1 (2021-09-14)
 

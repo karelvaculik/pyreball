@@ -59,16 +59,10 @@ class Reference:
         self.text = default_text
 
     def __str__(self) -> str:
-        return (
-            '<a href="#ref-'
-            + self.id
-            + '">'
-            + (self.id if self.text is None else self.text)
-            + "</a>"
-        )
+        return f"<a href=\"#ref-{self.id}\">{self.id if self.text is None else self.text}</a>"
 
     def __call__(self, text: str):
-        return '<a href="#ref-' + self.id + '">' + text + "</a>"
+        return f"<a href=\"#ref-{self.id}\">{text}</a>"
 
 
 def create_reference(default_text: Optional[str] = None) -> Reference:
