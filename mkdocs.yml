@@ -1,0 +1,34 @@
+site_name: Pyreball
+theme:
+  name: material
+
+plugins:
+  - search
+  - macros:
+      module_name: docs/plugins/main
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [ . ]
+          options:
+            members_order: source
+            separate_signature: true
+            filters: [ "!^_" ]
+            docstring_options:
+              ignore_init_summary: true
+            merge_init_into_class: true
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+nav:
+  - Get Started:
+      - Welcome to Pyreball: index.md
+  - API Documentation:
+      - pyreball.html: api/pyreball_html.md

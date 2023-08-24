@@ -45,7 +45,6 @@ FigType = Union[
     "altair.vegalite.v4.api.VConcatChart",
 ]
 
-
 _references: Set[str] = set()
 _heading_memory: Dict[str, Any] = {}
 _table_memory: Dict[str, Any] = {}
@@ -59,16 +58,10 @@ class Reference:
         self.text = default_text
 
     def __str__(self) -> str:
-        return (
-            '<a href="#ref-'
-            + self.id
-            + '">'
-            + (self.id if self.text is None else self.text)
-            + "</a>"
-        )
+        return f'<a href="#ref-{self.id}">{self.id if self.text is None else self.text}</a>'
 
     def __call__(self, text: str):
-        return '<a href="#ref-' + self.id + '">' + text + "</a>"
+        return f'<a href="#ref-{self.id}">{text}</a>'
 
 
 def create_reference(default_text: Optional[str] = None) -> Reference:
@@ -90,13 +83,15 @@ def _check_and_mark_reference(reference: Reference) -> None:
 
 
 def set_title(title: str) -> None:
-    """Set page title.
+    """
+    Set page title.
 
     Note that this function does not have to be called at the beginning of the script.
     If this function is not called via pyreball and parameter keep_stdout is set to True,
     it just prints the title to stdout.
 
-    :param title: title string.
+    Args:
+        title (str): Title string.
     """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
         print(title)
@@ -128,8 +123,11 @@ def _tidy_title(title: str) -> str:
     """
     Transforms title string into lowercase alphanumerical sequence separated by underscores.
 
-    :param title: str
-    :return: str
+    Args:
+        title (str): The string that you want to transform.
+
+    Returns:
+        str: The transformed string.
     """
     new_title = re.sub(
         "([a-z])([A-Z])", r"\g<1> \g<2>", title
@@ -230,13 +228,19 @@ def print_h6(string: str) -> None:
 def print_div(
     *values: Any, sep: str = "", replace_newlines_with_br: bool = False
 ) -> None:
-    """Print values into a div element.
+    """
+    Print values into a div element.
 
     Any value that is not a string is converted to a string first.
 
-    :param values: one or more values to be printed into div.
-    :param sep: string separator of the values.
-    :param replace_newlines_with_br: whether to replace newline characters by <br> tag.
+    Args:
+        values (Any): One or more values to be printed into the div.
+        sep (str, optional): String separator of the values. Defaults to an empty string.
+        replace_newlines_with_br (bool, optional): Whether to replace newline characters with the <br> tag.
+            Defaults to False.
+
+    Returns:
+        None
     """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
         print(*values, sep=sep)
@@ -400,18 +404,23 @@ def print_table(
 
     The sortable tables are based on https://datatables.net/examples/basic_init/zero_configuration.html.
 
-    :param df: data frame to be printed.
-    :param caption: text caption.
-    :param reference: reference object.
-    :param align: how to align the table: "left", "center", "right".
-    If None, settings from config or CLI arguments is used.
-    :param numbered: should be the caption be numbered?
-    :param full_table: whether to show the table expanded. If None, settings from config or CLI arguments is used.
-    :param sortable: whether to allow sortable columns. If None, settings from config or CLI arguments is used.
-    :param sorting_definition: how to sort the table initially, in the form (<column_name>, <sorting>),
-    where <sorting> is either 'asc' or 'desc'.
-    :param kwargs: other parameters to pandas to_html method.
-    :return:
+    Args:
+        df (pandas.DataFrame): Data frame to be printed.
+        caption (str, optional): Text caption.
+        reference (Reference, optional): Reference object.
+        align (str, optional): How to align the table. If None, settings from config or CLI arguments are used.
+            Acceptable values are 'left', 'center', or 'right'.
+        numbered (bool, optional): Should the caption be numbered?
+        full_table (bool, optional): Whether to show the table expanded.
+            If None, settings from config or CLI arguments are used.
+        sortable (bool, optional): Whether to allow sortable columns.
+            If None, settings from config or CLI arguments are used.
+        sorting_definition (tuple, optional): How to sort the table initially, in the form (<column_name>, <sorting>),
+            where <sorting> is either 'asc' or 'desc'.
+        **kwargs: Other parameters to pandas to_html method.
+
+    Returns:
+        None
     """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
         print(df)
@@ -650,18 +659,24 @@ def plot_graph(
     matplotlib_format: Optional[str] = None,
     embedded: Optional[bool] = None,
 ) -> None:
-    """Plot a graph.
+    """
+    Plot a graph.
 
-    :param fig: plot object.
-    :param caption: caption of the plot.
-    :param reference: reference object for link creation.
-    :param align: how to align the table: "left", "center", "right".
-    If None, settings from config or CLI arguments is used.
-    :param numbered: should be the caption be numbered? If None, settings from config or CLI arguments is used.
-    :param matplotlib_format: format in the case of matplotlib plots. Either "svg", "png", or None.
-    If None, settings from config or CLI arguments is used.
-    :param embedded: whether to embed the plot directly into HTML; Only for matplotlib "svg" images.
-    If None, settings from config or CLI arguments is used.
+    Args:
+        fig (FigType): Plot object.
+        caption (Optional[str]): Caption of the plot.
+        reference (Optional[Reference]): Reference object for link creation.
+        align (Optional[str]): How to align the table. Can be "left", "center", or "right".
+            Defaults to settings from config or CLI arguments if None.
+        numbered (Optional[bool]): Whether the caption should be numbered.
+            Defaults to settings from config or CLI arguments if None.
+        matplotlib_format (Optional[str]): Format for matplotlib plots. Can be "svg", "png", or None.
+            Defaults to settings from config or CLI arguments if None.
+        embedded (Optional[bool]): Whether to embed the plot directly into HTML; Only applicable for matplotlib "svg" images.
+            Defaults to settings from config or CLI arguments if None.
+
+    Returns:
+        None
     """
 
     align = cast(
