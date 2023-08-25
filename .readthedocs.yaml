@@ -6,7 +6,7 @@ build:
     python: "3.10"
   jobs:
     pre_build:
-      - pyreball docs/examples/example_init.py
+      - echo "HELLO PREBUILD"
 
 python:
   install:
