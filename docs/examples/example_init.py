@@ -2,8 +2,6 @@ import pyreball as pb
 
 pb.set_title("Pyreball Illustration")
 
-pb.print_h1("Introduction")
-
 pb.print_div(
     "Pyreball has many features, among others:",
     pb.ul(

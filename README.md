@@ -4,7 +4,7 @@
 
 ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
 <a href="https://github.com/psf/black">
-    <img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg">
+<img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg">
 </a>
 [![Tests](https://github.com/karelvaculik/pyreball/actions/workflows/tests.yml/badge.svg)](https://github.com/karelvaculik/pyreball/actions/workflows/tests.yml)
 
@@ -131,13 +131,17 @@ pyreball-generate-config
 
 By default, the configs will be copied to `<HOME>/.pyreball/` directory, which can be changed by optional
 `--output-dir` parameter. Once generated, the `config.ini` can be modified and it will be used by Pyreball.
-Each of these values can be also overridden by specific cli option of `pyreball` command (e.g. `--center-tables=no`).
-This is useful if non-default settings should be applied to a specific file(s). For example, the following command
+
+Each config value can be also overridden by specific cli option of `pyreball` command (e.g. `--center-tables=no`).
+This is useful if non-default settings should be applied to specific files. For example, the following command
 overrides parameters `full-tables` and `page-width`:
 
 ```shell
 pyreball --full-tables=no --page-width=100 script.py
 ```
+
+Note that all parameters must be set before the positional argument, because otherwise they would be interpreted
+as script's arguments - see below.
 
 Some parameters can be overridden even on the level of individual function calls. For example, parameter `center`
 of `print_table` function can override both `--center-tables` cli option and `center-tables` in `config.ini`.
@@ -152,17 +156,20 @@ In order to change this output path, use `--output-path` option, for example:
 ```shell
 pyreball --output-path=report_123.html report.py
 pyreball --output-path=mydir/mysubdir/report_456.html report.py
+pyreball --output-path=mydir/mysubdir report.py
 ```
 
 Run `pyreball --help` to see the command help. It also shows the possible values for both cli and `config.ini`.
 
 ### Custom Script Arguments
 
-Sometimes, we might want to pass custom arguments into our Python script that is used to generate the report.
-To do so, pass `--` and all your arguments after all Pyreball's regular arguments.
+Sometimes, you might want to pass custom arguments into the Python script that is used to generate the report.
+To do so, pass all your arguments after Pyreball's positional arguments. You can also use `--` to delimit the
+arguments to improve readability.
 For example, you can try this on `custom_arguments.py` example script by calling:
 
 ```shell
+pyreball --page-width=90 custom_arguments.py --sum 23 25 24
 pyreball --page-width=90 custom_arguments.py -- --sum 23 25 24
 ```
 
