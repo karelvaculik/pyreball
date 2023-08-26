@@ -1,8 +1,10 @@
+import os
 from pathlib import Path
 
 import pytest
 from pyreball.__main__ import (
     _get_node_text,
+    _get_output_dir_and_file_stem,
     _parse_heading_info,
     insert_heading_title_and_toc,
     replace_ids,
@@ -241,3 +243,35 @@ def test_insert_heading_title_and_toc__without_headings(include_toc, title_set, 
     )
 
     assert result == report_after
+
+
+@pytest.mark.parametrize(
+    "input_path," "output_path_str," "expected_output_dir," "expected_filename_stem",
+    [
+        (Path("script.py"), None, "", "script"),
+        (Path("a/b/script.py"), None, "a/b", "script"),
+        (Path("script.py"), "output.html", "", "output"),
+        (Path("script.py"), "x/y/output.html", "x/y", "output"),
+        (Path("a/b/script.py"), "x/y/output.html", "x/y", "output"),
+        (Path("script.py"), "x/y", "x/y", "script"),
+        (Path("script.py"), "x/y/", "x/y", "script"),
+        (Path("script.py"), "output.unsupported", "output.unsupported", "script"),
+    ],
+)
+def test__get_output_dir_and_file_stem(
+    input_path,
+    output_path_str,
+    expected_output_dir,
+    expected_filename_stem,
+    tmpdir,
+):
+    os.chdir(tmpdir)
+    input_path.parents[0].mkdir(parents=True, exist_ok=True)
+    input_path.touch()
+
+    result_output_dir_path, result_filename_stem = _get_output_dir_and_file_stem(
+        input_path, output_path_str
+    )
+    expected_output_dir_path = tmpdir / expected_output_dir
+    assert result_output_dir_path == expected_output_dir_path
+    assert result_filename_stem == expected_filename_stem
