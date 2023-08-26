@@ -3,9 +3,8 @@
 <p style="text-align: center">
 
 ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
-<a href="https://github.com/psf/black">
-<img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg">
-</a>
+[![pypi](https://img.shields.io/pypi/v/pyreball.svg)](https://pypi.python.org/pypi/pyreball)
+[![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Tests](https://github.com/karelvaculik/pyreball/actions/workflows/tests.yml/badge.svg)](https://github.com/karelvaculik/pyreball/actions/workflows/tests.yml)
 
 </p>
