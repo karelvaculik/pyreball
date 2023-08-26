@@ -20,7 +20,7 @@ pyreball report.py
 
 `pyreball` will create `report.html` that should look like this when opened in a browser:
 
-<iframe style="border:2px solid;" src="examples/example_init.html" height="300" width="100%" title="Iframe Example"></iframe>
+<iframe style="border:2px solid;" src="examples/example_init.html" height="350" width="100%" title="Iframe Example"></iframe>
 
 ## Adding Tables and Charts
 
