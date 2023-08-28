@@ -35,12 +35,12 @@ pb.print_div(
 pb.print_div(
     "In the previous section, we pasted string values on separate lines. "
     "Let's use lists instead:",
-    pb.ul(
+    pb.ulist(
         "Each argument is one element in the list",
         "We can even make nested lists as with the following ordered list:",
-        pb.ol("First", "Second"),
+        pb.olist("First", "Second"),
         "And we can of course mix the lists:",
-        pb.ul("Nested list again, but now an unordered one."),
+        pb.ulist("Nested list again, but now an unordered one."),
     ),
 )
 

@@ -22,7 +22,7 @@ pyreball report.py
 
 <iframe style="border:2px solid;" src="examples/example_init.html" height="350" width="100%" title="Iframe Example"></iframe>
 
-## Adding Tables and Charts
+## Adding Tables and Plots
 
 The core functionality of `pyreball` does not require any 3rd party dependencies.
 However, it is possible to generate other types of elements with the help of libraries such
@@ -42,4 +42,3 @@ pyreball report_plot.py
 `report_plot.html` should look like this:
 
 <iframe style="border:2px solid;" src="examples/example_init_deps.html" height="800" width="100%" title="Iframe Example"></iframe>
-

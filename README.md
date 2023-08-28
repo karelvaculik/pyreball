@@ -50,7 +50,7 @@ pb.print_h1("Introduction")
 
 pb.print_div(
     "Pyreball has many features, among others:",
-    pb.ul(
+    pb.ulist(
         "Plots in altair, plotly, bokeh, and matplotlib (and thus also seaborn etc.).",
         "Sortable and scrollable tables from pandas DataFrame.",
         f'Basic text formatting such as {pb.bold("headings")}, {pb.em("emphasis")}, and {pb.code("lists")}.',

@@ -16,4 +16,4 @@ from pyreball.html import (
     print_table,
     set_title,
 )
-from pyreball.text import bold, code, em, link, ol, ul
+from pyreball.text import a, bold, code, div, em, link, olist, span, tag, ulist

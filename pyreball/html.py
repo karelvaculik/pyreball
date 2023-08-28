@@ -238,9 +238,6 @@ def print_div(
         sep (str, optional): String separator of the values. Defaults to an empty string.
         replace_newlines_with_br (bool, optional): Whether to replace newline characters with the <br> tag.
             Defaults to False.
-
-    Returns:
-        None
     """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
         print(*values, sep=sep)
@@ -262,6 +259,11 @@ def print_code(string: str, highlight_syntax: bool = True) -> None:
 
 
 def print_html(string: str) -> None:
+    """Print string to HTML file.
+
+    Args:
+        string: String to be printed.
+    """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
         print(string)
     if get_parameter_value("html_file_path"):
@@ -418,9 +420,6 @@ def print_table(
         sorting_definition (tuple, optional): How to sort the table initially, in the form (<column_name>, <sorting>),
             where <sorting> is either 'asc' or 'desc'.
         **kwargs: Other parameters to pandas to_html method.
-
-    Returns:
-        None
     """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
         print(df)
@@ -674,9 +673,6 @@ def plot_graph(
             Defaults to settings from config or CLI arguments if None.
         embedded (Optional[bool]): Whether to embed the plot directly into HTML; Only applicable for matplotlib "svg" images.
             Defaults to settings from config or CLI arguments if None.
-
-    Returns:
-        None
     """
 
     align = cast(
