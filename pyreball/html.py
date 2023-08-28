@@ -1,10 +1,26 @@
 """Main functions that serve as building blocks of the final html file."""
+import builtins
 import io
 import os
 import random
 import re
-from typing import Any, cast, Dict, List, Optional, Set, Tuple, TYPE_CHECKING, Union
+import warnings
+from typing import (
+    Any,
+    cast,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Set,
+    Tuple,
+    TYPE_CHECKING,
+    Union,
+)
 
+from pyreball._common import AttrsConfig, ClassConfig
+
+from pyreball.text import code, div, tag
 from pyreball.utils.utils import get_parameter_value, make_sure_dir_exists, merge_values
 
 if TYPE_CHECKING:
@@ -91,20 +107,22 @@ def set_title(title: str) -> None:
     it just prints the title to stdout.
 
     Args:
-        title (str): Title string.
+        title: Title string.
     """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        print(title)
+        builtins.print(title)
     if get_parameter_value("html_file_path"):
         # it is assumed that the heading is already written into the file,
         # so find the line with title element and replace its contents
         with open(get_parameter_value("html_file_path"), "r") as f:
             lines = f.readlines()
 
-        # replace the title and also add "custom" class so that we know it was replaced by this function
+        # replace the title and also add "custom_pyreball_title" class so that we know it was replaced by this function
         lines = [
             re.sub(
-                r"^<title>[^<]*</title>", f'<title class="custom">{title}</title>', line
+                r"^<title>[^<]*</title>",
+                f'<title class="custom_pyreball_title">{title}</title>',
+                line,
             )
             for line in lines
         ]
@@ -112,11 +130,11 @@ def set_title(title: str) -> None:
             f.writelines(lines)
 
 
-def _write_to_html(string: str) -> None:
+def _write_to_html(string: str, end: str = "\n") -> None:
     if get_parameter_value("html_file_path"):
         with open(get_parameter_value("html_file_path"), "a") as f:
             f.write(string)
-            f.write("\n")
+            f.write(end)
 
 
 def _tidy_title(title: str) -> str:
@@ -124,7 +142,7 @@ def _tidy_title(title: str) -> str:
     Transforms title string into lowercase alphanumerical sequence separated by underscores.
 
     Args:
-        title (str): The string that you want to transform.
+        title: The string that you want to transform.
 
     Returns:
         str: The transformed string.
@@ -162,7 +180,7 @@ def _print_heading(string: str, level: int = 1) -> None:
         raise ValueError("Heading level cannot be less than 1.")
 
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        print("#" * level + " " + str(string))
+        builtins.print("#" * level + " " + str(string))
 
     if get_parameter_value("html_file_path"):
         if "heading_index" not in _heading_memory:
@@ -202,31 +220,71 @@ def _print_heading(string: str, level: int = 1) -> None:
 
 
 def print_h1(string: str) -> None:
+    """
+    Print h1 heading.
+
+    Args:
+        string: Content of the heading.
+    """
     _print_heading(string, level=1)
 
 
 def print_h2(string: str) -> None:
+    """
+    Print h2 heading.
+
+    Args:
+        string: Content of the heading.
+    """
     _print_heading(string, level=2)
 
 
 def print_h3(string: str) -> None:
+    """
+    Print h3 heading.
+
+    Args:
+        string: Content of the heading.
+    """
     _print_heading(string, level=3)
 
 
 def print_h4(string: str) -> None:
+    """
+    Print h4 heading.
+
+    Args:
+        string: Content of the heading.
+    """
     _print_heading(string, level=4)
 
 
 def print_h5(string: str) -> None:
+    """
+    Print h5 heading.
+
+    Args:
+        string: Content of the heading.
+    """
     _print_heading(string, level=5)
 
 
 def print_h6(string: str) -> None:
+    """
+    Print h6 heading.
+
+    Args:
+        string: Content of the heading.
+    """
     _print_heading(string, level=6)
 
 
 def print_div(
-    *values: Any, sep: str = "", replace_newlines_with_br: bool = False
+    *values: Any,
+    cl: ClassConfig = None,
+    attrs: AttrsConfig = None,
+    sep: str = "",
+    end="\n",
 ) -> None:
     """
     Print values into a div element.
@@ -234,21 +292,28 @@ def print_div(
     Any value that is not a string is converted to a string first.
 
     Args:
-        values (Any): One or more values to be printed into the div.
-        sep (str, optional): String separator of the values. Defaults to an empty string.
-        replace_newlines_with_br (bool, optional): Whether to replace newline characters with the <br> tag.
-            Defaults to False.
+        *values: One or more values to be printed into the div.
+        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
+            set None for given key. Any quotes in values are not escaped.
+        sep: String separator of the values inside the tag. Defaults to an empty string.
+        end: String appended after the tag. Defaults to a newline.
     """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        print(*values, sep=sep)
+        builtins.print(*values, sep=sep)
     if get_parameter_value("html_file_path"):
-        html_div = sep.join(map(str, values))
-        if replace_newlines_with_br:
-            html_div = re.sub(r"\n", "<br>", html_div)
-        _write_to_html(f"<div>{html_div}</div>")
+        div_str = div(*values, cl=cl, attrs=attrs, sep=sep)
+        print(div_str, end=end)
 
 
 def print_code(string: str, highlight_syntax: bool = True) -> None:
+    warnings.warn(
+        "print_code function is now deprecated, use print_source_code instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
         print(string)
     if get_parameter_value("html_file_path"):
@@ -258,16 +323,76 @@ def print_code(string: str, highlight_syntax: bool = True) -> None:
             _write_to_html("<pre>" + string + "</pre>")
 
 
+def print_source_code(
+    *values: Any,
+    cl: ClassConfig = None,
+    attrs: AttrsConfig = None,
+    sep: str = "",
+    end="\n",
+    syntax_highlight: Optional[Literal["python"]] = "python",
+) -> None:
+    """
+    Print values as a source code into a preformatted block.
+
+    Any value that is not a string is converted to a string first.
+
+    Args:
+        *values: One or more values to be printed into the block.
+        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
+            set None for given key. Any quotes in values are not escaped.
+        sep: String separator of the values inside the tag. Defaults to an empty string.
+        end: String appended after the tag. Defaults to a newline.
+        syntax_highlight: Syntax highlighting language. Currently only "python" is supported. If None,
+            no highlight is applied. Highlight is achieved by adding `language-python` to element's class.
+    """
+    if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
+        builtins.print(*values, sep=sep)
+    if get_parameter_value("html_file_path"):
+        code_str = code(
+            *values,
+            cl=cl,
+            attrs=attrs,
+            sep=sep,
+            syntax_highlight=syntax_highlight,
+        )
+        pre_code_str = tag(code_str, name="pre")
+        print(pre_code_str, end=end)
+
+
 def print_html(string: str) -> None:
     """Print string to HTML file.
 
     Args:
         string: String to be printed.
     """
+    warnings.warn(
+        "print_html function is now deprecated. Use print instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        print(string)
+        builtins.print(string)
     if get_parameter_value("html_file_path"):
         _write_to_html(string)
+
+
+def print(*values: Any, sep="", end="\n") -> None:
+    """Print values as strings to HTML file.
+
+    Args:
+        *values: One or more values to be printed. Each value is converted to a string first.
+        sep: Separator string to concatenate the values with. Defaults to an empty space.
+        end: String appended after the values. Defaults to a newline.
+    """
+    str_values = map(str, values)
+    string = sep.join(str_values) + end
+    if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
+        builtins.print(string)
+    if get_parameter_value("html_file_path"):
+        _write_to_html(string, end="")
 
 
 def _prepare_caption_element(
@@ -407,22 +532,22 @@ def print_table(
     The sortable tables are based on https://datatables.net/examples/basic_init/zero_configuration.html.
 
     Args:
-        df (pandas.DataFrame): Data frame to be printed.
-        caption (str, optional): Text caption.
-        reference (Reference, optional): Reference object.
-        align (str, optional): How to align the table. If None, settings from config or CLI arguments are used.
+        df: Data frame to be printed.
+        caption: Text caption.
+        reference: Reference object.
+        align: How to align the table. If None, settings from config or CLI arguments are used.
             Acceptable values are 'left', 'center', or 'right'.
-        numbered (bool, optional): Should the caption be numbered?
-        full_table (bool, optional): Whether to show the table expanded.
+        numbered: Should the caption be numbered?
+        full_table: Whether to show the table expanded.
             If None, settings from config or CLI arguments are used.
-        sortable (bool, optional): Whether to allow sortable columns.
+        sortable: Whether to allow sortable columns.
             If None, settings from config or CLI arguments are used.
-        sorting_definition (tuple, optional): How to sort the table initially, in the form (<column_name>, <sorting>),
+        sorting_definition: How to sort the table initially, in the form (<column_name>, <sorting>),
             where <sorting> is either 'asc' or 'desc'.
         **kwargs: Other parameters to pandas to_html method.
     """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        print(df)
+        builtins.print(df)
     if get_parameter_value("html_file_path"):
         if "table_index" not in _table_memory:
             _table_memory["table_index"] = 1
@@ -662,16 +787,16 @@ def plot_graph(
     Plot a graph.
 
     Args:
-        fig (FigType): Plot object.
-        caption (Optional[str]): Caption of the plot.
-        reference (Optional[Reference]): Reference object for link creation.
-        align (Optional[str]): How to align the table. Can be "left", "center", or "right".
+        fig: Plot object.
+        caption: Caption of the plot.
+        reference: Reference object for link creation.
+        align: How to align the table. Can be "left", "center", or "right".
             Defaults to settings from config or CLI arguments if None.
-        numbered (Optional[bool]): Whether the caption should be numbered.
+        numbered: Whether the caption should be numbered.
             Defaults to settings from config or CLI arguments if None.
-        matplotlib_format (Optional[str]): Format for matplotlib plots. Can be "svg", "png", or None.
+        matplotlib_format: Format for matplotlib plots. Can be "svg", "png", or None.
             Defaults to settings from config or CLI arguments if None.
-        embedded (Optional[bool]): Whether to embed the plot directly into HTML; Only applicable for matplotlib "svg" images.
+        embedded: Whether to embed the plot directly into HTML; Only applicable for matplotlib "svg" images.
             Defaults to settings from config or CLI arguments if None.
     """
 

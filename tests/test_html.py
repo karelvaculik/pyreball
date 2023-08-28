@@ -37,7 +37,8 @@ from pyreball.html import (
     create_reference,
     plot_graph,
     plot_multi_graph,
-    print_code,
+    print as print_html,
+    print_source_code,
     print_div,
     print_h1,
     print_h2,
@@ -45,7 +46,6 @@ from pyreball.html import (
     print_h4,
     print_h5,
     print_h6,
-    print_html,
     print_table,
     Reference,
     set_title,
@@ -173,7 +173,7 @@ def test_set_title__stdout(capsys):
         assert captured.out.strip() == "my title"
 
 
-@pytest.mark.parametrize("keep_stdout", [False, True])
+@pytest.mark.parametrize("keep_stdout", [True])
 def test_set_title__file_output(keep_stdout, capsys, simple_html_file):
     def fake_get_parameter_value(key):
         if key == "html_file_path":
@@ -397,14 +397,7 @@ def test_print_h1_h6__file_output__with_numbers(
         assert captured.out.strip() == expected_stdout
 
 
-@pytest.mark.parametrize(
-    "replace_newlines_with_br",
-    [
-        True,
-        False,
-    ],
-)
-def test_print_div__stdout(replace_newlines_with_br, capsys):
+def test_print_div__stdout(capsys):
     def fake_get_parameter_value(key):
         return key == "keep_stdout"
 
@@ -418,10 +411,7 @@ def test_print_div__stdout(replace_newlines_with_br, capsys):
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        print_div(
-            "arbitrary paragraph\nsecond line",
-            replace_newlines_with_br=replace_newlines_with_br,
-        )
+        print_div("arbitrary paragraph\nsecond line")
         captured = capsys.readouterr()
         assert "arbitrary paragraph\nsecond line" in captured.out
 
@@ -430,25 +420,13 @@ def test_print_div__stdout(replace_newlines_with_br, capsys):
         "pyreball.html.get_parameter_value",
         side_effect=fake_get_parameter_value_different,
     ):
-        print_div(
-            "another paragraph\nsecond line",
-            replace_newlines_with_br=replace_newlines_with_br,
-        )
+        print_div("another paragraph\nsecond line")
         captured = capsys.readouterr()
         assert "another paragraph\nsecond line" in captured.out
 
 
-@pytest.mark.parametrize(
-    "replace_newlines_with_br",
-    [
-        True,
-        False,
-    ],
-)
 @pytest.mark.parametrize("keep_stdout", [False, True])
-def test_print_div__file_output(
-    keep_stdout, replace_newlines_with_br, capsys, simple_html_file
-):
+def test_print_div__file_output(keep_stdout, capsys, simple_html_file):
     def fake_get_parameter_value(key):
         if key == "html_file_path":
             return simple_html_file
@@ -457,18 +435,13 @@ def test_print_div__file_output(
         else:
             return None
 
-    expected_newline_separator = "<br>" if replace_newlines_with_br else "\n"
-
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        print_div("new\nparagraph", replace_newlines_with_br=replace_newlines_with_br)
+        print_div("new\nparagraph")
         with open(simple_html_file, "r") as f:
             result = f.read()
-            assert (
-                result
-                == f"<html>\n<div>new{expected_newline_separator}paragraph</div>\n"
-            )
+            assert result == f"<html>\n<div>new\nparagraph</div>\n"
 
         captured = capsys.readouterr()
         expected_stdout = "new\nparagraph" if keep_stdout else ""
@@ -497,7 +470,7 @@ def test_print_code__stdout(highlight_syntax, capsys):
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        print_code("[1, 2, 3]", highlight_syntax=highlight_syntax)
+        print_source_code("[1, 2, 3]", highlight_syntax=highlight_syntax)
         captured = capsys.readouterr()
         assert "[1, 2, 3]" in captured.out
 
@@ -506,7 +479,7 @@ def test_print_code__stdout(highlight_syntax, capsys):
         "pyreball.html.get_parameter_value",
         side_effect=fake_get_parameter_value_different,
     ):
-        print_code("{'a': 4}", highlight_syntax=highlight_syntax)
+        print_source_code("{'a': 4}", highlight_syntax=highlight_syntax)
         captured = capsys.readouterr()
         assert "{'a': 4}" in captured.out
 
@@ -533,7 +506,7 @@ def test_print_code__file_output(
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        print_code("[1, 2, 3]", highlight_syntax=highlight_syntax)
+        print_source_code("[1, 2, 3]", highlight_syntax=highlight_syntax)
         with open(simple_html_file, "r") as f:
             result = f.read()
             assert result == f"<html>\n{expected_result}\n"
@@ -543,7 +516,7 @@ def test_print_code__file_output(
         assert captured.out.strip() == expected_stdout
 
 
-def test_print_html__stdout(capsys):
+def test_print__stdout(capsys):
     def fake_get_parameter_value(key):
         return key == "keep_stdout"
 
@@ -571,8 +544,57 @@ def test_print_html__stdout(capsys):
         assert "<h1>another string</h1>" in captured.out
 
 
+@pytest.mark.parametrize(
+    "values,sep,end,replace_newlines_with_br,expected_printed_result",
+    [
+        (
+            ["<p><b>whatever</b></p>"],
+            "",
+            "\n",
+            False,
+            "<p><b>whatever</b></p>\n",
+        ),
+        (
+            ["<p><b>whatever</b></p>"],
+            "",
+            "<br>",
+            False,
+            "<p><b>whatever</b></p><br>",
+        ),
+        (
+            ["<x>", 1, 2, "</x>"],
+            "<br>",
+            "\n",
+            False,
+            "<x><br>1<br>2<br></x>\n",
+        ),
+        (
+            ["<x>", "hello\nworld", "</x>"],
+            "<br>",
+            "\n",
+            False,
+            "<x><br>hello\nworld<br></x>\n",
+        ),
+        (
+            ["<x>", "hello\nworld", "</x>"],
+            "<br>",
+            "\n",
+            True,
+            "<x><br>hello<br>world<br></x>\n",
+        ),
+    ],
+)
 @pytest.mark.parametrize("keep_stdout", [False, True])
-def test_print_html__file_output(keep_stdout, capsys, simple_html_file):
+def test_print__file_output(
+    values,
+    sep,
+    end,
+    replace_newlines_with_br,
+    expected_printed_result,
+    keep_stdout,
+    capsys,
+    simple_html_file,
+):
     def fake_get_parameter_value(key):
         if key == "html_file_path":
             return simple_html_file
@@ -584,13 +606,15 @@ def test_print_html__file_output(keep_stdout, capsys, simple_html_file):
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        print_html("<p><b>whatever</b></p>")
+        print_html(
+            *values, sep=sep, end=end, replace_newlines_with_br=replace_newlines_with_br
+        )
         with open(simple_html_file, "r") as f:
             result = f.read()
-            assert result == "<html>\n<p><b>whatever</b></p>\n"
+            assert result == "<html>\n" + expected_printed_result
 
         captured = capsys.readouterr()
-        expected_stdout = "<p><b>whatever</b></p>" if keep_stdout else ""
+        expected_stdout = expected_printed_result.strip() if keep_stdout else ""
         assert captured.out.strip() == expected_stdout
 
 

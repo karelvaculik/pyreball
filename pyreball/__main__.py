@@ -188,7 +188,7 @@ def insert_heading_title_and_toc(filename: Path, include_toc: bool = True):
     # try to extract the title from <title> element:
     report_title = None
     for line in lines:
-        m = re.match(r'^<title class="custom">([^<]*)</title>$', line)
+        m = re.match(r'^<title class="custom_pyreball_title">([^<]*)</title>$', line)
         if m:
             report_title = m.group(1)
             break

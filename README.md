@@ -9,7 +9,7 @@
 
 </p>
 
-Python reporting tool that generates HTML reports from Python scripts.
+Pyreball is a Python reporting tool that generates HTML reports from Python scripts.
 
 Main features:
 

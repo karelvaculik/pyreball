@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title class="custom">Multi-graph Plots</title>
+<title class="custom_pyreball_title">Multi-graph Plots</title>
 <meta charset="UTF-16">
-<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
@@ -15,6 +14,10 @@
 <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.2.2.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.2.2.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.2.2.min.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+<script>hljs.highlightAll();</script>
 <script>
 
     function change_expand(button, table_id){
@@ -367,7 +370,7 @@ Table 3: Data table 3.
 </div>
 <div class="text-centered table-expander" style="display: none;" id="table-expander-3" onclick="change_expand(this, 'table-scroller-3')">⟱</div></div></div>
 <h2 id="1_1_three_plots_2">1.1  Three Plots<a class="anchor-link" href="#1_1_three_plots_2">¶</a></h2>
-<div>The plot below illustrates <code>plot_multi_graph</code> function. Note that currently it's only a prototype. For example, it cannot use references.</div>
+<div>The plot below illustrates <code class="language-python">plot_multi_graph</code> function. Note that currently it's only a prototype. For example, it cannot use references.</div>
 <br>
 <button id="button_prev_1" disabled onclick="previous('#image-multi-panel-1', 'button_next_1', 'button_prev_1')">&lt;</button>
 <button id="button_next_1" onclick="next('#image-multi-panel-1', 'button_next_1', 'button_prev_1')">&gt;</button>

@@ -15,7 +15,7 @@ plugins:
           options:
             members_order: alphabetical
             separate_signature: true
-            filters: [ "!^_" ]
+            filters: [ "!^_", "!print_html" ]
             docstring_options:
               ignore_init_summary: true
             merge_init_into_class: true
@@ -31,9 +31,15 @@ markdown_extensions:
   - pymdownx.superfences
 
 nav:
-  - Get Started:
-      - Welcome to Pyreball: index.md
+  - Get Started: index.md
+  - Usage:
+      - Basic Printing: basic_printing.md
       - Text Utils: text_utils.md
+      - Tables: tables.md
+      - Plotting: plotting.md
+      - References: references.md
+      - CLI Parameters: cli_parameters.md
+      - Config File: config_file.md
   - API Documentation:
       - pyreball.html: api/pyreball_html.md
       - pyreball.text: api/pyreball_text.md

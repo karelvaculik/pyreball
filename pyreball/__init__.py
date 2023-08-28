@@ -4,7 +4,7 @@ from pyreball.html import (
     create_reference,
     plot_graph,
     plot_multi_graph,
-    print_code,
+    print_source_code,
     print_div,
     print_h1,
     print_h2,
@@ -12,7 +12,7 @@ from pyreball.html import (
     print_h4,
     print_h5,
     print_h6,
-    print_html,
+    print,
     print_table,
     set_title,
 )

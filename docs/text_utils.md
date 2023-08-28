@@ -1,6 +1,6 @@
 # Text Utils
 
-TODO - introduce individual text util functions.
+TBD
 
 ## Custom HTML Tags
 

@@ -44,7 +44,7 @@ pb.print_div(
     f"The plot below illustrates {pb.code('plot_multi_graph')} function. "
     f"Note that currently it's only a prototype. For example, it cannot use references."
 )
-pb.print_html("<br>")
+pb.print("<br>")
 
 pb.plot_multi_graph(
     [fig1, fig2, fig3],

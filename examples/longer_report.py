@@ -10,12 +10,12 @@ pb.set_title("Sample Report")
 
 pb.print_h1("Displaying Texts")
 
-pb.print_html("<div>We can always start inserting custom raw HTML code.</div>")
-pb.print_html("<br>")
+pb.print("<div>We can always start inserting custom raw HTML code.</div>")
+pb.print("<br>")
 pb.print_div(
     "However, we can use special function to write text into a &lt;br&gt; element."
 )
-pb.print_html("<br>")
+pb.print("<br>")
 pb.print_div(
     "It is possible to pass several values and optionally a separator.",
     "The values will be joined and automatically converted to strings, as with the following number and list.",
@@ -23,7 +23,6 @@ pb.print_div(
     [11, 13, 19],
     "Newline characters can be converted to &lt;br&gt; elements by using replace_newlines_with_br parameter.",
     sep="\n",
-    replace_newlines_with_br=True,
 )
 
 pb.print_h2("Basic String-wrapping Formatting Functions")
@@ -49,7 +48,7 @@ pb.print_div(
     f"We can also add a link to {pb.link('Python documentation', 'https://www.python.org/doc/')} "
     f"if necessary. Talking about links, note that each heading has a clickable anchor."
 )
-pb.print_html("<br>")
+pb.print("<br>")
 pb.print_div(
     f"We already used {pb.code('code')} function for inline formatting. There is also {pb.code('print_code')} "
     f"function that creates a text block formatted as code, "
@@ -58,7 +57,7 @@ pb.print_div(
 
 np.random.seed(1)
 array = np.random.random((3, 3))
-pb.print_code(str(array))
+pb.print_source_code(str(array))
 
 pb.print_div("... or even a piece of code:")
 
@@ -72,7 +71,7 @@ def factorial(n):
 
 import inspect
 
-pb.print_code(inspect.getsource(factorial))
+pb.print_source_code(inspect.getsource(factorial))
 
 pb.print_div(
     f"Before going further, let's return to the very first function we used: {pb.code('set_title')}. "
