@@ -1,3 +1,11 @@
 </div>
 </body>
+<script>
+    // Inline source sode is just in <code> element, so force the formatting on it too:
+    $(document).ready(function () {
+        $('code.inline-highlight').each(function (i, block) {
+            hljs.highlightBlock(block);
+        });
+    });
+</script>
 </html>

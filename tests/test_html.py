@@ -38,7 +38,7 @@ from pyreball.html import (
     plot_graph,
     plot_multi_graph,
     print as print_html,
-    print_source_code,
+    print_code_block,
     print_div,
     print_h1,
     print_h2,
@@ -192,10 +192,8 @@ def test_set_title__file_output(keep_stdout, capsys, simple_html_file):
         set_title("new title with more words")
         with open(simple_html_file, "r") as f:
             result = f.read()
-            assert (
-                result
-                == '<html>\n<title class="custom">new title with more words</title>\n</html>'
-            )
+            expected_result = '<html>\n<title class="custom_pyreball_title">new title with more words</title>\n</html>'
+            assert result == expected_result
 
     captured = capsys.readouterr()
     expected_stdout = "new title with more words" if keep_stdout else ""
@@ -439,24 +437,24 @@ def test_print_div__file_output(keep_stdout, capsys, simple_html_file):
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         print_div("new\nparagraph")
+        expected_div_element = "<div>new\nparagraph</div>"
         with open(simple_html_file, "r") as f:
             result = f.read()
-            assert result == f"<html>\n<div>new\nparagraph</div>\n"
+            assert result == f"<html>\n{expected_div_element}\n"
 
         captured = capsys.readouterr()
-        expected_stdout = "new\nparagraph" if keep_stdout else ""
+        expected_stdout = expected_div_element if keep_stdout else ""
         assert captured.out.strip() == expected_stdout
 
 
 @pytest.mark.parametrize(
-    "highlight_syntax",
+    "syntax_highlight",
     [
-        True,
-        False,
+        "python",
+        None,
     ],
 )
-def test_print_code__stdout(highlight_syntax, capsys):
-    # highlight_syntax should not matter here
+def test_print_code_block__stdout(syntax_highlight, capsys):
     def fake_get_parameter_value(key):
         return key == "keep_stdout"
 
@@ -470,7 +468,7 @@ def test_print_code__stdout(highlight_syntax, capsys):
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        print_source_code("[1, 2, 3]", highlight_syntax=highlight_syntax)
+        print_code_block("[1, 2, 3]", syntax_highlight=syntax_highlight)
         captured = capsys.readouterr()
         assert "[1, 2, 3]" in captured.out
 
@@ -479,21 +477,21 @@ def test_print_code__stdout(highlight_syntax, capsys):
         "pyreball.html.get_parameter_value",
         side_effect=fake_get_parameter_value_different,
     ):
-        print_source_code("{'a': 4}", highlight_syntax=highlight_syntax)
+        print_code_block("{'a': 4}", syntax_highlight=syntax_highlight)
         captured = capsys.readouterr()
         assert "{'a': 4}" in captured.out
 
 
 @pytest.mark.parametrize("keep_stdout", [False, True])
 @pytest.mark.parametrize(
-    "highlight_syntax,expected_result",
+    "syntax_highlight,expected_result",
     [
-        (True, '<pre class="prettyprint lang-py">[1, 2, 3]</pre>'),
-        (False, "<pre>[1, 2, 3]</pre>"),
+        ("python", '<pre><code class="python">[1, 2, 3]</code></pre>'),
+        (None, "<pre><code>[1, 2, 3]</code></pre>"),
     ],
 )
-def test_print_code__file_output(
-    keep_stdout, highlight_syntax, expected_result, capsys, simple_html_file
+def test_print_code_block__file_output(
+    keep_stdout, syntax_highlight, expected_result, capsys, simple_html_file
 ):
     def fake_get_parameter_value(key):
         if key == "html_file_path":
@@ -506,13 +504,13 @@ def test_print_code__file_output(
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        print_source_code("[1, 2, 3]", highlight_syntax=highlight_syntax)
+        print_code_block("[1, 2, 3]", syntax_highlight=syntax_highlight)
         with open(simple_html_file, "r") as f:
             result = f.read()
             assert result == f"<html>\n{expected_result}\n"
 
         captured = capsys.readouterr()
-        expected_stdout = "[1, 2, 3]" if keep_stdout else ""
+        expected_stdout = expected_result if keep_stdout else ""
         assert captured.out.strip() == expected_stdout
 
 
@@ -545,42 +543,31 @@ def test_print__stdout(capsys):
 
 
 @pytest.mark.parametrize(
-    "values,sep,end,replace_newlines_with_br,expected_printed_result",
+    "values,sep,end,expected_printed_result",
     [
         (
             ["<p><b>whatever</b></p>"],
             "",
             "\n",
-            False,
             "<p><b>whatever</b></p>\n",
         ),
         (
             ["<p><b>whatever</b></p>"],
             "",
             "<br>",
-            False,
             "<p><b>whatever</b></p><br>",
         ),
         (
             ["<x>", 1, 2, "</x>"],
             "<br>",
             "\n",
-            False,
             "<x><br>1<br>2<br></x>\n",
         ),
         (
             ["<x>", "hello\nworld", "</x>"],
             "<br>",
             "\n",
-            False,
             "<x><br>hello\nworld<br></x>\n",
-        ),
-        (
-            ["<x>", "hello\nworld", "</x>"],
-            "<br>",
-            "\n",
-            True,
-            "<x><br>hello<br>world<br></x>\n",
         ),
     ],
 )
@@ -589,7 +576,6 @@ def test_print__file_output(
     values,
     sep,
     end,
-    replace_newlines_with_br,
     expected_printed_result,
     keep_stdout,
     capsys,
@@ -606,9 +592,7 @@ def test_print__file_output(
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        print_html(
-            *values, sep=sep, end=end, replace_newlines_with_br=replace_newlines_with_br
-        )
+        print_html(*values, sep=sep, end=end)
         with open(simple_html_file, "r") as f:
             result = f.read()
             assert result == "<html>\n" + expected_printed_result

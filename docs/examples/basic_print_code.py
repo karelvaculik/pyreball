@@ -8,4 +8,4 @@ def add(x, y):
 
 
 pb.print("An example of a source code printed in HTML:")
-pb.print_source_code(inspect.getsource(add))
+pb.print_code_block(inspect.getsource(add))

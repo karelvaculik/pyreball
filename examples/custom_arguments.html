@@ -101,7 +101,7 @@ body {
 }
 
 .main_container {
-    width: 80%;
+    width: 90%;
     margin-left: auto;
     margin-right: auto;
 }
@@ -117,10 +117,6 @@ img, svg, canvas.marks, div.vega-embed {
     margin-left: auto;
     margin-right: auto;
     display: block;
-}
-
-code {
-    background: rgb(245, 245, 245);
 }
 
 table.dataframe  {
@@ -264,6 +260,15 @@ h6:hover .anchor-link {
 <body>
 <div class="main_container">
 <h1 id="toc_generated_0">Custom Arguments<a class="anchor-link" href="#toc_generated_0">¶</a></h1>
+<div>The sum of the arg values is 72.</div>
 </div>
 </body>
+<script>
+    // Inline source sode is just in <code> element, so force the formatting on it too:
+    $(document).ready(function () {
+        $('code.inline-highlight').each(function (i, block) {
+            hljs.highlightBlock(block);
+        });
+    });
+</script>
 </html>

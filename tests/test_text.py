@@ -1,13 +1,15 @@
-from unittest.mock import patch
+from copy import copy
 
 import pytest
 
 from pyreball.text import (
+    _collect_classes_for_code_strings,
     _construct_attrs_str,
     _construct_class_attr_string,
     a,
     bold,
     code,
+    code_block,
     div,
     em,
     link,
@@ -16,11 +18,6 @@ from pyreball.text import (
     tag,
     ulist,
 )
-
-
-def assert_function_result(func, patch_env, test_input, input_kwargs, expected_result):
-    with patch("pyreball.text.get_parameter_value", return_value=patch_env):
-        assert func(*test_input, **input_kwargs) == expected_result
 
 
 @pytest.mark.parametrize(
@@ -65,84 +62,118 @@ def test__construct_attrs_str(test_input, expected_result):
 
 
 def test_bold():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        assert bold("a", "b", sep="\n") == "<b>a\nb</b>"
+    assert bold("a", "b", sep="\n") == "<b>\na\nb\n</b>"
 
 
 def test_em():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        assert em("a", "b", sep="\n") == "<em>a\nb</em>"
+    assert em("a", "b", sep="\n") == "<em>\na\nb\n</em>"
 
 
-def test_code():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        assert code("a", "b", sep="\n") == "<code>a\nb</code>"
+@pytest.mark.parametrize(
+    "initial_class_list,cl,syntax_highlight,expected_result",
+    [
+        ([], None, None, None),
+        ([], [], None, []),
+        ([], "cl1", None, "cl1"),
+        ([], ["cl1"], None, ["cl1"]),
+        ([], None, "python", ["python"]),
+        ([], [], "python", ["python"]),
+        ([], "cl1", "python", ["cl1", "python"]),
+        ([], ["cl1"], "python", ["cl1", "python"]),
+        (["x"], None, None, None),
+        (["x"], [], None, []),
+        (["x"], "cl1", None, "cl1"),
+        (["x"], ["cl1"], None, ["cl1"]),
+        (["x"], None, "python", ["x", "python"]),
+        (["x"], [], "python", ["x", "python"]),
+        (["x"], "cl1", "python", ["cl1", "x", "python"]),
+        (["x"], ["cl1"], "python", ["cl1", "x", "python"]),
+    ],
+)
+def test__collect_classes_for_code_strings(
+    initial_class_list, cl, syntax_highlight, expected_result
+):
+    original_cl = copy(cl)
+    original_initial_class_list = copy(initial_class_list)
+    original_syntax_highlight = copy(syntax_highlight)
+    result = _collect_classes_for_code_strings(initial_class_list, cl, syntax_highlight)
+    assert result == expected_result
+    # check that input values haven't changed
+    assert original_cl == cl
+    assert original_initial_class_list == initial_class_list
+    assert original_syntax_highlight == syntax_highlight
+
+
+def test_code__without_syntax_highlight():
+    expected_result = "<code>\na\nb\n</code>"
+    assert code("a", "b", sep="\n", syntax_highlight=None) == expected_result
+
+
+def test_code__with_syntax_highlight():
+    expected_result = '<code class="inline-highlight python">\na\nb\n</code>'
+    assert code("a", "b", sep="\n", syntax_highlight="python") == expected_result
+
+
+def test_code__unsupported_syntax_highlight():
+    with pytest.raises(ValueError):
+        code("a", "b", sep="\n", syntax_highlight="my_new_lang")
+
+
+def test_code_block__without_syntax_highlight():
+    expected_result = "<pre><code>\na\nb\n</code></pre>"
+    assert code_block("a", "b", sep="\n", syntax_highlight=None) == expected_result
+
+
+def test_code_block__with_syntax_highlight():
+    expected_result = '<pre><code class="python">\na\nb\n</code></pre>'
+    assert code_block("a", "b", sep="\n", syntax_highlight="python") == expected_result
+
+
+def test_code_block__unsupported_syntax_highlight():
+    with pytest.raises(ValueError):
+        code_block("a", "b", sep="\n", syntax_highlight="my_new_lang")
 
 
 def test_div():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        assert div("a", "b", sep="\n") == "<div>a\nb</div>"
+    assert div("a", "b", sep="\n") == "<div>\na\nb\n</div>"
 
 
 def test_span():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        assert span("a", "b", sep="\n") == "<span>a\nb</span>"
+    assert span("a", "b", sep="\n") == "<span>\na\nb\n</span>"
 
 
 def test_a():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        result = a("a", "b", attrs={"href": "www.example.com"}, sep="\n")
-        assert result == '<a href="www.example.com">a\nb</a>'
+    expected_result = '<a href="www.example.com">\na\nb\n</a>'
+    assert a("a", "b", attrs={"href": "www.example.com"}, sep="\n") == expected_result
+
+
+def test_link():
+    assert link("my text", "myurl") == '<a href="myurl">my text</a>'
 
 
 @pytest.mark.parametrize(
-    "patch_env,test_input,expected_result",
-    [
-        (False, ["my text", "myurl"], "my text"),
-        (True, ["my text", "myurl"], '<a href="myurl">my text</a>'),
-    ],
-)
-def test_link(patch_env, test_input, expected_result):
-    assert_function_result(link, patch_env, test_input, {}, expected_result)
-
-
-@pytest.mark.parametrize(
-    "patch_env,test_input,expected_result",
+    "test_input,expected_result",
     [
         (
-            False,
-            ["a", "b", "c"],
-            "['a', 'b', 'c']",
-        ),
-        (
-            False,
-            ["a", 53, "<ul><li>b</li></ul>"],
-            "['a', 53, '<ul><li>b</li></ul>']",
-        ),
-        (
-            True,
             ["a", "b", "c"],
             "<ul><li>a</li><li>b</li><li>c</li></ul>",
         ),
         (
-            True,
             ["a", 43, 42],
             "<ul><li>a</li><li>43</li><li>42</li></ul>",
         ),
         (
-            True,
-            ["a", "<ul><li>b</li></ul>"],
-            "<ul><li>a</li><ul><li>b</li></ul></ul>",
+            [("a", "<ul><li>b</li></ul>")],
+            "<ul><li>a<ul><li>b</li></ul></li></ul>",
         ),
         (
-            True,
-            ["<ol><li>x</li></ol>", "a", "<ul><li>y</li><li>z</li></ul>"],
-            "<ul><ol><li>x</li></ol><li>a</li><ul><li>y</li><li>z</li></ul></ul>",
+            [("b", "<ol><li>x</li></ol>"), ("a", "<ul><li>y</li><li>z</li></ul>")],
+            "<ul><li>b<ol><li>x</li></ol></li><li>a<ul><li>y</li><li>z</li></ul></li></ul>",
         ),
     ],
 )
-def test_ulist__without_parameters(patch_env, test_input, expected_result):
-    assert_function_result(ulist, patch_env, test_input, {}, expected_result)
+def test_ulist__without_parameters(test_input, expected_result):
+    assert ulist(*test_input) == expected_result
 
 
 def test_ulist__with_parameters():
@@ -160,46 +191,32 @@ def test_ulist__with_parameters():
         '<li class="li_class" a="b">value3</li>'
         "</ul>"
     )
-    assert_function_result(ulist, True, test_input, input_kwargs, expected_result)
+    assert ulist(*test_input, **input_kwargs) == expected_result
 
 
 @pytest.mark.parametrize(
-    "patch_env,test_input,expected_result",
+    "test_input,expected_result",
     [
         (
-            False,
-            ["a", "b", "c"],
-            "['a', 'b', 'c']",
-        ),
-        (
-            False,
-            ["a", 53, "<ol><li>b</li></ol>"],
-            "['a', 53, '<ol><li>b</li></ol>']",
-        ),
-        (
-            True,
             ["a", "b", "c"],
             "<ol><li>a</li><li>b</li><li>c</li></ol>",
         ),
         (
-            True,
             ["a", 43, 42],
             "<ol><li>a</li><li>43</li><li>42</li></ol>",
         ),
         (
-            True,
-            ["a", "<ol><li>b</li></ol>"],
-            "<ol><li>a</li><ol><li>b</li></ol></ol>",
+            [("a", "<ol><li>b</li></ol>")],
+            "<ol><li>a<ol><li>b</li></ol></li></ol>",
         ),
         (
-            True,
-            ["<ol><li>x</li></ol>", "a", "<ol><li>y</li><li>z</li></ol>"],
-            "<ol><ol><li>x</li></ol><li>a</li><ol><li>y</li><li>z</li></ol></ol>",
+            [("b", "<ol><li>x</li></ol>"), ("a", "<ol><li>y</li><li>z</li></ol>")],
+            "<ol><li>b<ol><li>x</li></ol></li><li>a<ol><li>y</li><li>z</li></ol></li></ol>",
         ),
     ],
 )
-def test_olist__without_parameters(patch_env, test_input, expected_result):
-    assert_function_result(olist, patch_env, test_input, {}, expected_result)
+def test_olist__without_parameters(test_input, expected_result):
+    assert olist(*test_input) == expected_result
 
 
 def test_olist__with_parameters():
@@ -217,80 +234,53 @@ def test_olist__with_parameters():
         '<li class="li_class" a="b">value3</li>'
         "</ol>"
     )
-    assert_function_result(olist, True, test_input, input_kwargs, expected_result)
+    assert olist(*test_input, **input_kwargs) == expected_result
 
 
 @pytest.mark.parametrize(
-    "patch_env,input_args,input_kwargs,expected_result",
+    "input_args,input_kwargs,expected_result",
     [
         (
-            False,
-            ["a"],
-            {"name": "x", "cl": None, "attrs": None, "sep": ""},
-            "a",
-        ),
-        (
-            False,
-            [1],
-            {"name": "x", "cl": None, "attrs": None, "sep": ""},
-            "1",
-        ),
-        (
-            True,
             ["abc"],
             {"name": "x", "cl": None, "attrs": None, "sep": ""},
             "<x>abc</x>",
         ),
         (
-            True,
             [2351],
             {"name": "x", "cl": None, "attrs": None, "sep": ""},
             "<x>2351</x>",
         ),
         (
-            False,
-            [2351, "hello"],
-            {"name": "abc", "cl": None, "attrs": None, "sep": "\n"},
-            "2351\nhello",
-        ),
-        (
-            True,
             [2351, "hello"],
             {"name": "abc", "cl": None, "attrs": None, "sep": "\n"},
             "<abc>\n2351\nhello\n</abc>",
         ),
         (
-            True,
             [2351, "hello"],
             {"name": "abc", "cl": "cl1", "attrs": None, "sep": "\n"},
             '<abc class="cl1">\n2351\nhello\n</abc>',
         ),
         (
-            True,
             [2351, "hello"],
             {"name": "abc", "cl": "cl1 cl2", "attrs": None, "sep": "\n"},
             '<abc class="cl1 cl2">\n2351\nhello\n</abc>',
         ),
         (
-            True,
             [2351, "hello"],
             {"name": "abc", "cl": ["cl1", "cl2"], "attrs": None, "sep": "\n"},
             '<abc class="cl1 cl2">\n2351\nhello\n</abc>',
         ),
         (
-            True,
             [2351, "hello"],
             {"name": "abc", "cl": None, "attrs": {"key": "val"}, "sep": "\n"},
             '<abc key="val">\n2351\nhello\n</abc>',
         ),
         (
-            True,
             [2351, "hello"],
             {"name": "abc", "cl": ["cl1", "cl2"], "attrs": {"key": "val"}, "sep": "\n"},
             '<abc class="cl1 cl2" key="val">\n2351\nhello\n</abc>',
         ),
         (
-            True,
             [],
             {
                 "name": "abc",
@@ -302,11 +292,10 @@ def test_olist__with_parameters():
         ),
     ],
 )
-def test_tag(patch_env, input_args, input_kwargs, expected_result):
-    assert_function_result(tag, patch_env, input_args, input_kwargs, expected_result)
+def test_tag(input_args, input_kwargs, expected_result):
+    assert tag(*input_args, **input_kwargs) == expected_result
 
 
 def test_tag__duplicate_class_setting():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        with pytest.raises(ValueError):
-            tag("value", name="x", cl="my_class", attrs={"class": "my_cl"}, sep="")
+    with pytest.raises(ValueError):
+        tag("value", name="x", cl="my_class", attrs={"class": "my_cl"}, sep="")

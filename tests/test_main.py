@@ -105,7 +105,7 @@ def test_parse_heading_info(test_input, expected_result):
 @pytest.mark.parametrize("include_toc", [True, False])
 def test_insert_heading_title_and_toc__with_headings(include_toc, title_set, tmpdir):
     if title_set:
-        title = '<title class="custom">Custom Title</title>'
+        title = '<title class="custom_pyreball_title">Custom Title</title>'
         expected_toc_heading = "Custom Title"
     else:
         title = "<title>Default Title</title>"
@@ -198,7 +198,7 @@ def test_insert_heading_title_and_toc__with_headings(include_toc, title_set, tmp
 @pytest.mark.parametrize("include_toc", [True, False])
 def test_insert_heading_title_and_toc__without_headings(include_toc, title_set, tmpdir):
     if title_set:
-        title = '<title class="custom">Custom Title</title>'
+        title = '<title class="custom_pyreball_title">Custom Title</title>'
     else:
         title = "<title>Default Title</title>"
 

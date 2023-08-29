@@ -18,9 +18,9 @@ from typing import (
     Union,
 )
 
-from pyreball._common import AttrsConfig, ClassConfig
+from pyreball._common import AttrsParameter, ClParameter
 
-from pyreball.text import code, div, tag
+from pyreball.text import code, code_block, div, tag
 from pyreball.utils.utils import get_parameter_value, make_sure_dir_exists, merge_values
 
 if TYPE_CHECKING:
@@ -281,10 +281,10 @@ def print_h6(string: str) -> None:
 
 def print_div(
     *values: Any,
-    cl: ClassConfig = None,
-    attrs: AttrsConfig = None,
+    cl: ClParameter = None,
+    attrs: AttrsParameter = None,
     sep: str = "",
-    end="\n",
+    end: str = "\n",
 ) -> None:
     """
     Print values into a div element.
@@ -292,98 +292,64 @@ def print_div(
     Any value that is not a string is converted to a string first.
 
     Args:
-        *values: One or more values to be printed into the div.
+        *values: Zero or more values to be printed into the div.
         cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
             If a list of strings is provided, the strings are joined with space. If None, no class is added.
+            If an empty list is provided, class attribute is added with an empty string.
         attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
             is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
             set None for given key. Any quotes in values are not escaped.
         sep: String separator of the values inside the tag. Defaults to an empty string.
         end: String appended after the tag. Defaults to a newline.
     """
-    if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        builtins.print(*values, sep=sep)
-    if get_parameter_value("html_file_path"):
-        div_str = div(*values, cl=cl, attrs=attrs, sep=sep)
-        print(div_str, end=end)
+    div_str = div(*values, cl=cl, attrs=attrs, sep=sep)
+    print(div_str, end=end)
 
 
-def print_code(string: str, highlight_syntax: bool = True) -> None:
-    warnings.warn(
-        "print_code function is now deprecated, use print_source_code instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        print(string)
-    if get_parameter_value("html_file_path"):
-        if highlight_syntax:
-            _write_to_html('<pre class="prettyprint lang-py">' + string + "</pre>")
-        else:
-            _write_to_html("<pre>" + string + "</pre>")
-
-
-def print_source_code(
+def print_code_block(
     *values: Any,
-    cl: ClassConfig = None,
-    attrs: AttrsConfig = None,
+    cl: ClParameter = None,
+    attrs: AttrsParameter = None,
     sep: str = "",
-    end="\n",
+    end: str = "\n",
     syntax_highlight: Optional[Literal["python"]] = "python",
 ) -> None:
     """
     Print values as a source code into a preformatted block.
 
-    Any value that is not a string is converted to a string first.
+    This element is used to display a source code in a block.
+    It is possible to highlight the code syntax by setting `syntax_highlight` parameter to an appropriate string.
+
+    This function is a shortcut for `code_block()` and `print()`.
 
     Args:
-        *values: One or more values to be printed into the block.
+        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
         cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
             If a list of strings is provided, the strings are joined with space. If None, no class is added.
+            If an empty list is provided, class attribute is added with an empty string.
         attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
             is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
             set None for given key. Any quotes in values are not escaped.
         sep: String separator of the values inside the tag. Defaults to an empty string.
         end: String appended after the tag. Defaults to a newline.
         syntax_highlight: Syntax highlighting language. Currently only "python" is supported. If None,
-            no highlight is applied. Highlight is achieved by adding `language-python` to element's class.
+            no highlight is applied. When highlight is turned on, class "<language>" is added to the `<code>` element.
     """
-    if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        builtins.print(*values, sep=sep)
-    if get_parameter_value("html_file_path"):
-        code_str = code(
-            *values,
-            cl=cl,
-            attrs=attrs,
-            sep=sep,
-            syntax_highlight=syntax_highlight,
-        )
-        pre_code_str = tag(code_str, name="pre")
-        print(pre_code_str, end=end)
-
-
-def print_html(string: str) -> None:
-    """Print string to HTML file.
-
-    Args:
-        string: String to be printed.
-    """
-    warnings.warn(
-        "print_html function is now deprecated. Use print instead.",
-        DeprecationWarning,
-        stacklevel=2,
+    source_code_str = code_block(
+        *values,
+        cl=cl,
+        attrs=attrs,
+        sep=sep,
+        syntax_highlight=syntax_highlight,
     )
-    if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        builtins.print(string)
-    if get_parameter_value("html_file_path"):
-        _write_to_html(string)
+    print(source_code_str, end=end)
 
 
-def print(*values: Any, sep="", end="\n") -> None:
+def print(*values: Any, sep: str = "", end: str = "\n") -> None:
     """Print values as strings to HTML file.
 
     Args:
-        *values: One or more values to be printed. Each value is converted to a string first.
+        *values: Zero or more values to be printed. Each value is converted to a string first.
         sep: Separator string to concatenate the values with. Defaults to an empty space.
         end: String appended after the values. Defaults to a newline.
     """
@@ -535,7 +501,7 @@ def print_table(
         df: Data frame to be printed.
         caption: Text caption.
         reference: Reference object.
-        align: How to align the table. If None, settings from config or CLI arguments are used.
+        align: How to align the table horizontally. If None, settings from config or CLI arguments are used.
             Acceptable values are 'left', 'center', or 'right'.
         numbered: Should the caption be numbered?
         full_table: Whether to show the table expanded.
@@ -671,7 +637,7 @@ def _prepare_plotly_plot_element(fig: "plotly.graph_objs.Figure") -> str:
     return fig.to_html(full_html=False, include_plotlyjs=False)
 
 
-def _prepare_bokeh_plot_element(fig: "bokeh.plotting.figure.Figure") -> str:
+def _prepare_bokeh_plot_element(fig: "bokeh.plotting._figure.figure") -> str:
     # noinspection PyPackageRequirements
     from bokeh.embed import components  # type: ignore
 

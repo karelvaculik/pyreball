@@ -57,7 +57,7 @@ pb.print_div(
 
 np.random.seed(1)
 array = np.random.random((3, 3))
-pb.print_source_code(str(array))
+pb.print_code_block(str(array))
 
 pb.print_div("... or even a piece of code:")
 
@@ -71,7 +71,7 @@ def factorial(n):
 
 import inspect
 
-pb.print_source_code(inspect.getsource(factorial))
+pb.print_code_block(inspect.getsource(factorial))
 
 pb.print_div(
     f"Before going further, let's return to the very first function we used: {pb.code('set_title')}. "

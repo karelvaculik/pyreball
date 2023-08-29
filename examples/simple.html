@@ -119,10 +119,6 @@ img, svg, canvas.marks, div.vega-embed {
     display: block;
 }
 
-code {
-    background: rgb(245, 245, 245);
-}
-
 table.dataframe  {
     border-style: none;
     border-width: 0px;
@@ -269,4 +265,12 @@ h6:hover .anchor-link {
 <div>This is my div with <b>important</b> text.</div>
 </div>
 </body>
+<script>
+    // Inline source sode is just in <code> element, so force the formatting on it too:
+    $(document).ready(function () {
+        $('code.inline-highlight').each(function (i, block) {
+            hljs.highlightBlock(block);
+        });
+    });
+</script>
 </html>

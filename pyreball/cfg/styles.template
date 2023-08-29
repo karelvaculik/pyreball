@@ -21,10 +21,6 @@ img, svg, canvas.marks, div.vega-embed {
     display: block;
 }
 
-code {
-    background: rgb(245, 245, 245);
-}
-
 table.dataframe  {
     border-style: none;
     border-width: 0px;
