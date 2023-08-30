@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 from pyreball.__main__ import (
-    _get_node_text,
     _get_output_dir_and_file_stem,
     _parse_heading_info,
     insert_heading_title_and_toc,

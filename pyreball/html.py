@@ -4,7 +4,6 @@ import io
 import os
 import random
 import re
-import warnings
 from typing import (
     Any,
     cast,
