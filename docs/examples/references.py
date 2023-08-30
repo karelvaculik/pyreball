@@ -9,7 +9,7 @@ pb.set_title("References to Plots and Tables")
 
 ref_ch_1 = pb.Reference()
 
-pb.print_h1("First Table", reference=ref_ch_1)
+pb.print_h1("Tables", reference=ref_ch_1)
 
 N = 10
 np.random.seed(1)
