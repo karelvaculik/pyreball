@@ -34,7 +34,6 @@ from pyreball.html import (
     _tidy_title,
     _wrap_plot_element_by_outer_divs,
     _write_to_html,
-    create_reference,
     plot_graph,
     plot_multi_graph,
     print as print_html,
@@ -135,15 +134,6 @@ def test_reference__with_default_text_and_text_override():
     ref = Reference("whatever")
     ref_string = ref("nevermind")
     regex_match = re.match(r'^<a href="#ref-id(\d+)">nevermind</a>$', ref_string)
-    assert regex_match is not None
-
-
-def test_create_reference():
-    ref = create_reference()
-    assert isinstance(ref, Reference)
-
-    ref_string = str(create_reference("whatever"))
-    regex_match = re.match(r'^<a href="#ref-id(\d+)">whatever</a>$', ref_string)
     assert regex_match is not None
 
 
@@ -267,7 +257,7 @@ def test__print_heading__unsupported_level(level, pre_test_print_heading_cleanup
 
 def test__print_heading__stdout(capsys, pre_test_print_heading_cleanup):
     def fake_get_parameter_value(key):
-        return key == "keep_stdout"
+        return key in ["keep_stdout", "numbered_headings"]
 
     def fake_get_parameter_value_different(key):
         if key == "keep_stdout":
@@ -281,7 +271,7 @@ def test__print_heading__stdout(capsys, pre_test_print_heading_cleanup):
     ):
         _print_heading("simple heading", level=3)
         captured = capsys.readouterr()
-        assert "### simple heading" in captured.out
+        assert "0.0.1 simple heading" in captured.out
 
     # when keep_stdout is set off, but we don't have html file either
     with mock.patch(
@@ -290,12 +280,18 @@ def test__print_heading__stdout(capsys, pre_test_print_heading_cleanup):
     ):
         _print_heading("another heading", level=5)
         captured = capsys.readouterr()
-        assert "##### another heading" in captured.out
+        assert "another heading" in captured.out
 
 
 @pytest.mark.parametrize("keep_stdout", [False, True])
+@pytest.mark.parametrize("use_reference", [False, True])
 def test_print_h1_h6__file_output__no_numbers(
-    keep_stdout, capsys, simple_html_file, pre_test_print_heading_cleanup
+    keep_stdout,
+    use_reference,
+    capsys,
+    simple_html_file,
+    pre_test_print_heading_cleanup,
+    pre_test_check_and_mark_reference_cleanup,
 ):
     def fake_get_parameter_value(key):
         if key == "html_file_path":
@@ -308,7 +304,15 @@ def test_print_h1_h6__file_output__no_numbers(
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        print_h1("heading 1")
+        if use_reference:
+            ref = Reference()
+            ref.id = "id123"
+            exp_id = "id123_"
+        else:
+            ref = None
+            exp_id = ""
+
+        print_h1("heading 1", reference=ref)
         print_h3("heading 3")
         print_h6("heading 6")
         print_h4("heading 4")
@@ -317,12 +321,12 @@ def test_print_h1_h6__file_output__no_numbers(
 
         expected_result = (
             "<html>\n"
-            '<h1 id="heading_1_1">heading 1<a class="anchor-link" href="#heading_1_1">\u00B6</a></h1>\n'
-            '<h3 id="heading_3_2">heading 3<a class="anchor-link" href="#heading_3_2">\u00B6</a></h3>\n'
-            '<h6 id="heading_6_3">heading 6<a class="anchor-link" href="#heading_6_3">\u00B6</a></h6>\n'
-            '<h4 id="heading_4_4">heading 4<a class="anchor-link" href="#heading_4_4">\u00B6</a></h4>\n'
-            '<h2 id="heading_2_5">heading 2<a class="anchor-link" href="#heading_2_5">\u00B6</a></h2>\n'
-            '<h5 id="heading_5_6">heading 5<a class="anchor-link" href="#heading_5_6">\u00B6</a></h5>\n'
+            f'<h1 id="ch_{exp_id}heading_1_1">heading 1<a class="anchor-link" href="#ch_{exp_id}heading_1_1">\u00B6</a></h1>\n'
+            '<h3 id="ch_heading_3_2">heading 3<a class="anchor-link" href="#ch_heading_3_2">\u00B6</a></h3>\n'
+            '<h6 id="ch_heading_6_3">heading 6<a class="anchor-link" href="#ch_heading_6_3">\u00B6</a></h6>\n'
+            '<h4 id="ch_heading_4_4">heading 4<a class="anchor-link" href="#ch_heading_4_4">\u00B6</a></h4>\n'
+            '<h2 id="ch_heading_2_5">heading 2<a class="anchor-link" href="#ch_heading_2_5">\u00B6</a></h2>\n'
+            '<h5 id="ch_heading_5_6">heading 5<a class="anchor-link" href="#ch_heading_5_6">\u00B6</a></h5>\n'
         )
 
         with open(simple_html_file, "r") as f:
@@ -331,10 +335,7 @@ def test_print_h1_h6__file_output__no_numbers(
 
         captured = capsys.readouterr()
         expected_stdout = (
-            (
-                "# heading 1\n### heading 3\n###### heading 6\n"
-                "#### heading 4\n## heading 2\n##### heading 5"
-            )
+            ("heading 1\nheading 3\nheading 6\n" "heading 4\nheading 2\nheading 5")
             if keep_stdout
             else ""
         )
@@ -342,8 +343,14 @@ def test_print_h1_h6__file_output__no_numbers(
 
 
 @pytest.mark.parametrize("keep_stdout", [False, True])
+@pytest.mark.parametrize("use_reference", [False, True])
 def test_print_h1_h6__file_output__with_numbers(
-    keep_stdout, capsys, simple_html_file, pre_test_print_heading_cleanup
+    keep_stdout,
+    use_reference,
+    capsys,
+    simple_html_file,
+    pre_test_print_heading_cleanup,
+    pre_test_check_and_mark_reference_cleanup,
 ):
     def fake_get_parameter_value(key):
         if key == "html_file_path":
@@ -356,7 +363,15 @@ def test_print_h1_h6__file_output__with_numbers(
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        print_h1("he 1")
+        if use_reference:
+            ref = Reference()
+            ref.id = "id123"
+            exp_id = "id123_"
+        else:
+            ref = None
+            exp_id = ""
+
+        print_h1("he 1", reference=ref)
         print_h2("he 2")
         print_h3("he 3")
         print_h3("he 3")
@@ -368,15 +383,15 @@ def test_print_h1_h6__file_output__with_numbers(
 
         expected_result = (
             "<html>\n"
-            '<h1 id="1_he_1_1">1\u00A0\u00A0he 1<a class="anchor-link" href="#1_he_1_1">\u00B6</a></h1>\n'
-            '<h2 id="1_1_he_2_2">1.1\u00A0\u00A0he 2<a class="anchor-link" href="#1_1_he_2_2">\u00B6</a></h2>\n'
-            '<h3 id="1_1_1_he_3_3">1.1.1\u00A0\u00A0he 3<a class="anchor-link" href="#1_1_1_he_3_3">\u00B6</a></h3>\n'
-            '<h3 id="1_1_2_he_3_4">1.1.2\u00A0\u00A0he 3<a class="anchor-link" href="#1_1_2_he_3_4">\u00B6</a></h3>\n'
-            '<h2 id="1_2_he_2_5">1.2\u00A0\u00A0he 2<a class="anchor-link" href="#1_2_he_2_5">\u00B6</a></h2>\n'
-            '<h1 id="2_he_1_6">2\u00A0\u00A0he 1<a class="anchor-link" href="#2_he_1_6">\u00B6</a></h1>\n'
-            '<h2 id="2_1_he_2_7">2.1\u00A0\u00A0he 2<a class="anchor-link" href="#2_1_he_2_7">\u00B6</a></h2>\n'
-            '<h2 id="2_2_he_2_8">2.2\u00A0\u00A0he 2<a class="anchor-link" href="#2_2_he_2_8">\u00B6</a></h2>\n'
-            '<h3 id="2_2_1_he_3_9">2.2.1\u00A0\u00A0he 3<a class="anchor-link" href="#2_2_1_he_3_9">\u00B6</a></h3>\n'
+            f'<h1 id="ch_{exp_id}1_he_1_1">1\u00A0\u00A0he 1<a class="anchor-link" href="#ch_{exp_id}1_he_1_1">\u00B6</a></h1>\n'
+            '<h2 id="ch_1_1_he_2_2">1.1\u00A0\u00A0he 2<a class="anchor-link" href="#ch_1_1_he_2_2">\u00B6</a></h2>\n'
+            '<h3 id="ch_1_1_1_he_3_3">1.1.1\u00A0\u00A0he 3<a class="anchor-link" href="#ch_1_1_1_he_3_3">\u00B6</a></h3>\n'
+            '<h3 id="ch_1_1_2_he_3_4">1.1.2\u00A0\u00A0he 3<a class="anchor-link" href="#ch_1_1_2_he_3_4">\u00B6</a></h3>\n'
+            '<h2 id="ch_1_2_he_2_5">1.2\u00A0\u00A0he 2<a class="anchor-link" href="#ch_1_2_he_2_5">\u00B6</a></h2>\n'
+            '<h1 id="ch_2_he_1_6">2\u00A0\u00A0he 1<a class="anchor-link" href="#ch_2_he_1_6">\u00B6</a></h1>\n'
+            '<h2 id="ch_2_1_he_2_7">2.1\u00A0\u00A0he 2<a class="anchor-link" href="#ch_2_1_he_2_7">\u00B6</a></h2>\n'
+            '<h2 id="ch_2_2_he_2_8">2.2\u00A0\u00A0he 2<a class="anchor-link" href="#ch_2_2_he_2_8">\u00B6</a></h2>\n'
+            '<h3 id="ch_2_2_1_he_3_9">2.2.1\u00A0\u00A0he 3<a class="anchor-link" href="#ch_2_2_1_he_3_9">\u00B6</a></h3>\n'
         )
 
         with open(simple_html_file, "r") as f:
@@ -386,8 +401,8 @@ def test_print_h1_h6__file_output__with_numbers(
         captured = capsys.readouterr()
         expected_stdout = (
             (
-                "# he 1\n## he 2\n### he 3\n### he 3\n## he 2\n"
-                "# he 1\n## he 2\n## he 2\n### he 3"
+                "1 he 1\n1.1 he 2\n1.1.1 he 3\n1.1.2 he 3\n1.2 he 2\n"
+                "2 he 1\n2.1 he 2\n2.2 he 2\n2.2.1 he 3"
             )
             if keep_stdout
             else ""

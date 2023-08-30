@@ -1,7 +1,7 @@
 __version__ = "0.2.0-alpha.1"
 
 from pyreball.html import (
-    create_reference,
+    Reference,
     plot_graph,
     plot_multi_graph,
     print,

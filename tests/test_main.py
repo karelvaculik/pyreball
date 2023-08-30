@@ -5,8 +5,8 @@ import pytest
 from pyreball.__main__ import (
     _get_output_dir_and_file_stem,
     _parse_heading_info,
+    _replace_ids,
     insert_heading_title_and_toc,
-    replace_ids,
 )
 
 
@@ -47,9 +47,26 @@ from pyreball.__main__ import (
                 "</html>",
             ],
         ),
+        (
+            [
+                "<html>",
+                'Reference to chapter <a href="#ref-id123">id123</a>',
+                '<h1 id="ch_id123_heading_1_1">My Chapter'
+                '<a class="anchor-link" href="#ch_id123_heading_1_1">\u00B6</a></h1>',
+                'Reference to chapter <a href="#ref-id123">id123</a> again',
+                "</html>",
+            ],
+            [
+                "<html>",
+                'Reference to chapter <a href="#ch_heading_1_1">My Chapter</a>',
+                '<h1 id="ch_heading_1_1">My Chapter<a class="anchor-link" href="#ch_heading_1_1">\u00B6</a></h1>',
+                'Reference to chapter <a href="#ch_heading_1_1">My Chapter</a> again',
+                "</html>",
+            ],
+        ),
     ],
 )
-def test_replace_ids(report_before, report_after, tmpdir):
+def test__replace_ids(report_before, report_after, tmpdir):
     report_dir = Path(tmpdir)
     report_dir.mkdir(parents=True, exist_ok=True)
     report_path = report_dir / "report.py"
@@ -57,7 +74,7 @@ def test_replace_ids(report_before, report_after, tmpdir):
     with open(report_path, "w") as f:
         f.write("\n".join(report_before))
 
-    replace_ids(report_path)
+    _replace_ids(report_path)
 
     with open(report_path) as f:
         result = f.read().split("\n")

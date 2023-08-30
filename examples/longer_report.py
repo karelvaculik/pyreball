@@ -97,8 +97,8 @@ pb.plot_graph(fig, caption="The first plot.")
 pb.print_h2("References to Plots and Tables")
 
 # Creating a reference to a graph and a table:
-img_reference = pb.create_reference()
-table_ref = pb.create_reference()
+img_reference = pb.Reference()
+table_ref = pb.Reference()
 pb.print_div(
     f"It is also possible to create references to tables and figures. "
     f"For example Table {table_ref} shows sortable columns and Fig. {img_reference} displays a scatterplot."

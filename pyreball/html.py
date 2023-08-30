@@ -68,19 +68,26 @@ _multi_graph_memory: Dict[str, Any] = {}
 
 
 class Reference:
+    """
+    Class for creating references, i.e. anchors in HTML.
+    """
+
     def __init__(self, default_text: Optional[str] = None) -> None:
-        self.id = "id" + str(random.getrandbits(64))
+        """Create a new reference.
+
+        Args:
+            default_text:
+        """
+        self.id = f"id{random.getrandbits(64)}"
         self.text = default_text
 
     def __str__(self) -> str:
-        return f'<a href="#ref-{self.id}">{self.id if self.text is None else self.text}</a>'
+        return (
+            f'<a href="#ref-{self.id}">{self.id if self.text is None else self.text}</a>'
+        )
 
     def __call__(self, text: str):
         return f'<a href="#ref-{self.id}">{text}</a>'
-
-
-def create_reference(default_text: Optional[str] = None) -> Reference:
-    return Reference(default_text)
 
 
 def _check_and_mark_reference(reference: Reference) -> None:
@@ -172,110 +179,124 @@ def _get_heading_number(level: int, l_heading_counting: List[int]) -> str:
     return ".".join(map(str, l_heading_counting[:level]))
 
 
-def _print_heading(string: str, level: int = 1) -> None:
+def _print_heading(string: str, level: int = 1, reference: Optional[Reference] = None) -> None:
     if level > 6:
         raise ValueError("Heading level cannot be greater than 6.")
     if level < 1:
         raise ValueError("Heading level cannot be less than 1.")
 
+    if "heading_index" not in _heading_memory:
+        _heading_memory["heading_index"] = 1
+
+    heading_index = _heading_memory["heading_index"]
+
+    if get_parameter_value("numbered_headings"):
+        if "heading_counting" not in _heading_memory:
+            # what is the index of current h1, h2, h3, h4, h5, h6?
+            _heading_memory["heading_counting"] = [0, 0, 0, 0, 0, 0]
+
+        # increase the number in the level
+        _heading_memory["heading_counting"][level - 1] = (
+            _heading_memory["heading_counting"][level - 1] + 1
+        )
+        # reset all sub-levels
+        _heading_memory["heading_counting"][level:] = [0] * (6 - level)
+        # get the string of the numbered section and append non-breakable space
+        non_breakable_spaces = "\u00A0\u00A0"
+        heading_number_str = (
+            _get_heading_number(level, _heading_memory["heading_counting"])
+            + non_breakable_spaces
+        )
+    else:
+        heading_number_str = ""
+
+    string = heading_number_str + _reduce_whitespaces(string)
+    # use heading_index in the id of the heading so there are no collisions in the case of same texts
+    if reference:
+        _check_and_mark_reference(reference)
+        tidy_string = f"ch_{reference.id}_{_tidy_title(string)}_{heading_index}"
+    else:
+        tidy_string = f"ch_{_tidy_title(string)}_{heading_index}"
+
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        builtins.print("#" * level + " " + str(string))
+        builtins.print(string.replace("\u00A0\u00A0", " "))
 
     if get_parameter_value("html_file_path"):
-        if "heading_index" not in _heading_memory:
-            _heading_memory["heading_index"] = 1
-
-        heading_index = _heading_memory["heading_index"]
-
-        if get_parameter_value("numbered_headings"):
-            if "heading_counting" not in _heading_memory:
-                # what is the index of current h1, h2, h3, h4, h5, h6?
-                _heading_memory["heading_counting"] = [0, 0, 0, 0, 0, 0]
-
-            # increase the number in the level
-            _heading_memory["heading_counting"][level - 1] = (
-                _heading_memory["heading_counting"][level - 1] + 1
-            )
-            # reset all sub-levels
-            _heading_memory["heading_counting"][level:] = [0] * (6 - level)
-            # get the string of the numbered section and append non-breakable space
-            non_breakable_spaces = "\u00A0\u00A0"
-            heading_number_str = (
-                _get_heading_number(level, _heading_memory["heading_counting"])
-                + non_breakable_spaces
-            )
-        else:
-            heading_number_str = ""
-
-        string = heading_number_str + _reduce_whitespaces(string)
-        # use heading_index in the id of the heading so there are no collisions in the case of same texts
-        tidy_string = _tidy_title(string) + "_" + str(heading_index)
         pilcrow_sign = "\u00B6"
-        string = (
+        header_contents = (
             string + f'<a class="anchor-link" href="#{tidy_string}">{pilcrow_sign}</a>'
         )
-        _write_to_html(f'<h{level} id="{tidy_string}">{string}</h{level}>')
+        # For correct functioning of references, it is expected that single line contains at most one heading,
+        # and the heading is whole there with all links.
+        _write_to_html(f'<h{level} id="{tidy_string}">{header_contents}</h{level}>')
         _heading_memory["heading_index"] += 1
 
 
-def print_h1(string: str) -> None:
+
+def print_h1(string: str, reference: Optional[Reference] = None) -> None:
     """
     Print h1 heading.
 
     Args:
         string: Content of the heading.
+        reference: Reference object.
     """
-    _print_heading(string, level=1)
+    _print_heading(string, level=1, reference=reference)
 
 
-def print_h2(string: str) -> None:
+def print_h2(string: str, reference: Optional[Reference] = None) -> None:
     """
     Print h2 heading.
 
     Args:
         string: Content of the heading.
+        reference: Reference object.
     """
-    _print_heading(string, level=2)
+    _print_heading(string, level=2, reference=reference)
 
 
-def print_h3(string: str) -> None:
+def print_h3(string: str, reference: Optional[Reference] = None) -> None:
     """
     Print h3 heading.
 
     Args:
         string: Content of the heading.
+        reference: Reference object.
     """
-    _print_heading(string, level=3)
+    _print_heading(string, level=3, reference=reference)
 
 
-def print_h4(string: str) -> None:
+def print_h4(string: str, reference: Optional[Reference] = None) -> None:
     """
     Print h4 heading.
 
     Args:
         string: Content of the heading.
+        reference: Reference object.
     """
-    _print_heading(string, level=4)
+    _print_heading(string, level=4, reference=reference)
 
 
-def print_h5(string: str) -> None:
+def print_h5(string: str, reference: Optional[Reference] = None) -> None:
     """
     Print h5 heading.
 
     Args:
         string: Content of the heading.
+        reference: Reference object.
     """
-    _print_heading(string, level=5)
+    _print_heading(string, level=5, reference=reference)
 
 
-def print_h6(string: str) -> None:
+def print_h6(string: str, reference: Optional[Reference] = None) -> None:
     """
     Print h6 heading.
 
     Args:
         string: Content of the heading.
+        reference: Reference object.
     """
-    _print_heading(string, level=6)
+    _print_heading(string, level=6, reference=reference)
 
 
 def print_div(
@@ -404,9 +425,9 @@ def _prepare_table_html(
     table_html = df.to_html(classes=table_classes, **kwargs)
     if reference:
         _check_and_mark_reference(reference)
-        anchor_link = "table-" + reference.id + "-" + str(tab_index)
+        anchor_link = f"table-{reference.id}-{tab_index}"
     else:
-        anchor_link = "table-" + str(tab_index)
+        anchor_link = f"table-{tab_index}"
 
     caption_element = _prepare_caption_element(
         prefix="Table",

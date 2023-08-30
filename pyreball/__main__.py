@@ -112,10 +112,16 @@ JAVASCRIPT_SORTABLE_TABLE = """
 """
 
 
-def replace_ids(filename: Path) -> None:
-    # collect all ids in form of table-N-M
+def _replace_ids(html_path: Path) -> None:
+    """Replace IDs of HTML elements to create working anchors based on references.
+
+    Args:
+        html_path: Path to the HTML file.
+    """
+    # collect all ids in form of "table-N-M", "img-N-M"
     all_table_and_img_ids = set()
-    with open(filename, "r") as f:
+    chapter_text_replacemenets = []
+    with open(html_path, "r") as f:
         for line in f:
             # note that we don't need to replace only "table" ids by also "img" etc.
             results = re.findall(r"table-id[\d]+-[\d]+", line)
@@ -124,10 +130,24 @@ def replace_ids(filename: Path) -> None:
             results = re.findall(r"img-id[\d]+-[\d]+", line)
             if results:
                 all_table_and_img_ids.update(results)
+            # now collect heading references:
+            results = re.findall(r"ch_id[\d]+_[^\"]+", line)
+            if results:
+                all_table_and_img_ids.update(results)
+                # obtain also the heading text
+                search_result_text = re.search(results[0] + r"\">([^<]+)<", line)
+                link_text = search_result_text.group(1) if search_result_text else ""
+                search_result_id = re.search(r"_(id[\d]+)_", results[0])
+                link_id = search_result_id.group(1) if search_result_id else ""
+                if link_id and link_text:
+                    chapter_text_replacemenets.append(
+                        (f">{link_id}<", f">{link_text}<")
+                    )
+    # Prepare all replacement definitions for a substitutor below
     replacements = []
     for element_id in all_table_and_img_ids:
+        # Tables and images:
         re_results = re.search(r"(.+)-(id\d+)-(\d+)", element_id)
-
         if re_results:
             # this must be first
             replacements.append(
@@ -144,14 +164,29 @@ def replace_ids(filename: Path) -> None:
                 )
             )
 
+        # Headings
+        re_results = re.search(r"ch_(id\d+)_(.+)", element_id)
+        if re_results:
+            # this must be first
+            replacements.append(
+                (
+                    "ref-" + re_results.group(1),
+                    "ch_" + re_results.group(2),
+                )
+            )
+            # this must be second (because it would catch the first case as well)
+            replacements.append((element_id, f"ch_{re_results.group(2)}"))
+    # add also replacements for links to chapters
+    replacements += chapter_text_replacemenets
+
     # replace all table-N-M with table-M and Table N with Table M
     substitutor = Substitutor(replacements=replacements)
     modified_lines = []
-    with open(filename, "r") as f:
+    with open(html_path, "r") as f:
         for line in f:
             modified_lines.append(substitutor.sub(line))
 
-    with open(filename, "w") as f:
+    with open(html_path, "w") as f:
         f.writelines(modified_lines)
 
 
@@ -365,8 +400,8 @@ def get_config_directory() -> Path:
         # the config was generated, let's find out its directory
         config_directory = Path(Path(PATH_TO_CONFIG_LOCATION).read_text())
         if (
-            not (config_directory / CONFIG_INI_FILENAME).exists()
-            or not (config_directory / STYLES_TEMPLATE_FILENAME).exists()
+                not (config_directory / CONFIG_INI_FILENAME).exists()
+                or not (config_directory / STYLES_TEMPLATE_FILENAME).exists()
         ):
             logger.warning(
                 f"{CONFIG_INI_FILENAME} or {STYLES_TEMPLATE_FILENAME} was not found in {config_directory}. "
@@ -380,7 +415,7 @@ def get_config_directory() -> Path:
 
 
 def _get_output_dir_and_file_stem(
-    input_path: Path, output_path_str: Optional[str]
+        input_path: Path, output_path_str: Optional[str]
 ) -> Tuple[Path, str]:
     if not input_path.is_file():
         raise ValueError(f"File {input_path} does not exist.")
@@ -441,10 +476,10 @@ def main() -> None:
     carefully_remove_directory_if_exists(directory=Path(path_str))
 
     script_definitions = (
-        JAVASCRIPT_CHANGE_EXPAND
-        + JAVASCRIPT_ON_LOAD
-        + JAVASCRIPT_SORTABLE_TABLE
-        + JAVASCRIPT_ROLLING_PLOTS
+            JAVASCRIPT_CHANGE_EXPAND
+            + JAVASCRIPT_ON_LOAD
+            + JAVASCRIPT_SORTABLE_TABLE
+            + JAVASCRIPT_ROLLING_PLOTS
     )
 
     css_definitions = get_css(
@@ -476,7 +511,7 @@ def main() -> None:
         with open(html_path, "a") as f:
             f.write(html_end)
 
-    replace_ids(html_path)
+    _replace_ids(html_path)
     insert_heading_title_and_toc(
         filename=html_path, include_toc=parameters["toc"] == "yes"
     )
