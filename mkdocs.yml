@@ -15,7 +15,7 @@ plugins:
           options:
             members_order: alphabetical
             separate_signature: true
-            filters: [ "!^_", "!print_html" ]
+            filters: [ "!^_", "!print_html", "__str__", "__call__" ]
             docstring_options:
               ignore_init_summary: true
             merge_init_into_class: true

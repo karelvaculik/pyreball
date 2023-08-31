@@ -73,20 +73,38 @@ class Reference:
     """
 
     def __init__(self, default_text: Optional[str] = None) -> None:
-        """Create a new reference.
+        """
+        Create a new reference.
 
         Args:
-            default_text:
+            default_text: Default text of the link. This text can be overriden by parameter of `__call__` method.
+                If not provided, Pyreball automatically inserts a text. For tables and images, their number is used.
+                For headings, their text is used.
         """
         self.id = f"id{random.getrandbits(64)}"
         self.text = default_text
 
     def __str__(self) -> str:
+        """
+        Create a link string.
+
+        Returns:
+            Link string.
+        """
         return (
             f'<a href="#ref-{self.id}">{self.id if self.text is None else self.text}</a>'
         )
 
-    def __call__(self, text: str):
+    def __call__(self, text: str) -> str:
+        """
+        Create a link string with given text.
+
+        Args:
+            text: Text of the link.
+
+        Returns:
+            Link string.
+        """
         return f'<a href="#ref-{self.id}">{text}</a>'
 
 
@@ -197,15 +215,15 @@ def _print_heading(string: str, level: int = 1, reference: Optional[Reference] =
 
         # increase the number in the level
         _heading_memory["heading_counting"][level - 1] = (
-            _heading_memory["heading_counting"][level - 1] + 1
+                _heading_memory["heading_counting"][level - 1] + 1
         )
         # reset all sub-levels
         _heading_memory["heading_counting"][level:] = [0] * (6 - level)
         # get the string of the numbered section and append non-breakable space
         non_breakable_spaces = "\u00A0\u00A0"
         heading_number_str = (
-            _get_heading_number(level, _heading_memory["heading_counting"])
-            + non_breakable_spaces
+                _get_heading_number(level, _heading_memory["heading_counting"])
+                + non_breakable_spaces
         )
     else:
         heading_number_str = ""
@@ -224,13 +242,12 @@ def _print_heading(string: str, level: int = 1, reference: Optional[Reference] =
     if get_parameter_value("html_file_path"):
         pilcrow_sign = "\u00B6"
         header_contents = (
-            string + f'<a class="anchor-link" href="#{tidy_string}">{pilcrow_sign}</a>'
+                string + f'<a class="anchor-link" href="#{tidy_string}">{pilcrow_sign}</a>'
         )
         # For correct functioning of references, it is expected that single line contains at most one heading,
         # and the heading is whole there with all links.
         _write_to_html(f'<h{level} id="{tidy_string}">{header_contents}</h{level}>')
         _heading_memory["heading_index"] += 1
-
 
 
 def print_h1(string: str, reference: Optional[Reference] = None) -> None:
@@ -300,11 +317,11 @@ def print_h6(string: str, reference: Optional[Reference] = None) -> None:
 
 
 def print_div(
-    *values: Any,
-    cl: ClParameter = None,
-    attrs: AttrsParameter = None,
-    sep: str = "",
-    end: str = "\n",
+        *values: Any,
+        cl: ClParameter = None,
+        attrs: AttrsParameter = None,
+        sep: str = "",
+        end: str = "\n",
 ) -> None:
     """
     Print values into a div element.
@@ -327,12 +344,12 @@ def print_div(
 
 
 def print_code_block(
-    *values: Any,
-    cl: ClParameter = None,
-    attrs: AttrsParameter = None,
-    sep: str = "",
-    end: str = "\n",
-    syntax_highlight: Optional[Literal["python"]] = "python",
+        *values: Any,
+        cl: ClParameter = None,
+        attrs: AttrsParameter = None,
+        sep: str = "",
+        end: str = "\n",
+        syntax_highlight: Optional[Literal["python"]] = "python",
 ) -> None:
     """
     Print values as a source code into a preformatted block.
@@ -382,7 +399,7 @@ def print(*values: Any, sep: str = "", end: str = "\n") -> None:
 
 
 def _prepare_caption_element(
-    prefix: str, caption: Optional[str], numbered: bool, index: int, anchor_link: str
+        prefix: str, caption: Optional[str], numbered: bool, index: int, anchor_link: str
 ) -> str:
     if numbered:
         caption_text = f"{prefix} {index}"
@@ -398,16 +415,16 @@ def _prepare_caption_element(
 
 
 def _prepare_table_html(
-    df: "pandas.DataFrame",
-    caption: Optional[str] = None,
-    align: str = "center",
-    full_table: bool = True,
-    numbered: bool = True,
-    reference: Optional[Reference] = None,
-    sortable: bool = False,
-    tab_index: int = 0,
-    sorting_definition: Optional[Tuple[str, str]] = None,
-    **kwargs: Any,
+        df: "pandas.DataFrame",
+        caption: Optional[str] = None,
+        align: str = "center",
+        full_table: bool = True,
+        numbered: bool = True,
+        reference: Optional[Reference] = None,
+        sortable: bool = False,
+        tab_index: int = 0,
+        sorting_definition: Optional[Tuple[str, str]] = None,
+        **kwargs: Any,
 ) -> str:
     align_mapping = {
         "center": "centered",
@@ -442,42 +459,42 @@ def _prepare_table_html(
     expander_id = "table-expander-" + str(tab_index)
     if full_table:
         table_html = (
-            caption_element
-            + '<div id="'
-            + scroller_id
-            + '" class="table-scroller">\n'
-            + table_html
-            + "\n</div>\n"
+                caption_element
+                + '<div id="'
+                + scroller_id
+                + '" class="table-scroller">\n'
+                + table_html
+                + "\n</div>\n"
         )
         table_html += (
-            '<div class="text-centered table-expander" style="display: none;" id="'
-            + expander_id
-            + '" onclick="change_expand(this, \''
-            + scroller_id
-            + "')\">⟱</div>"
+                '<div class="text-centered table-expander" style="display: none;" id="'
+                + expander_id
+                + '" onclick="change_expand(this, \''
+                + scroller_id
+                + "')\">⟱</div>"
         )
     else:
         table_html = (
-            caption_element
-            + '<div id="'
-            + scroller_id
-            + '" class="table-scroller-collapsed">\n'
-            + table_html
-            + "\n</div>\n"
+                caption_element
+                + '<div id="'
+                + scroller_id
+                + '" class="table-scroller-collapsed">\n'
+                + table_html
+                + "\n</div>\n"
         )
         table_html += (
-            '<div class="text-centered table-expander" '
-            'id="'
-            + expander_id
-            + '" onclick="change_expand(this, \''
-            + scroller_id
-            + "')\">⟱</div>"
+                '<div class="text-centered table-expander" '
+                'id="'
+                + expander_id
+                + '" onclick="change_expand(this, \''
+                + scroller_id
+                + "')\">⟱</div>"
         )
 
     table_html = (
-        f'<div class="table-wrapper-inner {align_mapping[align]}">'
-        + table_html
-        + "</div>"
+            f'<div class="table-wrapper-inner {align_mapping[align]}">'
+            + table_html
+            + "</div>"
     )
     table_html = '<div class="table-wrapper">' + table_html + "</div>"
     if sorting_definition:
@@ -503,15 +520,15 @@ def _prepare_table_html(
 
 
 def print_table(
-    df: "pandas.DataFrame",
-    caption: Optional[str] = None,
-    reference: Optional[Reference] = None,
-    align: Optional[str] = None,
-    numbered: Optional[bool] = None,
-    full_table: Optional[bool] = None,
-    sortable: Optional[bool] = None,
-    sorting_definition: Optional[Tuple[str, str]] = None,
-    **kwargs: Any,
+        df: "pandas.DataFrame",
+        caption: Optional[str] = None,
+        reference: Optional[Reference] = None,
+        align: Optional[str] = None,
+        numbered: Optional[bool] = None,
+        full_table: Optional[bool] = None,
+        sortable: Optional[bool] = None,
+        sorting_definition: Optional[Tuple[str, str]] = None,
+        **kwargs: Any,
 ) -> None:
     """Print pandas DataFrame into HTML.
 
@@ -589,25 +606,25 @@ def _construct_plot_anchor_link(reference: Optional[Reference], plot_ind: int) -
 
 def _wrap_plot_element_by_outer_divs(img_element: str, align: str, hidden: bool) -> str:
     img_element = (
-        f'<div align="{align}"><div style="display: inline-block;">'
-        + img_element
-        + "</div></div>"
+            f'<div align="{align}"><div style="display: inline-block;">'
+            + img_element
+            + "</div></div>"
     )
     if hidden:
         return (
-            f'<div class="image-wrapper" style="display: none;">'
-            + img_element
-            + "</div>"
+                f'<div class="image-wrapper" style="display: none;">'
+                + img_element
+                + "</div>"
         )
     else:
         return f'<div class="image-wrapper">' + img_element + "</div>"
 
 
 def _prepare_matplotlib_plot_element(
-    fig: "matplotlib.figure.Figure",
-    l_plot_index: int,
-    plot_format: Optional[str] = None,
-    embedded: Optional[bool] = None,
+        fig: "matplotlib.figure.Figure",
+        l_plot_index: int,
+        plot_format: Optional[str] = None,
+        embedded: Optional[bool] = None,
 ) -> str:
     if plot_format is not None and plot_format not in ["svg", "png"]:
         raise ValueError('Matplotlib format can be only "svg" or "png".')
@@ -666,17 +683,17 @@ def _prepare_bokeh_plot_element(fig: "bokeh.plotting._figure.figure") -> str:
 
 
 def _prepare_image_element(
-    fig: FigType,
-    plot_index: int,
-    matplotlib_format: Optional[str] = None,
-    embedded: Optional[bool] = None,
+        fig: FigType,
+        plot_index: int,
+        matplotlib_format: Optional[str] = None,
+        embedded: Optional[bool] = None,
 ):
     # Create the html string according to the figure type.
     # (if we checked type of fig, we would have to add the libraries to requirements)
     if (
-        type(fig).__name__ == "Figure" and type(fig).__module__ == "matplotlib.figure"
+            type(fig).__name__ == "Figure" and type(fig).__module__ == "matplotlib.figure"
     ) or (
-        type(fig).__name__ == "PairGrid" and type(fig).__module__ == "seaborn.axisgrid"
+            type(fig).__name__ == "PairGrid" and type(fig).__module__ == "seaborn.axisgrid"
     ):
         img_element = _prepare_matplotlib_plot_element(
             fig=fig,
@@ -695,8 +712,8 @@ def _prepare_image_element(
     ]:
         img_element = _prepare_altair_plot_element(fig=fig, l_plot_index=plot_index)
     elif (
-        type(fig).__name__ == "Figure"
-        and type(fig).__module__ == "plotly.graph_objs._figure"
+            type(fig).__name__ == "Figure"
+            and type(fig).__module__ == "plotly.graph_objs._figure"
     ):
         img_element = _prepare_plotly_plot_element(fig=fig)
     elif type(fig).__name__.lower() == "figure" and type(fig).__module__ in [
@@ -711,14 +728,14 @@ def _prepare_image_element(
 
 
 def _plot_graph(
-    fig: FigType,
-    caption: Optional[str] = None,
-    reference: Optional[Reference] = None,
-    align: str = "center",
-    numbered: bool = True,
-    matplotlib_format: Optional[str] = None,
-    embedded: Optional[bool] = None,
-    hidden: bool = False,
+        fig: FigType,
+        caption: Optional[str] = None,
+        reference: Optional[Reference] = None,
+        align: str = "center",
+        numbered: bool = True,
+        matplotlib_format: Optional[str] = None,
+        embedded: Optional[bool] = None,
+        hidden: bool = False,
 ) -> None:
     if not get_parameter_value("html_file_path"):
         # only when we don't print to HTML
@@ -761,13 +778,13 @@ def _plot_graph(
 
 
 def plot_graph(
-    fig: FigType,
-    caption: Optional[str] = None,
-    reference: Optional[Reference] = None,
-    align: Optional[str] = None,
-    numbered: Optional[bool] = None,
-    matplotlib_format: Optional[str] = None,
-    embedded: Optional[bool] = None,
+        fig: FigType,
+        caption: Optional[str] = None,
+        reference: Optional[Reference] = None,
+        align: Optional[str] = None,
+        numbered: Optional[bool] = None,
+        matplotlib_format: Optional[str] = None,
+        embedded: Optional[bool] = None,
 ) -> None:
     """
     Plot a graph.
@@ -812,10 +829,10 @@ def plot_graph(
 
 
 def plot_multi_graph(
-    figs: List[FigType],
-    captions: Optional[List[Optional[str]]] = None,
-    align: Optional[str] = None,
-    numbered: Optional[bool] = None,
+        figs: List[FigType],
+        captions: Optional[List[Optional[str]]] = None,
+        align: Optional[str] = None,
+        numbered: Optional[bool] = None,
 ) -> None:
     if captions is None:
         captions = [None] * len(figs)
