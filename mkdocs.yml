@@ -40,8 +40,7 @@ nav:
       - Tables: tables.md
       - Plotting: plotting.md
       - References: references.md
-      - CLI Parameters: cli_parameters.md
-      - Config File: config_file.md
+      - Configuration and CLI Arguments: configuration.md
   - API Documentation:
       - pyreball.html: api/pyreball_html.md
       - pyreball.text: api/pyreball_text.md

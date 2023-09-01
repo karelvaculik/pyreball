@@ -13,7 +13,8 @@ import pkg_resources
 from pyreball.constants import (
     CONFIG_INI_FILENAME,
     DEFAULT_PATH_TO_CONFIG,
-    PATH_TO_CONFIG_LOCATION,
+    HTML_BEGIN_TEMPLATE_FILENAME,
+    HTML_END_TEMPLATE_FILENAME,
     STYLES_TEMPLATE_FILENAME,
 )
 from pyreball.utils.logger import get_logger
@@ -335,7 +336,7 @@ parameter_specifications = [
         "--matplotlib-embedded",
         choices=["yes", "no"],
         default="no",
-        help="Whether to embedded matplotlib images directly into HTML. Only for svg format.",
+        help="Whether to embedded matplotlib plots directly into HTML. Only for svg format.",
     ),
     ChoiceParameter(
         "--numbered-headings",
@@ -347,7 +348,10 @@ parameter_specifications = [
         "--page-width",
         boundaries=(40, 100),
         default=80,
-        help="Width of the page in percentage. An integer in the range 40..100.",
+        help=(
+            "Width of the page container in percentage. An integer in the range 40..100. "
+            "If set outside the range, the value will be shifted towards the range."
+        ),
     ),
     ChoiceParameter(
         "--keep-stdout",
@@ -358,7 +362,114 @@ parameter_specifications = [
 ]
 
 
-def parse_arguments() -> Dict[str, Optional[Union[str, int]]]:
+def _check_existence_of_config_files(
+    config_dir_path: Path, recommendation_msg: str
+) -> None:
+    required_filename = [
+        CONFIG_INI_FILENAME,
+        STYLES_TEMPLATE_FILENAME,
+        HTML_BEGIN_TEMPLATE_FILENAME,
+        HTML_END_TEMPLATE_FILENAME,
+    ]
+    for filename in required_filename:
+        if not (config_dir_path / filename).exists():
+            raise FileNotFoundError(
+                f"Config directory '{config_dir_path}' does not contain all necessary files: "
+                f"{', '.join(required_filename)}. {recommendation_msg}"
+            )
+
+
+def _get_config_directory(config_dir_path: Optional[Path] = None) -> Path:
+    """Get the directory with the config files.
+
+    If config path is provided by user, it is used primarily.
+    If not, pyreball will try to check if config under home directory exists.
+    If it does not exist, it will fall back to the default config directory in installation directory.
+    In all cases, tbe function checks whether all config files exist.
+
+    Args:
+        config_dir_path: Optional path to the config file set by user through CLI argument.
+            Can be a relative or absolute path and can contain ~ for home dir.
+
+    Returns:
+        An absolute path to the config directory.
+    """
+    rec_msg = "Try to regenerate the configs by pyreball-generate-config command."
+    # Try to use the config directory from CLI argument
+    if config_dir_path is not None:
+        config_dir_path = config_dir_path.expanduser().resolve()
+        if not config_dir_path.exists():
+            raise NotADirectoryError(
+                f"Provided config directory '{config_dir_path}' does not exist"
+            )
+        else:
+            _check_existence_of_config_files(
+                config_dir_path=config_dir_path, recommendation_msg=rec_msg
+            )
+            return config_dir_path
+
+    # Try to use config directory from home directory if it exists
+    home_config_dir_path = Path.home() / ".pyreball"
+    if home_config_dir_path.exists():
+        _check_existence_of_config_files(
+            config_dir_path=home_config_dir_path, recommendation_msg=rec_msg
+        )
+        return home_config_dir_path
+
+    # Fallback to the default config directory in installation directory
+    default_config_dir_path = DEFAULT_PATH_TO_CONFIG
+    _check_existence_of_config_files(
+        config_dir_path=default_config_dir_path,
+        recommendation_msg="Try re-installing pyreball.",
+    )
+    return default_config_dir_path
+
+
+def _get_output_dir_and_file_stem(
+    input_path: Path, output_path_str: Optional[Path]
+) -> Tuple[Path, str]:
+    """
+    Obtain the output directory for the HTML file and output filename stem.
+
+    Args:
+        input_path: Path to the input script. Can be a relative or absolute path and can contain ~ for home dir.
+        output_path_str: Optional path denoting the output path. Either as path to an HTML file or a directory.
+            Can be a relative or absolute path and can contain ~ for home dir.
+
+    Returns:
+        A tuple of (output_dir_path, filename_stem) where output_dir_path is an absolute path
+        to the output directory, and filename_stem is the output filename stem.
+    """
+    if not input_path.is_file():
+        raise FileNotFoundError(f"File {input_path} does not exist.")
+
+    if not output_path_str:
+        # use the directory of the input file
+        output_dir_path = input_path.parents[0].resolve()
+        filename_stem = input_path.stem
+    else:
+        output_path = output_path_str.expanduser().resolve()
+        if output_path.suffix == ".html":
+            filename_stem = output_path.stem
+            output_dir_path = output_path.parents[0]
+        else:
+            output_dir_path = output_path
+            filename_stem = input_path.stem
+        output_dir_path.mkdir(parents=True, exist_ok=True)
+
+    return output_dir_path, filename_stem
+
+
+class PathAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if values.strip() == "":
+            raise argparse.ArgumentError(
+                self, "Path argument cannot contain only whitespaces."
+            )
+        setattr(namespace, self.dest, Path(values))
+
+
+def parse_arguments(args) -> Dict[str, Optional[Union[str, int]]]:
     parser = argparse.ArgumentParser(
         description=(
             "Generate Python report. "
@@ -375,78 +486,44 @@ def parse_arguments() -> Dict[str, Optional[Union[str, int]]]:
             "Any path with suffix different from '.html' will be considered a directory path. "
             "All parent directories are automatically created if they do not exist."
         ),
+        action=PathAction,
+    )
+    parser.add_argument(
+        "--config-path",
+        help=(
+            "Path to config directory. "
+            "If not provided, Pyreball will try to use $HOME/.pyreball directory. "
+            "If it does not exist, it will then try to use the default config directory in installation directory. "
+        ),
+        action=PathAction,
     )
     parser.add_argument(
         "input-path",
         help="Input file path. Must represent an existing Python script.",
+        action=PathAction,
     )
     parser.add_argument(
         "script-args",
         nargs=argparse.REMAINDER,
         help="Remaining arguments that are passed to the Python script.",
     )
-    args = parser.parse_args()
-    return vars(args)
-
-
-def get_config_directory() -> Path:
-    """Get the location of the config files.
-
-    If the configs were generated by pyreball-generate-config command, they should be found.
-    If they were not generated or some of them no longer exist, the default package config will be used.
-    """
-    config_location_file_path = Path(PATH_TO_CONFIG_LOCATION)
-    if config_location_file_path.exists():
-        # the config was generated, let's find out its directory
-        config_directory = Path(Path(PATH_TO_CONFIG_LOCATION).read_text())
-        if (
-                not (config_directory / CONFIG_INI_FILENAME).exists()
-                or not (config_directory / STYLES_TEMPLATE_FILENAME).exists()
-        ):
-            logger.warning(
-                f"{CONFIG_INI_FILENAME} or {STYLES_TEMPLATE_FILENAME} was not found in {config_directory}. "
-                f"Try re-generating the configs by pyreball-generate-config command. For now, we will "
-                f"use the default package configs."
-            )
-            config_directory = DEFAULT_PATH_TO_CONFIG
-    else:
-        config_directory = DEFAULT_PATH_TO_CONFIG
-    return config_directory
-
-
-def _get_output_dir_and_file_stem(
-        input_path: Path, output_path_str: Optional[str]
-) -> Tuple[Path, str]:
-    if not input_path.is_file():
-        raise ValueError(f"File {input_path} does not exist.")
-
-    if not output_path_str:
-        # use the directory of the input file
-        output_dir_path = input_path.resolve().parents[0]
-        filename_stem = input_path.stem
-    else:
-        output_path = Path(output_path_str).resolve()
-        if output_path.suffix == ".html":
-            filename_stem = output_path.stem
-            output_dir_path = output_path.parents[0]
-        else:
-            output_dir_path = output_path
-            filename_stem = input_path.stem
-        output_dir_path.mkdir(parents=True, exist_ok=True)
-
-    return output_dir_path, filename_stem
+    return vars(parser.parse_args(args))
 
 
 def main() -> None:
-    args_dict = parse_arguments()
+    args_dict = parse_arguments(sys.argv[1:])
     script_args_string = " ".join(cast(List[str], args_dict.pop("script-args")))
-    input_path = Path(args_dict.pop("input-path"))  # type: ignore
-    output_path_str = cast(Optional[str], args_dict.pop("output_path"))
+    input_path = cast(Path, args_dict.pop("input-path"))
+    input_path = input_path.expanduser().resolve()
+    output_path = cast(Optional[Path], args_dict.pop("output_path"))
+    config_path = cast(Optional[Path], args_dict.pop("config_path"))
 
     output_dir_path, filename_stem = _get_output_dir_and_file_stem(
-        input_path, output_path_str
+        input_path, output_path
     )
-    path_str = str(output_dir_path / filename_stem)
+    # Directory, where HTML's images would be stored;
+    # It basically contains both the output directory and HTML filename stem in one value.
+    html_dir_path_str = str(output_dir_path / filename_stem)
     html_path = output_dir_path / f"{filename_stem}.html"
 
     cli_parameters = check_and_fix_parameters(
@@ -455,7 +532,7 @@ def main() -> None:
         none_allowed=True,
     )
 
-    config_directory = get_config_directory()
+    config_directory = _get_config_directory(config_path)
     file_config_parameters = get_file_config(
         filename=CONFIG_INI_FILENAME,
         directory=config_directory,
@@ -469,17 +546,17 @@ def main() -> None:
     )
 
     os.environ["_TMP_PYREBALL_GENERATOR_PARAMETERS"] = json.dumps(
-        {**parameters, "html_dir_path": path_str}
+        {**parameters, "html_dir_path": html_dir_path_str}
     )
 
     # remove the directory with images if it exists:
-    carefully_remove_directory_if_exists(directory=Path(path_str))
+    carefully_remove_directory_if_exists(directory=Path(html_dir_path_str))
 
     script_definitions = (
-            JAVASCRIPT_CHANGE_EXPAND
-            + JAVASCRIPT_ON_LOAD
-            + JAVASCRIPT_SORTABLE_TABLE
-            + JAVASCRIPT_ROLLING_PLOTS
+        JAVASCRIPT_CHANGE_EXPAND
+        + JAVASCRIPT_ON_LOAD
+        + JAVASCRIPT_SORTABLE_TABLE
+        + JAVASCRIPT_ROLLING_PLOTS
     )
 
     css_definitions = get_css(

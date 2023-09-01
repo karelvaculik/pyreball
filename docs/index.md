@@ -9,12 +9,13 @@ Main features:
 - Basic text formatting such as headings, emphasis, and lists.
 - Hyperlinks, references and table of contents.
 
-The main motivation is to allow the users to
-create persistent reports in the form of interactive HTML pages from scripts retaining the Python syntax. The advantage
-of *regular* Python scripts is that they are easy to maintain, can be refactored quickly through various IDEs, etc.
+The main motivation is to allow users to create persistent reports in the form of HTML pages from scripts retaining the
+Python syntax.
+The advantage of using *regular* Python scripts as the source of these HTML pages is that they are easy to maintain, can
+be refactored quickly through various IDEs, etc.
 
 Pyreball is designed not to require any dependencies, unless you decide to use them. For example, if you decide to print
-pandas DataFrames to tables and plot altair charts, you need to install pandas and altair.
+pandas DataFrames to HTML tables and plot altair charts, you need to install pandas and altair.
 
 Note that Pyreball is still in early stages of development, so there can be some breaking changes between released
 versions.
