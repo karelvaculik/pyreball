@@ -479,8 +479,10 @@ def test_parse_arguments__valid_arguments(args, expected_non_empty_result):
         "numbered_tables": None,
         "output_path": None,
         "page_width": None,
+        "plot_captions_position": None,
         "script-args": [],
         "sortable_tables": None,
+        "table_captions_position": None,
         "toc": None,
     }
     expected_result.update(**expected_non_empty_result)

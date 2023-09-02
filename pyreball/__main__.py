@@ -297,6 +297,12 @@ parameter_specifications = [
         help="Alignment of tables.",
     ),
     ChoiceParameter(
+        "--table-captions-position",
+        choices=["top", "bottom"],
+        default="top",
+        help="Position of the table captions.",
+    ),
+    ChoiceParameter(
         "--numbered-tables",
         choices=["yes", "no"],
         default="no",
@@ -319,6 +325,12 @@ parameter_specifications = [
         choices=["left", "center", "right"],
         default="center",
         help="Alignment of plots.",
+    ),
+    ChoiceParameter(
+        "--plot-captions-position",
+        choices=["top", "bottom"],
+        default="bottom",
+        help="Position of the plot captions.",
     ),
     ChoiceParameter(
         "--numbered-plots",

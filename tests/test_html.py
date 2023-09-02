@@ -823,6 +823,13 @@ def test_print_table__stdout(capsys, simple_dataframe):
     ],
 )
 @pytest.mark.parametrize(
+    "caption_position,param_caption_position,expected_caption_position",
+    [
+        ("top", "bottom", "top"),
+        (None, "bottom", "bottom"),
+    ],
+)
+@pytest.mark.parametrize(
     "numbered,param_numbered,expected_used_numbered",
     [
         (True, False, True),
@@ -857,6 +864,9 @@ def test_print_table__file_output(
     align,
     param_align,
     expected_used_align,
+    caption_position,
+    param_caption_position,
+    expected_caption_position,
     numbered,
     param_numbered,
     expected_used_numbered,
@@ -880,6 +890,8 @@ def test_print_table__file_output(
             return keep_stdout
         elif key == "align_tables":
             return param_align
+        elif key == "table_captions_position":
+            return param_caption_position
         elif key == "numbered_tables":
             return param_numbered
         elif key == "full_tables":
@@ -901,6 +913,7 @@ def test_print_table__file_output(
                 caption="cap",
                 reference=ref,
                 align=align,
+                caption_position=caption_position,
                 numbered=numbered,
                 full_table=full_table,
                 sortable=sortable,
@@ -915,6 +928,7 @@ def test_print_table__file_output(
                 df=simple_dataframe,
                 caption="cap",
                 align=expected_used_align,
+                caption_position=expected_caption_position,
                 full_table=expected_used_full_table,
                 numbered=expected_used_numbered,
                 reference=ref,
@@ -1312,6 +1326,13 @@ def test__plot_graph__file_output(
     ],
 )
 @pytest.mark.parametrize(
+    "caption_position,param_caption_position,expected_caption_position",
+    [
+        ("top", "bottom", "top"),
+        (None, "bottom", "bottom"),
+    ],
+)
+@pytest.mark.parametrize(
     "numbered,param_numbered,expected_used_numbered",
     [
         (True, False, True),
@@ -1323,6 +1344,9 @@ def test_plot_graph(
     align,
     param_align,
     expected_used_align,
+    caption_position,
+    param_caption_position,
+    expected_caption_position,
     numbered,
     param_numbered,
     expected_used_numbered,
@@ -1333,6 +1357,8 @@ def test_plot_graph(
             return simple_html_file
         elif key == "align_plots":
             return param_align
+        elif key == "plot_captions_position":
+            return param_caption_position
         elif key == "numbered_plots":
             return param_numbered
         else:
@@ -1349,6 +1375,7 @@ def test_plot_graph(
                 caption="cap",
                 reference=ref,
                 align=align,
+                caption_position=caption_position,
                 numbered=numbered,
                 matplotlib_format="does_not_matter",
                 embedded=True,
@@ -1359,6 +1386,7 @@ def test_plot_graph(
                 caption="cap",
                 reference=ref,
                 align=expected_used_align,
+                caption_position=expected_caption_position,
                 numbered=expected_used_numbered,
                 matplotlib_format="does_not_matter",
                 embedded=True,

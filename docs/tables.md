@@ -23,6 +23,15 @@ via `numbered` parameter.
 
 Note that internally all tables are numbered, even though the numbering might be turned off.
 
+## Caption Position
+
+By default, the caption is positioned at the top of the table.
+The position can be controlled by `caption_position`  parameter, which can be set either to `top` or `bottom`.,
+
+{{ inline_source("docs/examples/table_caption_position.py") }}
+
+<iframe style="border:2px solid;" src="../examples/table_caption_position.html" height="440" width="100%" title="Iframe Example"></iframe>
+
 ## Aligning
 
 Tables can be horizontally aligned by `align` parameter, as shown in the following code example.

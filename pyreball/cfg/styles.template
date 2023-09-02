@@ -50,6 +50,7 @@ table.dataframe  {
 {
     overflow: auto;    /* scrollable */
     margin-top: 10px;
+    margin-bottom: 10px;
     max-height: none;    /* don't show all cells - the last one should be hidden a bit */
     width: fit-content;
     margin-left: auto;
@@ -61,6 +62,7 @@ table.dataframe  {
 {
     overflow: auto;    /* scrollable */
     margin-top: 10px;
+    margin-bottom: 10px;
     max-height: 390px;    /* don't show all cells - the last one should be hidden a bit */
     width: fit-content;
     margin-left: auto;

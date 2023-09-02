@@ -5,8 +5,9 @@ by [Matplotlib](https://matplotlib.org/), [Seaborn](https://seaborn.pydata.org/)
 [Plotly](https://plotly.com/), and [Bokeh](https://bokeh.org/).
 
 There is a single function [`plot_graph()`](../api/pyreball_html/#pyreball.html.plot_graph) for all these libraries.
-Similarly to [`print_table()`](../api/pyreball_html/#pyreball.html.print_table), it uses parameters `caption`, `align`
-and `numbered` with the same meaning.
+Similarly to [`print_table()`](../api/pyreball_html/#pyreball.html.print_table), it uses
+parameters `caption`, `align`, `caption_position` and `numbered` with the same meaning.
+In contrast to table captions, the default position of plot captions is `bottom`.
 
 ## Matplotlib
 
