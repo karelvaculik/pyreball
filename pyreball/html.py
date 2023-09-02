@@ -19,7 +19,7 @@ from typing import (
 
 from pyreball._common import AttrsParameter, ClParameter
 
-from pyreball.text import code, code_block, div, tag
+from pyreball.text import code_block, div
 from pyreball.utils.utils import get_parameter_value, make_sure_dir_exists, merge_values
 
 if TYPE_CHECKING:
@@ -77,8 +77,10 @@ class Reference:
         Create a new reference.
 
         Args:
-            default_text: Default text of the link. This text can be overriden by parameter of `__call__` method.
-                If not provided, Pyreball automatically inserts a text. For tables and images, their number is used.
+            default_text: Default text of the link.
+                This text can be overriden by parameter of `__call__` method.
+                If not provided, Pyreball automatically inserts a text.
+                For tables and images, their number is used.
                 For headings, their text is used.
         """
         self.id = f"id{random.getrandbits(64)}"
@@ -91,7 +93,11 @@ class Reference:
         Returns:
             Link string.
         """
-        return f'<a href="#ref-{self.id}">{self.id if self.text is None else self.text}</a>'
+        return (
+            f'<a href="#ref-{self.id}">'
+            f"{self.id if self.text is None else self.text}"
+            f"</a>"
+        )
 
     def __call__(self, text: str) -> str:
         """
@@ -110,11 +116,13 @@ def _check_and_mark_reference(reference: Reference) -> None:
     """Check and save a reference.
 
     This function is used when references are added to tables or plots.
-    If a table or plot is about to get a reference that was already used for another object, an error is raised.
+    If a table or plot is about to get a reference that was already used
+    for another object, an error is raised.
     """
     if reference.id in _references:
         raise ValueError(
-            "Reference is used for the second time. You have to create another reference for this object."
+            "Reference is used for the second time. "
+            "You have to create another reference for this object."
         )
     else:
         _references.add(reference.id)
@@ -125,8 +133,8 @@ def set_title(title: str) -> None:
     Set page title.
 
     Note that this function does not have to be called at the beginning of the script.
-    If this function is not called via pyreball and parameter keep_stdout is set to True,
-    it just prints the title to stdout.
+    If this function is not called via pyreball and parameter keep_stdout
+    is set to True, it just prints the title to stdout.
 
     Args:
         title: Title string.
@@ -139,7 +147,8 @@ def set_title(title: str) -> None:
         with open(get_parameter_value("html_file_path"), "r") as f:
             lines = f.readlines()
 
-        # replace the title and also add "custom_pyreball_title" class so that we know it was replaced by this function
+        # replace the title and also add "custom_pyreball_title" class,
+        # so that we know it was replaced by this function
         lines = [
             re.sub(
                 r"^<title>[^<]*</title>",
@@ -161,7 +170,7 @@ def _write_to_html(string: str, end: str = "\n") -> None:
 
 def _tidy_title(title: str) -> str:
     """
-    Transforms title string into lowercase alphanumerical sequence separated by underscores.
+    Transforms title into lowercase alphanumerical sequence separated by underscores.
 
     Args:
         title: The string that you want to transform.
@@ -229,7 +238,8 @@ def _print_heading(
         heading_number_str = ""
 
     string = heading_number_str + _reduce_whitespaces(string)
-    # use heading_index in the id of the heading so there are no collisions in the case of same texts
+    # use heading_index in the id of the heading,
+    # so there are no collisions in the case of same texts
     if reference:
         _check_and_mark_reference(reference)
         tidy_string = f"ch_{reference.id}_{_tidy_title(string)}_{heading_index}"
@@ -244,7 +254,8 @@ def _print_heading(
         header_contents = (
             string + f'<a class="anchor-link" href="#{tidy_string}">{pilcrow_sign}</a>'
         )
-        # For correct functioning of references, it is expected that single line contains at most one heading,
+        # For correct functioning of references,
+        # it is expected that single line contains at most one heading,
         # and the heading is whole there with all links.
         _write_to_html(f'<h{level} id="{tidy_string}">{header_contents}</h{level}>')
         _heading_memory["heading_index"] += 1
@@ -330,12 +341,16 @@ def print_div(
 
     Args:
         *values: Zero or more values to be printed into the div.
-        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
-            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        cl: One or more class names to be added to the tag.
+            If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space.
+            If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
-            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
-            set None for given key. Any quotes in values are not escaped.
+        attrs: Additional attributes to be added to the tag.
+            Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`.
+            To construct boolean HTML attributes, set None for given key.
+            Any quotes in values are not escaped.
         sep: String separator of the values inside the tag. Defaults to an empty string.
         end: String appended after the tag. Defaults to a newline.
     """
@@ -355,22 +370,30 @@ def print_code_block(
     Print values as a source code into a preformatted block.
 
     This element is used to display a source code in a block.
-    It is possible to highlight the code syntax by setting `syntax_highlight` parameter to an appropriate string.
+    It is possible to highlight the code syntax by setting `syntax_highlight`
+    parameter to an appropriate string.
 
     This function is a shortcut for `code_block()` and `print()`.
 
     Args:
-        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
-        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
-            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        *values: Zero or more values to be enclosed in the tag.
+            All values are converted to strings.
+        cl: One or more class names to be added to the tag.
+            If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space.
+            If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
-            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
-            set None for given key. Any quotes in values are not escaped.
+        attrs: Additional attributes to be added to the tag.
+            Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`.
+            To construct boolean HTML attributes, set None for given key.
+            Any quotes in values are not escaped.
         sep: String separator of the values inside the tag. Defaults to an empty string.
         end: String appended after the tag. Defaults to a newline.
-        syntax_highlight: Syntax highlighting language. Currently only "python" is supported. If None,
-            no highlight is applied. When highlight is turned on, class "<language>" is added to the `<code>` element.
+        syntax_highlight: Syntax highlighting language.
+            Currently only "python" is supported. If None,
+            no highlight is applied. When highlight is turned on,
+            class "<language>" is added to the `<code>` element.
     """
     source_code_str = code_block(
         *values,
@@ -386,8 +409,10 @@ def print(*values: Any, sep: str = "", end: str = "\n") -> None:
     """Print values as strings to HTML file.
 
     Args:
-        *values: Zero or more values to be printed. Each value is converted to a string first.
-        sep: Separator string to concatenate the values with. Defaults to an empty space.
+        *values: Zero or more values to be printed.
+            Each value is converted to a string first.
+        sep: Separator string to concatenate the values with.
+            Defaults to an empty space.
         end: String appended after the values. Defaults to a newline.
     """
     str_values = map(str, values)
@@ -411,7 +436,11 @@ def _prepare_caption_element(
         caption_text = f"{caption}"
     else:
         caption_text = ""
-    return f'\n<div class="text-centered"><a name="{anchor_link}"><b>\n{caption_text}\n</b></a></div>\n'
+    return (
+        f'\n<div class="text-centered">'
+        f'<a name="{anchor_link}"><b>\n{caption_text}\n</b></a>'
+        f"</div>\n"
+    )
 
 
 def _prepare_table_html(
@@ -493,8 +522,9 @@ def _prepare_table_html(
             )
         if sorting_definition[1] not in ["asc", "desc"]:
             raise ValueError(
-                f"sorting_definition must be either None or a pair (<column_name>, <sorting>), "
-                f"where <sorting> is either 'asc' or 'desc'."
+                "sorting_definition must be either None "
+                "or a pair (<column_name>, <sorting>), "
+                "where <sorting> is either 'asc' or 'desc'."
             )
         column_index = df.columns.get_loc(sorting_definition[0]) + 1  # (+ index)
         table_init = (
@@ -522,15 +552,18 @@ def print_table(
 ) -> None:
     """Print pandas DataFrame into HTML.
 
-    The sortable tables are based on https://datatables.net/examples/basic_init/zero_configuration.html.
+    The sortable tables are based on
+    https://datatables.net/examples/basic_init/zero_configuration.html.
 
     Args:
         df: Data frame to be printed.
         caption: Text caption.
         reference: Reference object.
-        align: How to align the table horizontally. Acceptable values are 'left', 'center', and 'right'.
+        align: How to align the table horizontally.
+            Acceptable values are 'left', 'center', and 'right'.
             Defaults to settings from config or CLI arguments if None.
-        caption_position: Where to place the caption. Acceptable values are 'top', and 'bottom'.
+        caption_position: Where to place the caption.
+            Acceptable values are 'top', and 'bottom'.
             Defaults to settings from config or CLI arguments if None.
         numbered: Whether the caption should be numbered.
             Defaults to settings from config or CLI arguments if None.
@@ -538,7 +571,8 @@ def print_table(
             Defaults to settings from config or CLI arguments if None.
         sortable: Whether to allow sortable columns.
             Defaults to settings from config or CLI arguments if None.
-        sorting_definition: How to sort the table initially, in the form (<column_name>, <sorting>),
+        sorting_definition: How to sort the table initially,
+            in the form (<column_name>, <sorting>),
             where <sorting> is either 'asc' or 'desc'.
         **kwargs: Other parameters to pandas to_html method.
     """
@@ -600,25 +634,21 @@ def print_table(
 def _construct_plot_anchor_link(reference: Optional[Reference], plot_ind: int) -> str:
     if reference:
         _check_and_mark_reference(reference)
-        return "img-" + reference.id + "-" + str(plot_ind)
+        return f"img-{reference.id}-{plot_ind}"
     else:
-        return "img-" + str(plot_ind)
+        return f"img-{plot_ind}"
 
 
 def _wrap_plot_element_by_outer_divs(img_element: str, align: str, hidden: bool) -> str:
     img_element = (
         f'<div align="{align}"><div style="display: inline-block;">'
-        + img_element
-        + "</div></div>"
+        f"{img_element}"
+        f"</div></div>"
     )
     if hidden:
-        return (
-            f'<div class="image-wrapper" style="display: none;">'
-            + img_element
-            + "</div>"
-        )
+        return f'<div class="image-wrapper" style="display: none;">{img_element}</div>'
     else:
-        return f'<div class="image-wrapper">' + img_element + "</div>"
+        return f'<div class="image-wrapper">{img_element}</div>'
 
 
 def _prepare_matplotlib_plot_element(
@@ -656,7 +686,11 @@ def _prepare_matplotlib_plot_element(
             format=plot_format,
             bbox_inches="tight",
         )
-        img_element = f'<img src="{os.path.join(get_parameter_value("html_dir_name"), img_file_name)}">'
+        img_element = (
+            f'<img src="'
+            f'{os.path.join(get_parameter_value("html_dir_name"), img_file_name)}'
+            f'">'
+        )
     else:
         raise RuntimeError("Failed to create a matplotlib image.")
     return img_element
@@ -664,7 +698,10 @@ def _prepare_matplotlib_plot_element(
 
 def _prepare_altair_plot_element(fig: AltairFigType, l_plot_index: int) -> str:
     vis_id = "altairvis" + str(l_plot_index)
-    img_element = f'<div id="{vis_id}"></div><script type="text/javascript">\nvar spec = {fig.to_json()};\n'
+    img_element = (
+        f'<div id="{vis_id}">'
+        f'</div><script type="text/javascript">\nvar spec = {fig.to_json()};\n'
+    )
     img_element += 'var opt = {"renderer": "canvas", "actions": false};\n'
     img_element += f'vegaEmbed("#{vis_id}", spec, opt);'
     img_element += "</script>"
@@ -680,7 +717,7 @@ def _prepare_bokeh_plot_element(fig: "bokeh.plotting._figure.figure") -> str:
     from bokeh.embed import components  # type: ignore
 
     script, div = components(fig)
-    return "<div>" + div + script + "</div>"
+    return f"<div>{div}{script}</div>"
 
 
 def _prepare_image_element(
@@ -815,15 +852,19 @@ def plot_graph(
         fig: Plot object.
         caption: Caption of the plot.
         reference: Reference object for link creation.
-        align: How to align the graph horizontally. Acceptable values are 'left', 'center', and 'right'.
+        align: How to align the graph horizontally.
+            Acceptable values are 'left', 'center', and 'right'.
             Defaults to settings from config or CLI arguments if None.
-        caption_position: Where to place the caption. Acceptable values are 'top', and 'bottom'.
+        caption_position: Where to place the caption.
+            Acceptable values are 'top', and 'bottom'.
             Defaults to settings from config or CLI arguments if None.
         numbered: Whether the caption should be numbered.
             Defaults to settings from config or CLI arguments if None.
-        matplotlib_format: Format for matplotlib plots. Acceptable values are "svg", and "png".
+        matplotlib_format: Format for matplotlib plots.
+            Acceptable values are "svg", and "png".
             Defaults to settings from config or CLI arguments if None.
-        embedded: Whether to embed the plot directly into HTML; Only applicable for matplotlib "svg" images.
+        embedded: Whether to embed the plot directly into HTML;
+            Only applicable for matplotlib "svg" images.
             Defaults to settings from config or CLI arguments if None.
     """
 
