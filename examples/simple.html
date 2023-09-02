@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title class="custom">Simple report</title>
+<title class="custom_pyreball_title">Simple report</title>
 <meta charset="UTF-16">
-<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
@@ -15,6 +14,10 @@
 <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.2.2.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.2.2.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.2.2.min.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+<script>hljs.highlightAll();</script>
 <script>
 
     function change_expand(button, table_id){
@@ -114,10 +117,6 @@ img, svg, canvas.marks, div.vega-embed {
     margin-left: auto;
     margin-right: auto;
     display: block;
-}
-
-code {
-    background: rgb(245, 245, 245);
 }
 
 table.dataframe  {
@@ -261,9 +260,17 @@ h6:hover .anchor-link {
 <body>
 <div class="main_container">
 <h1 id="toc_generated_0">Simple report<a class="anchor-link" href="#toc_generated_0">¶</a></h1>
-<a href="#1_heading_1">1  Heading</a><br/>
-<h1 id="1_heading_1">1  Heading<a class="anchor-link" href="#1_heading_1">¶</a></h1>
+<a href="#ch_1_heading_1">1  Heading</a><br/>
+<h1 id="ch_1_heading_1">1  Heading<a class="anchor-link" href="#ch_1_heading_1">¶</a></h1>
 <div>This is my div with <b>important</b> text.</div>
 </div>
 </body>
+<script>
+    // Inline source sode is just in <code> element, so force the formatting on it too:
+    $(document).ready(function () {
+        $('code.inline-highlight').each(function (i, block) {
+            hljs.highlightBlock(block);
+        });
+    });
+</script>
 </html>

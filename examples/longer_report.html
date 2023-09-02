@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title class="custom">Sample Report</title>
+<title class="custom_pyreball_title">Sample Report</title>
 <meta charset="UTF-16">
-<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
@@ -15,6 +14,10 @@
 <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.2.2.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.2.2.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.2.2.min.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+<script>hljs.highlightAll();</script>
 <script>
 
     function change_expand(button, table_id){
@@ -114,10 +117,6 @@ img, svg, canvas.marks, div.vega-embed {
     margin-left: auto;
     margin-right: auto;
     display: block;
-}
-
-code {
-    background: rgb(245, 245, 245);
 }
 
 table.dataframe  {
@@ -261,42 +260,48 @@ h6:hover .anchor-link {
 <body>
 <div class="main_container">
 <h1 id="toc_generated_0">Sample Report<a class="anchor-link" href="#toc_generated_0">¶</a></h1>
-<a href="#1_displaying_texts_1">1  Displaying Texts</a><br/>
+<a href="#ch_1_displaying_texts_1">1  Displaying Texts</a><br/>
 <ul style="list-style-type:none; margin:0px">
-<li><a href="#1_1_basic_stringwrapping_formatting_functions_2">1.1  Basic String-wrapping Formatting Functions</a></li>
-<li><a href="#1_2_other_special_functions_3">1.2  Other Special Functions</a></li>
+<li><a href="#ch_1_1_basic_stringwrapping_formatting_functions_2">1.1  Basic String-wrapping Formatting Functions</a></li>
+<li><a href="#ch_1_2_other_special_functions_3">1.2  Other Special Functions</a></li>
 </ul>
-<a href="#2_inspecting_data_4">2  Inspecting Data</a><br/>
+<a href="#ch_2_inspecting_data_4">2  Inspecting Data</a><br/>
 <ul style="list-style-type:none; margin:0px">
-<li><a href="#2_1_tables_and_plots_5">2.1  Tables and Plots</a></li>
-<li><a href="#2_2_references_to_plots_and_tables_6">2.2  References to Plots and Tables</a></li>
+<li><a href="#ch_2_1_tables_and_plots_5">2.1  Tables and Plots</a></li>
+<li><a href="#ch_2_2_references_to_plots_and_tables_6">2.2  References to Plots and Tables</a></li>
 </ul>
-<h1 id="1_displaying_texts_1">1  Displaying Texts<a class="anchor-link" href="#1_displaying_texts_1">¶</a></h1>
+<h1 id="ch_1_displaying_texts_1">1  Displaying Texts<a class="anchor-link" href="#ch_1_displaying_texts_1">¶</a></h1>
 <div>We can always start inserting custom raw HTML code.</div>
 <br>
 <div>However, we can use special function to write text into a &lt;br&gt; element.</div>
 <br>
-<div>It is possible to pass several values and optionally a separator.<br>The values will be joined and automatically converted to strings, as with the following number and list.<br>42<br>[11, 13, 19]<br>Newline characters can be converted to &lt;br&gt; elements by using replace_newlines_with_br parameter.</div>
-<h2 id="1_1_basic_stringwrapping_formatting_functions_2">1.1  Basic String-wrapping Formatting Functions<a class="anchor-link" href="#1_1_basic_stringwrapping_formatting_functions_2">¶</a></h2>
-<div>This is a text with <b>bold</b> word and with <em>emphasised</em> word.You can also use <code>inline code formatting</code>.</div>
-<div>In the previous section, we pasted string values on separate lines. Let's use lists instead:<ul><li>Each argument is one element in the list</li><li>We can even make nested lists as with the following ordered list:</li><ol><li>First</li><li>Second</li></ol><li>And we can of course mix the lists:</li><ul><li>Nested list again, but now an unordered one.</li></ul></ul></div>
-<h2 id="1_2_other_special_functions_3">1.2  Other Special Functions<a class="anchor-link" href="#1_2_other_special_functions_3">¶</a></h2>
+<div>
+It is possible to pass several values and optionally a separator.
+The values will be joined and automatically converted to strings, as with the following number and list.
+42
+[11, 13, 19]
+Newline characters can be converted to &lt;br&gt; elements by using replace_newlines_with_br parameter.
+</div>
+<h2 id="ch_1_1_basic_stringwrapping_formatting_functions_2">1.1  Basic String-wrapping Formatting Functions<a class="anchor-link" href="#ch_1_1_basic_stringwrapping_formatting_functions_2">¶</a></h2>
+<div>This is a text with <b>bold</b> word and with <em>emphasised</em> word.You can also use <code class="inline-highlight python">inline code formatting</code>.</div>
+<div>In the previous section, we pasted string values on separate lines. Let's use lists instead:<ul><li>Each argument is one element in the list</li><li>We can even make nested lists as with the following ordered list:</li><li><ol><li>First</li><li>Second</li></ol></li><li>And we can of course mix the lists:</li><li><ul><li>Nested list again, but now an unordered one.</li></ul></li></ul></div>
+<h2 id="ch_1_2_other_special_functions_3">1.2  Other Special Functions<a class="anchor-link" href="#ch_1_2_other_special_functions_3">¶</a></h2>
 <div>We can also add a link to <a href="https://www.python.org/doc/">Python documentation</a> if necessary. Talking about links, note that each heading has a clickable anchor.</div>
 <br>
-<div>We already used <code>code</code> function for inline formatting. There is also <code>print_code</code> function that creates a text block formatted as code, which can be useful when we want to print various data structures, such as matrices:</div>
-<pre class="prettyprint lang-py">[[4.17022005e-01 7.20324493e-01 1.14374817e-04]
+<div>We already used <code class="inline-highlight python">code</code> function for inline formatting. There is also <code class="inline-highlight python">print_code</code> function that creates a text block formatted as code, which can be useful when we want to print various data structures, such as matrices:</div>
+<pre><code class="python">[[4.17022005e-01 7.20324493e-01 1.14374817e-04]
  [3.02332573e-01 1.46755891e-01 9.23385948e-02]
- [1.86260211e-01 3.45560727e-01 3.96767474e-01]]</pre>
+ [1.86260211e-01 3.45560727e-01 3.96767474e-01]]</code></pre>
 <div>... or even a piece of code:</div>
-<pre class="prettyprint lang-py">def factorial(n):
+<pre><code class="python">def factorial(n):
     result = 1
     for i in range(1, n + 1):
         result *= i
     return result
-</pre>
-<div>Before going further, let's return to the very first function we used: <code>set_title</code>. As the name suggests, it sets the title of the HTML page. It is optional and can be actually placed in any part of the report.</div>
-<h1 id="2_inspecting_data_4">2  Inspecting Data<a class="anchor-link" href="#2_inspecting_data_4">¶</a></h1>
-<h2 id="2_1_tables_and_plots_5">2.1  Tables and Plots<a class="anchor-link" href="#2_1_tables_and_plots_5">¶</a></h2>
+</code></pre>
+<div>Before going further, let's return to the very first function we used: <code class="inline-highlight python">set_title</code>. As the name suggests, it sets the title of the HTML page. It is optional and can be actually placed in any part of the report.</div>
+<h1 id="ch_2_inspecting_data_4">2  Inspecting Data<a class="anchor-link" href="#ch_2_inspecting_data_4">¶</a></h1>
+<h2 id="ch_2_1_tables_and_plots_5">2.1  Tables and Plots<a class="anchor-link" href="#ch_2_1_tables_and_plots_5">¶</a></h2>
 <div class="table-wrapper"><div class="table-wrapper-inner centered">
 <div class="text-centered"><a name="table-1"><b>
 Table 1: A data table.
@@ -373,7 +378,7 @@ Table 1: A data table.
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2023-08-18T09:02:30.932689</dc:date>
+    <dc:date>2023-09-01T16:35:07.719831</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -409,12 +414,12 @@ z
     <g id="xtick_1">
      <g id="line2d_1">
       <defs>
-       <path id="m6547b72d79" d="M 0 0 
+       <path id="m5242446e24" d="M 0 0 
 L 0 3.5 
 " style="stroke: #000000; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#m6547b72d79" x="109.905455" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m5242446e24" x="109.905455" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_1">
@@ -453,7 +458,7 @@ z
     <g id="xtick_2">
      <g id="line2d_2">
       <g>
-       <use xlink:href="#m6547b72d79" x="182.050909" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m5242446e24" x="182.050909" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_2">
@@ -487,7 +492,7 @@ z
     <g id="xtick_3">
      <g id="line2d_3">
       <g>
-       <use xlink:href="#m6547b72d79" x="254.196364" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m5242446e24" x="254.196364" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_3">
@@ -532,7 +537,7 @@ z
     <g id="xtick_4">
      <g id="line2d_4">
       <g>
-       <use xlink:href="#m6547b72d79" x="326.341818" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m5242446e24" x="326.341818" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_4">
@@ -586,7 +591,7 @@ z
     <g id="xtick_5">
      <g id="line2d_5">
       <g>
-       <use xlink:href="#m6547b72d79" x="398.487273" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m5242446e24" x="398.487273" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_5">
@@ -662,12 +667,12 @@ z
     <g id="ytick_1">
      <g id="line2d_6">
       <defs>
-       <path id="m840adb96c5" d="M 0 0 
+       <path id="mdf7cb8efad" d="M 0 0 
 L -3.5 0 
 " style="stroke: #000000; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#m840adb96c5" x="57.6" y="303.276144" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mdf7cb8efad" x="57.6" y="303.276144" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_7">
@@ -723,7 +728,7 @@ z
     <g id="ytick_2">
      <g id="line2d_7">
       <g>
-       <use xlink:href="#m840adb96c5" x="57.6" y="267.730195" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mdf7cb8efad" x="57.6" y="267.730195" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_8">
@@ -765,7 +770,7 @@ z
     <g id="ytick_3">
      <g id="line2d_8">
       <g>
-       <use xlink:href="#m840adb96c5" x="57.6" y="232.184245" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mdf7cb8efad" x="57.6" y="232.184245" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_9">
@@ -780,7 +785,7 @@ z
     <g id="ytick_4">
      <g id="line2d_9">
       <g>
-       <use xlink:href="#m840adb96c5" x="57.6" y="196.638296" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mdf7cb8efad" x="57.6" y="196.638296" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_10">
@@ -795,7 +800,7 @@ z
     <g id="ytick_5">
      <g id="line2d_10">
       <g>
-       <use xlink:href="#m840adb96c5" x="57.6" y="161.092346" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mdf7cb8efad" x="57.6" y="161.092346" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_11">
@@ -810,7 +815,7 @@ z
     <g id="ytick_6">
      <g id="line2d_11">
       <g>
-       <use xlink:href="#m840adb96c5" x="57.6" y="125.546397" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mdf7cb8efad" x="57.6" y="125.546397" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_12">
@@ -825,7 +830,7 @@ z
     <g id="ytick_7">
      <g id="line2d_12">
       <g>
-       <use xlink:href="#m840adb96c5" x="57.6" y="90.000447" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mdf7cb8efad" x="57.6" y="90.000447" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_13">
@@ -840,7 +845,7 @@ z
     <g id="ytick_8">
      <g id="line2d_13">
       <g>
-       <use xlink:href="#m840adb96c5" x="57.6" y="54.454498" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mdf7cb8efad" x="57.6" y="54.454498" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_14">
@@ -889,7 +894,7 @@ L 290.269091 112.61691
 L 326.341818 184.608181 
 L 362.414545 144.402861 
 L 398.487273 263.354648 
-" clip-path="url(#pef68f4dff3)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+" clip-path="url(#p2cd51b1f09)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="patch_3">
     <path d="M 57.6 307.584 
@@ -914,7 +919,7 @@ L 414.72 41.472
   </g>
  </g>
  <defs>
-  <clipPath id="pef68f4dff3">
+  <clipPath id="p2cd51b1f09">
    <rect x="57.6" y="41.472" width="357.12" height="266.112"/>
   </clipPath>
  </defs>
@@ -924,7 +929,7 @@ L 414.72 41.472
 Figure 1: The first plot.
 </b></a></div>
 </div></div></div>
-<h2 id="2_2_references_to_plots_and_tables_6">2.2  References to Plots and Tables<a class="anchor-link" href="#2_2_references_to_plots_and_tables_6">¶</a></h2>
+<h2 id="ch_2_2_references_to_plots_and_tables_6">2.2  References to Plots and Tables<a class="anchor-link" href="#ch_2_2_references_to_plots_and_tables_6">¶</a></h2>
 <div>It is also possible to create references to tables and figures. For example Table <a href="#table-2">2</a> shows sortable columns and Fig. <a href="#img-2">2</a> displays a scatterplot.</div>
 <div class="table-wrapper"><div class="table-wrapper-inner centered">
 <div class="text-centered"><a name="table-2"><b>
@@ -1071,7 +1076,7 @@ Table 3: A table sorted by y column
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2023-08-18T09:02:31.015302</dc:date>
+    <dc:date>2023-09-01T16:35:07.747014</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -1104,7 +1109,7 @@ z
    </g>
    <g id="PathCollection_1">
     <defs>
-     <path id="m1d163d27d2" d="M 0 3 
+     <path id="mc34f04f8a1" d="M 0 3 
 C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
 C 2.683901 1.55874 3 0.795609 3 0 
 C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
@@ -1116,29 +1121,29 @@ C -1.55874 2.683901 -0.795609 3 0 3
 z
 " style="stroke: #ffffff; stroke-width: 0.48"/>
     </defs>
-    <g clip-path="url(#p79000ffbb8)">
-     <use xlink:href="#m1d163d27d2" x="73.832727" y="150.054125" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
-     <use xlink:href="#m1d163d27d2" x="109.905455" y="184.070808" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
-     <use xlink:href="#m1d163d27d2" x="145.978182" y="108.421922" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
-     <use xlink:href="#m1d163d27d2" x="182.050909" y="245.136549" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
-     <use xlink:href="#m1d163d27d2" x="218.123636" y="53.568" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
-     <use xlink:href="#m1d163d27d2" x="254.196364" y="295.488" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
-     <use xlink:href="#m1d163d27d2" x="290.269091" y="112.61691" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
-     <use xlink:href="#m1d163d27d2" x="326.341818" y="184.608181" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
-     <use xlink:href="#m1d163d27d2" x="362.414545" y="144.402861" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
-     <use xlink:href="#m1d163d27d2" x="398.487273" y="263.354648" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
+    <g clip-path="url(#pa82f619b14)">
+     <use xlink:href="#mc34f04f8a1" x="73.832727" y="150.054125" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
+     <use xlink:href="#mc34f04f8a1" x="109.905455" y="184.070808" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
+     <use xlink:href="#mc34f04f8a1" x="145.978182" y="108.421922" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
+     <use xlink:href="#mc34f04f8a1" x="182.050909" y="245.136549" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
+     <use xlink:href="#mc34f04f8a1" x="218.123636" y="53.568" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
+     <use xlink:href="#mc34f04f8a1" x="254.196364" y="295.488" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
+     <use xlink:href="#mc34f04f8a1" x="290.269091" y="112.61691" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
+     <use xlink:href="#mc34f04f8a1" x="326.341818" y="184.608181" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
+     <use xlink:href="#mc34f04f8a1" x="362.414545" y="144.402861" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
+     <use xlink:href="#mc34f04f8a1" x="398.487273" y="263.354648" style="fill: #1f77b4; stroke: #ffffff; stroke-width: 0.48"/>
     </g>
    </g>
    <g id="matplotlib.axis_1">
     <g id="xtick_1">
      <g id="line2d_1">
       <defs>
-       <path id="m2ce0d5576c" d="M 0 0 
+       <path id="m6c2e79387c" d="M 0 0 
 L 0 3.5 
 " style="stroke: #000000; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#m2ce0d5576c" x="109.905455" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m6c2e79387c" x="109.905455" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_1">
@@ -1177,7 +1182,7 @@ z
     <g id="xtick_2">
      <g id="line2d_2">
       <g>
-       <use xlink:href="#m2ce0d5576c" x="182.050909" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m6c2e79387c" x="182.050909" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_2">
@@ -1211,7 +1216,7 @@ z
     <g id="xtick_3">
      <g id="line2d_3">
       <g>
-       <use xlink:href="#m2ce0d5576c" x="254.196364" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m6c2e79387c" x="254.196364" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_3">
@@ -1256,7 +1261,7 @@ z
     <g id="xtick_4">
      <g id="line2d_4">
       <g>
-       <use xlink:href="#m2ce0d5576c" x="326.341818" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m6c2e79387c" x="326.341818" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_4">
@@ -1310,7 +1315,7 @@ z
     <g id="xtick_5">
      <g id="line2d_5">
       <g>
-       <use xlink:href="#m2ce0d5576c" x="398.487273" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m6c2e79387c" x="398.487273" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_5">
@@ -1386,12 +1391,12 @@ z
     <g id="ytick_1">
      <g id="line2d_6">
       <defs>
-       <path id="mb81cdc7ba1" d="M 0 0 
+       <path id="m9bdbf2cf13" d="M 0 0 
 L -3.5 0 
 " style="stroke: #000000; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#mb81cdc7ba1" x="57.6" y="303.276144" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m9bdbf2cf13" x="57.6" y="303.276144" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_7">
@@ -1447,7 +1452,7 @@ z
     <g id="ytick_2">
      <g id="line2d_7">
       <g>
-       <use xlink:href="#mb81cdc7ba1" x="57.6" y="267.730195" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m9bdbf2cf13" x="57.6" y="267.730195" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_8">
@@ -1489,7 +1494,7 @@ z
     <g id="ytick_3">
      <g id="line2d_8">
       <g>
-       <use xlink:href="#mb81cdc7ba1" x="57.6" y="232.184245" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m9bdbf2cf13" x="57.6" y="232.184245" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_9">
@@ -1504,7 +1509,7 @@ z
     <g id="ytick_4">
      <g id="line2d_9">
       <g>
-       <use xlink:href="#mb81cdc7ba1" x="57.6" y="196.638296" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m9bdbf2cf13" x="57.6" y="196.638296" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_10">
@@ -1519,7 +1524,7 @@ z
     <g id="ytick_5">
      <g id="line2d_10">
       <g>
-       <use xlink:href="#mb81cdc7ba1" x="57.6" y="161.092346" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m9bdbf2cf13" x="57.6" y="161.092346" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_11">
@@ -1534,7 +1539,7 @@ z
     <g id="ytick_6">
      <g id="line2d_11">
       <g>
-       <use xlink:href="#mb81cdc7ba1" x="57.6" y="125.546397" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m9bdbf2cf13" x="57.6" y="125.546397" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_12">
@@ -1549,7 +1554,7 @@ z
     <g id="ytick_7">
      <g id="line2d_12">
       <g>
-       <use xlink:href="#mb81cdc7ba1" x="57.6" y="90.000447" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m9bdbf2cf13" x="57.6" y="90.000447" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_13">
@@ -1564,7 +1569,7 @@ z
     <g id="ytick_8">
      <g id="line2d_13">
       <g>
-       <use xlink:href="#mb81cdc7ba1" x="57.6" y="54.454498" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m9bdbf2cf13" x="57.6" y="54.454498" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_14">
@@ -1625,7 +1630,7 @@ L 414.72 41.472
   </g>
  </g>
  <defs>
-  <clipPath id="p79000ffbb8">
+  <clipPath id="pa82f619b14">
    <rect x="57.6" y="41.472" width="357.12" height="266.112"/>
   </clipPath>
  </defs>
@@ -1638,4 +1643,12 @@ Figure 2: A plot with a reference.
 <div>Note that you can use the references in your text multiple times, see again the reference to Table <a href="#table-2">2</a> and Fig. <a href="#img-2">2</a>. Of course, we cannot use a single reference for multiple tables or figures.</div>
 </div>
 </body>
+<script>
+    // Inline source sode is just in <code> element, so force the formatting on it too:
+    $(document).ready(function () {
+        $('code.inline-highlight').each(function (i, block) {
+            hljs.highlightBlock(block);
+        });
+    });
+</script>
 </html>

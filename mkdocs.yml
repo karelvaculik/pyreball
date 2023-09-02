@@ -1,6 +1,8 @@
 site_name: Pyreball
 theme:
   name: material
+  features:
+    - content.code.copy
 
 plugins:
   - search
@@ -11,12 +13,13 @@ plugins:
         python:
           paths: [ . ]
           options:
-            members_order: source
+            members_order: alphabetical
             separate_signature: true
-            filters: [ "!^_" ]
+            filters: [ "!^_", "!print_html", "__str__", "__call__" ]
             docstring_options:
               ignore_init_summary: true
             merge_init_into_class: true
+            show_source: false
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -26,9 +29,18 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - admonition
+  - pymdownx.details
 
 nav:
-  - Get Started:
-      - Welcome to Pyreball: index.md
+  - Get Started: index.md
+  - Usage:
+      - Basic Printing: basic_printing.md
+      - Text Utils: text_utils.md
+      - Tables: tables.md
+      - Plotting: plotting.md
+      - References: references.md
+      - Configuration and CLI Arguments: configuration.md
   - API Documentation:
       - pyreball.html: api/pyreball_html.md
+      - pyreball.text: api/pyreball_text.md

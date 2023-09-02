@@ -1,10 +1,25 @@
 """Main functions that serve as building blocks of the final html file."""
+import builtins
 import io
 import os
 import random
 import re
-from typing import Any, cast, Dict, List, Optional, Set, Tuple, TYPE_CHECKING, Union
+from typing import (
+    Any,
+    cast,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Set,
+    Tuple,
+    TYPE_CHECKING,
+    Union,
+)
 
+from pyreball._common import AttrsParameter, ClParameter
+
+from pyreball.text import code, code_block, div, tag
 from pyreball.utils.utils import get_parameter_value, make_sure_dir_exists, merge_values
 
 if TYPE_CHECKING:
@@ -53,19 +68,42 @@ _multi_graph_memory: Dict[str, Any] = {}
 
 
 class Reference:
+    """
+    Class for creating references, i.e. anchors in HTML.
+    """
+
     def __init__(self, default_text: Optional[str] = None) -> None:
-        self.id = "id" + str(random.getrandbits(64))
+        """
+        Create a new reference.
+
+        Args:
+            default_text: Default text of the link. This text can be overriden by parameter of `__call__` method.
+                If not provided, Pyreball automatically inserts a text. For tables and images, their number is used.
+                For headings, their text is used.
+        """
+        self.id = f"id{random.getrandbits(64)}"
         self.text = default_text
 
     def __str__(self) -> str:
+        """
+        Create a link string.
+
+        Returns:
+            Link string.
+        """
         return f'<a href="#ref-{self.id}">{self.id if self.text is None else self.text}</a>'
 
-    def __call__(self, text: str):
+    def __call__(self, text: str) -> str:
+        """
+        Create a link string with given text.
+
+        Args:
+            text: Text of the link.
+
+        Returns:
+            Link string.
+        """
         return f'<a href="#ref-{self.id}">{text}</a>'
-
-
-def create_reference(default_text: Optional[str] = None) -> Reference:
-    return Reference(default_text)
 
 
 def _check_and_mark_reference(reference: Reference) -> None:
@@ -91,20 +129,22 @@ def set_title(title: str) -> None:
     it just prints the title to stdout.
 
     Args:
-        title (str): Title string.
+        title: Title string.
     """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        print(title)
+        builtins.print(title)
     if get_parameter_value("html_file_path"):
         # it is assumed that the heading is already written into the file,
         # so find the line with title element and replace its contents
         with open(get_parameter_value("html_file_path"), "r") as f:
             lines = f.readlines()
 
-        # replace the title and also add "custom" class so that we know it was replaced by this function
+        # replace the title and also add "custom_pyreball_title" class so that we know it was replaced by this function
         lines = [
             re.sub(
-                r"^<title>[^<]*</title>", f'<title class="custom">{title}</title>', line
+                r"^<title>[^<]*</title>",
+                f'<title class="custom_pyreball_title">{title}</title>',
+                line,
             )
             for line in lines
         ]
@@ -112,11 +152,11 @@ def set_title(title: str) -> None:
             f.writelines(lines)
 
 
-def _write_to_html(string: str) -> None:
+def _write_to_html(string: str, end: str = "\n") -> None:
     if get_parameter_value("html_file_path"):
         with open(get_parameter_value("html_file_path"), "a") as f:
             f.write(string)
-            f.write("\n")
+            f.write(end)
 
 
 def _tidy_title(title: str) -> str:
@@ -124,7 +164,7 @@ def _tidy_title(title: str) -> str:
     Transforms title string into lowercase alphanumerical sequence separated by underscores.
 
     Args:
-        title (str): The string that you want to transform.
+        title: The string that you want to transform.
 
     Returns:
         str: The transformed string.
@@ -155,78 +195,133 @@ def _get_heading_number(level: int, l_heading_counting: List[int]) -> str:
     return ".".join(map(str, l_heading_counting[:level]))
 
 
-def _print_heading(string: str, level: int = 1) -> None:
+def _print_heading(
+    string: str, level: int = 1, reference: Optional[Reference] = None
+) -> None:
     if level > 6:
         raise ValueError("Heading level cannot be greater than 6.")
     if level < 1:
         raise ValueError("Heading level cannot be less than 1.")
 
+    if "heading_index" not in _heading_memory:
+        _heading_memory["heading_index"] = 1
+
+    heading_index = _heading_memory["heading_index"]
+
+    if get_parameter_value("numbered_headings"):
+        if "heading_counting" not in _heading_memory:
+            # what is the index of current h1, h2, h3, h4, h5, h6?
+            _heading_memory["heading_counting"] = [0, 0, 0, 0, 0, 0]
+
+        # increase the number in the level
+        _heading_memory["heading_counting"][level - 1] = (
+            _heading_memory["heading_counting"][level - 1] + 1
+        )
+        # reset all sub-levels
+        _heading_memory["heading_counting"][level:] = [0] * (6 - level)
+        # get the string of the numbered section and append non-breakable space
+        non_breakable_spaces = "\u00A0\u00A0"
+        heading_number_str = (
+            _get_heading_number(level, _heading_memory["heading_counting"])
+            + non_breakable_spaces
+        )
+    else:
+        heading_number_str = ""
+
+    string = heading_number_str + _reduce_whitespaces(string)
+    # use heading_index in the id of the heading so there are no collisions in the case of same texts
+    if reference:
+        _check_and_mark_reference(reference)
+        tidy_string = f"ch_{reference.id}_{_tidy_title(string)}_{heading_index}"
+    else:
+        tidy_string = f"ch_{_tidy_title(string)}_{heading_index}"
+
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        print("#" * level + " " + str(string))
+        builtins.print(string.replace("\u00A0\u00A0", " "))
 
     if get_parameter_value("html_file_path"):
-        if "heading_index" not in _heading_memory:
-            _heading_memory["heading_index"] = 1
-
-        heading_index = _heading_memory["heading_index"]
-
-        if get_parameter_value("numbered_headings"):
-            if "heading_counting" not in _heading_memory:
-                # what is the index of current h1, h2, h3, h4, h5, h6?
-                _heading_memory["heading_counting"] = [0, 0, 0, 0, 0, 0]
-
-            # increase the number in the level
-            _heading_memory["heading_counting"][level - 1] = (
-                _heading_memory["heading_counting"][level - 1] + 1
-            )
-            # reset all sub-levels
-            _heading_memory["heading_counting"][level:] = [0] * (6 - level)
-            # get the string of the numbered section and append non-breakable space
-            non_breakable_spaces = "\u00A0\u00A0"
-            heading_number_str = (
-                _get_heading_number(level, _heading_memory["heading_counting"])
-                + non_breakable_spaces
-            )
-        else:
-            heading_number_str = ""
-
-        string = heading_number_str + _reduce_whitespaces(string)
-        # use heading_index in the id of the heading so there are no collisions in the case of same texts
-        tidy_string = _tidy_title(string) + "_" + str(heading_index)
         pilcrow_sign = "\u00B6"
-        string = (
+        header_contents = (
             string + f'<a class="anchor-link" href="#{tidy_string}">{pilcrow_sign}</a>'
         )
-        _write_to_html(f'<h{level} id="{tidy_string}">{string}</h{level}>')
+        # For correct functioning of references, it is expected that single line contains at most one heading,
+        # and the heading is whole there with all links.
+        _write_to_html(f'<h{level} id="{tidy_string}">{header_contents}</h{level}>')
         _heading_memory["heading_index"] += 1
 
 
-def print_h1(string: str) -> None:
-    _print_heading(string, level=1)
+def print_h1(string: str, reference: Optional[Reference] = None) -> None:
+    """
+    Print h1 heading.
+
+    Args:
+        string: Content of the heading.
+        reference: Reference object.
+    """
+    _print_heading(string, level=1, reference=reference)
 
 
-def print_h2(string: str) -> None:
-    _print_heading(string, level=2)
+def print_h2(string: str, reference: Optional[Reference] = None) -> None:
+    """
+    Print h2 heading.
+
+    Args:
+        string: Content of the heading.
+        reference: Reference object.
+    """
+    _print_heading(string, level=2, reference=reference)
 
 
-def print_h3(string: str) -> None:
-    _print_heading(string, level=3)
+def print_h3(string: str, reference: Optional[Reference] = None) -> None:
+    """
+    Print h3 heading.
+
+    Args:
+        string: Content of the heading.
+        reference: Reference object.
+    """
+    _print_heading(string, level=3, reference=reference)
 
 
-def print_h4(string: str) -> None:
-    _print_heading(string, level=4)
+def print_h4(string: str, reference: Optional[Reference] = None) -> None:
+    """
+    Print h4 heading.
+
+    Args:
+        string: Content of the heading.
+        reference: Reference object.
+    """
+    _print_heading(string, level=4, reference=reference)
 
 
-def print_h5(string: str) -> None:
-    _print_heading(string, level=5)
+def print_h5(string: str, reference: Optional[Reference] = None) -> None:
+    """
+    Print h5 heading.
+
+    Args:
+        string: Content of the heading.
+        reference: Reference object.
+    """
+    _print_heading(string, level=5, reference=reference)
 
 
-def print_h6(string: str) -> None:
-    _print_heading(string, level=6)
+def print_h6(string: str, reference: Optional[Reference] = None) -> None:
+    """
+    Print h6 heading.
+
+    Args:
+        string: Content of the heading.
+        reference: Reference object.
+    """
+    _print_heading(string, level=6, reference=reference)
 
 
 def print_div(
-    *values: Any, sep: str = "", replace_newlines_with_br: bool = False
+    *values: Any,
+    cl: ClParameter = None,
+    attrs: AttrsParameter = None,
+    sep: str = "",
+    end: str = "\n",
 ) -> None:
     """
     Print values into a div element.
@@ -234,38 +329,73 @@ def print_div(
     Any value that is not a string is converted to a string first.
 
     Args:
-        values (Any): One or more values to be printed into the div.
-        sep (str, optional): String separator of the values. Defaults to an empty string.
-        replace_newlines_with_br (bool, optional): Whether to replace newline characters with the <br> tag.
-            Defaults to False.
-
-    Returns:
-        None
+        *values: Zero or more values to be printed into the div.
+        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+            If an empty list is provided, class attribute is added with an empty string.
+        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
+            set None for given key. Any quotes in values are not escaped.
+        sep: String separator of the values inside the tag. Defaults to an empty string.
+        end: String appended after the tag. Defaults to a newline.
     """
+    div_str = div(*values, cl=cl, attrs=attrs, sep=sep)
+    print(div_str, end=end)
+
+
+def print_code_block(
+    *values: Any,
+    cl: ClParameter = None,
+    attrs: AttrsParameter = None,
+    sep: str = "",
+    end: str = "\n",
+    syntax_highlight: Optional[Literal["python"]] = "python",
+) -> None:
+    """
+    Print values as a source code into a preformatted block.
+
+    This element is used to display a source code in a block.
+    It is possible to highlight the code syntax by setting `syntax_highlight` parameter to an appropriate string.
+
+    This function is a shortcut for `code_block()` and `print()`.
+
+    Args:
+        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
+        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+            If an empty list is provided, class attribute is added with an empty string.
+        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
+            set None for given key. Any quotes in values are not escaped.
+        sep: String separator of the values inside the tag. Defaults to an empty string.
+        end: String appended after the tag. Defaults to a newline.
+        syntax_highlight: Syntax highlighting language. Currently only "python" is supported. If None,
+            no highlight is applied. When highlight is turned on, class "<language>" is added to the `<code>` element.
+    """
+    source_code_str = code_block(
+        *values,
+        cl=cl,
+        attrs=attrs,
+        sep=sep,
+        syntax_highlight=syntax_highlight,
+    )
+    print(source_code_str, end=end)
+
+
+def print(*values: Any, sep: str = "", end: str = "\n") -> None:
+    """Print values as strings to HTML file.
+
+    Args:
+        *values: Zero or more values to be printed. Each value is converted to a string first.
+        sep: Separator string to concatenate the values with. Defaults to an empty space.
+        end: String appended after the values. Defaults to a newline.
+    """
+    str_values = map(str, values)
+    string = sep.join(str_values) + end
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        print(*values, sep=sep)
+        builtins.print(string)
     if get_parameter_value("html_file_path"):
-        html_div = sep.join(map(str, values))
-        if replace_newlines_with_br:
-            html_div = re.sub(r"\n", "<br>", html_div)
-        _write_to_html(f"<div>{html_div}</div>")
-
-
-def print_code(string: str, highlight_syntax: bool = True) -> None:
-    if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        print(string)
-    if get_parameter_value("html_file_path"):
-        if highlight_syntax:
-            _write_to_html('<pre class="prettyprint lang-py">' + string + "</pre>")
-        else:
-            _write_to_html("<pre>" + string + "</pre>")
-
-
-def print_html(string: str) -> None:
-    if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        print(string)
-    if get_parameter_value("html_file_path"):
-        _write_to_html(string)
+        _write_to_html(string, end="")
 
 
 def _prepare_caption_element(
@@ -288,6 +418,7 @@ def _prepare_table_html(
     df: "pandas.DataFrame",
     caption: Optional[str] = None,
     align: str = "center",
+    caption_position: str = "top",
     full_table: bool = True,
     numbered: bool = True,
     reference: Optional[Reference] = None,
@@ -309,12 +440,12 @@ def _prepare_table_html(
     if sortable and not sorting_definition:
         # add this class only to sortable tables that don't have sorting definition
         table_classes.append("sortable_table")
-    table_html = df.to_html(classes=table_classes, **kwargs)
+    df_html = df.to_html(classes=table_classes, **kwargs)
     if reference:
         _check_and_mark_reference(reference)
-        anchor_link = "table-" + reference.id + "-" + str(tab_index)
+        anchor_link = f"table-{reference.id}-{tab_index}"
     else:
-        anchor_link = "table-" + str(tab_index)
+        anchor_link = f"table-{tab_index}"
 
     caption_element = _prepare_caption_element(
         prefix="Table",
@@ -328,38 +459,26 @@ def _prepare_table_html(
     # div button that expands the table
     expander_id = "table-expander-" + str(tab_index)
     if full_table:
-        table_html = (
-            caption_element
-            + '<div id="'
-            + scroller_id
-            + '" class="table-scroller">\n'
-            + table_html
-            + "\n</div>\n"
-        )
-        table_html += (
-            '<div class="text-centered table-expander" style="display: none;" id="'
-            + expander_id
-            + '" onclick="change_expand(this, \''
-            + scroller_id
-            + "')\">⟱</div>"
-        )
+        enclosing_div_class = "table-scroller"
+        style_attr = 'style="display: none;" '
     else:
-        table_html = (
-            caption_element
-            + '<div id="'
-            + scroller_id
-            + '" class="table-scroller-collapsed">\n'
-            + table_html
-            + "\n</div>\n"
-        )
-        table_html += (
-            '<div class="text-centered table-expander" '
-            'id="'
-            + expander_id
-            + '" onclick="change_expand(this, \''
-            + scroller_id
-            + "')\">⟱</div>"
-        )
+        enclosing_div_class = "table-scroller-collapsed"
+        style_attr = " "
+    if caption_position == "top":
+        table_html = caption_element
+    else:
+        table_html = ""
+    table_html += (
+        f'<div id="{scroller_id}" class="{enclosing_div_class}">\n{df_html}\n</div>\n'
+    )
+    table_html += (
+        f'<div class="text-centered table-expander" {style_attr}id="{expander_id}" '
+        f"onclick=\"change_expand(this, '{scroller_id}')\">⟱</div>"
+    )
+    if caption_position == "bottom":
+        table_html += caption_element
+    else:
+        table_html += ""
 
     table_html = (
         f'<div class="table-wrapper-inner {align_mapping[align]}">'
@@ -394,6 +513,7 @@ def print_table(
     caption: Optional[str] = None,
     reference: Optional[Reference] = None,
     align: Optional[str] = None,
+    caption_position: Optional[str] = None,
     numbered: Optional[bool] = None,
     full_table: Optional[bool] = None,
     sortable: Optional[bool] = None,
@@ -405,25 +525,25 @@ def print_table(
     The sortable tables are based on https://datatables.net/examples/basic_init/zero_configuration.html.
 
     Args:
-        df (pandas.DataFrame): Data frame to be printed.
-        caption (str, optional): Text caption.
-        reference (Reference, optional): Reference object.
-        align (str, optional): How to align the table. If None, settings from config or CLI arguments are used.
-            Acceptable values are 'left', 'center', or 'right'.
-        numbered (bool, optional): Should the caption be numbered?
-        full_table (bool, optional): Whether to show the table expanded.
-            If None, settings from config or CLI arguments are used.
-        sortable (bool, optional): Whether to allow sortable columns.
-            If None, settings from config or CLI arguments are used.
-        sorting_definition (tuple, optional): How to sort the table initially, in the form (<column_name>, <sorting>),
+        df: Data frame to be printed.
+        caption: Text caption.
+        reference: Reference object.
+        align: How to align the table horizontally. Acceptable values are 'left', 'center', and 'right'.
+            Defaults to settings from config or CLI arguments if None.
+        caption_position: Where to place the caption. Acceptable values are 'top', and 'bottom'.
+            Defaults to settings from config or CLI arguments if None.
+        numbered: Whether the caption should be numbered.
+            Defaults to settings from config or CLI arguments if None.
+        full_table: Whether to show the table expanded.
+            Defaults to settings from config or CLI arguments if None.
+        sortable: Whether to allow sortable columns.
+            Defaults to settings from config or CLI arguments if None.
+        sorting_definition: How to sort the table initially, in the form (<column_name>, <sorting>),
             where <sorting> is either 'asc' or 'desc'.
         **kwargs: Other parameters to pandas to_html method.
-
-    Returns:
-        None
     """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        print(df)
+        builtins.print(df)
     if get_parameter_value("html_file_path"):
         if "table_index" not in _table_memory:
             _table_memory["table_index"] = 1
@@ -433,6 +553,13 @@ def print_table(
             str,
             merge_values(
                 primary_value=align, secondary_value=get_parameter_value("align_tables")
+            ),
+        )
+        caption_position = cast(
+            str,
+            merge_values(
+                primary_value=caption_position,
+                secondary_value=get_parameter_value("table_captions_position"),
             ),
         )
         numbered = bool(
@@ -457,6 +584,7 @@ def print_table(
             df=df,
             caption=caption,
             align=align,
+            caption_position=caption_position,
             full_table=full_table,
             numbered=numbered,
             reference=reference,
@@ -547,7 +675,7 @@ def _prepare_plotly_plot_element(fig: "plotly.graph_objs.Figure") -> str:
     return fig.to_html(full_html=False, include_plotlyjs=False)
 
 
-def _prepare_bokeh_plot_element(fig: "bokeh.plotting.figure.Figure") -> str:
+def _prepare_bokeh_plot_element(fig: "bokeh.plotting._figure.figure") -> str:
     # noinspection PyPackageRequirements
     from bokeh.embed import components  # type: ignore
 
@@ -605,6 +733,7 @@ def _plot_graph(
     caption: Optional[str] = None,
     reference: Optional[Reference] = None,
     align: str = "center",
+    caption_position: str = "bottom",
     numbered: bool = True,
     matplotlib_format: Optional[str] = None,
     embedded: Optional[bool] = None,
@@ -629,19 +758,38 @@ def _plot_graph(
         anchor_link = _construct_plot_anchor_link(
             reference=reference, plot_ind=plot_index
         )
-        img_element = _prepare_image_element(
-            fig=fig,
-            plot_index=plot_index,
-            matplotlib_format=matplotlib_format,
-            embedded=embedded,
-        )
-        img_element += _prepare_caption_element(
-            prefix="Figure",
-            caption=caption,
-            numbered=numbered,
-            index=plot_index,
-            anchor_link=anchor_link,
-        )
+        if caption_position == "bottom":
+            img_element = _prepare_image_element(
+                fig=fig,
+                plot_index=plot_index,
+                matplotlib_format=matplotlib_format,
+                embedded=embedded,
+            )
+            img_element += _prepare_caption_element(
+                prefix="Figure",
+                caption=caption,
+                numbered=numbered,
+                index=plot_index,
+                anchor_link=anchor_link,
+            )
+        elif caption_position == "top":
+            img_element = _prepare_caption_element(
+                prefix="Figure",
+                caption=caption,
+                numbered=numbered,
+                index=plot_index,
+                anchor_link=anchor_link,
+            )
+            img_element += _prepare_image_element(
+                fig=fig,
+                plot_index=plot_index,
+                matplotlib_format=matplotlib_format,
+                embedded=embedded,
+            )
+        else:
+            raise ValueError(
+                f"caption_position must be 'top' or 'bottom', not {caption_position}."
+            )
         img_html = _wrap_plot_element_by_outer_divs(
             img_element=img_element, align=align, hidden=hidden
         )
@@ -655,6 +803,7 @@ def plot_graph(
     caption: Optional[str] = None,
     reference: Optional[Reference] = None,
     align: Optional[str] = None,
+    caption_position: Optional[str] = None,
     numbered: Optional[bool] = None,
     matplotlib_format: Optional[str] = None,
     embedded: Optional[bool] = None,
@@ -663,26 +812,32 @@ def plot_graph(
     Plot a graph.
 
     Args:
-        fig (FigType): Plot object.
-        caption (Optional[str]): Caption of the plot.
-        reference (Optional[Reference]): Reference object for link creation.
-        align (Optional[str]): How to align the table. Can be "left", "center", or "right".
+        fig: Plot object.
+        caption: Caption of the plot.
+        reference: Reference object for link creation.
+        align: How to align the graph horizontally. Acceptable values are 'left', 'center', and 'right'.
             Defaults to settings from config or CLI arguments if None.
-        numbered (Optional[bool]): Whether the caption should be numbered.
+        caption_position: Where to place the caption. Acceptable values are 'top', and 'bottom'.
             Defaults to settings from config or CLI arguments if None.
-        matplotlib_format (Optional[str]): Format for matplotlib plots. Can be "svg", "png", or None.
+        numbered: Whether the caption should be numbered.
             Defaults to settings from config or CLI arguments if None.
-        embedded (Optional[bool]): Whether to embed the plot directly into HTML; Only applicable for matplotlib "svg" images.
+        matplotlib_format: Format for matplotlib plots. Acceptable values are "svg", and "png".
             Defaults to settings from config or CLI arguments if None.
-
-    Returns:
-        None
+        embedded: Whether to embed the plot directly into HTML; Only applicable for matplotlib "svg" images.
+            Defaults to settings from config or CLI arguments if None.
     """
 
     align = cast(
         str,
         merge_values(
             primary_value=align, secondary_value=get_parameter_value("align_plots")
+        ),
+    )
+    caption_position = cast(
+        str,
+        merge_values(
+            primary_value=caption_position,
+            secondary_value=get_parameter_value("plot_captions_position"),
         ),
     )
     numbered = bool(
@@ -697,6 +852,7 @@ def plot_graph(
         caption=caption,
         reference=reference,
         align=align,
+        caption_position=caption_position,
         numbered=numbered,
         matplotlib_format=matplotlib_format,
         embedded=embedded,

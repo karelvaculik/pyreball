@@ -1,32 +1,23 @@
-from unittest.mock import patch
+from copy import copy
 
 import pytest
 
 from pyreball.text import (
+    _collect_classes_for_code_strings,
     _construct_attrs_str,
-    _construct_class_atr_string,
-    _enclose_in_tags,
+    _construct_class_attr_string,
+    a,
     bold,
     code,
+    code_block,
     div,
     em,
     link,
-    ol,
+    olist,
     span,
-    ul,
+    tag,
+    ulist,
 )
-
-
-def assert_strings_single_arg(func, patch_env, test_input, expected_result):
-    with patch("pyreball.text.get_parameter_value", return_value=patch_env):
-        assert func(test_input) == expected_result
-
-
-def assert_strings_multiple_args(
-    func, patch_env, test_input, input_kwargs, expected_result
-):
-    with patch("pyreball.text.get_parameter_value", return_value=patch_env):
-        assert func(*test_input, **input_kwargs) == expected_result
 
 
 @pytest.mark.parametrize(
@@ -36,12 +27,13 @@ def assert_strings_multiple_args(
         ("", 'class=""'),
         ([], 'class=""'),
         ("ab", 'class="ab"'),
+        ("ab xy", 'class="ab xy"'),
         (["ab"], 'class="ab"'),
         (["ab", "e", "fg"], 'class="ab e fg"'),
     ],
 )
-def test__construct_class_atr_string(test_input, expected_result):
-    assert _construct_class_atr_string(test_input) == expected_result
+def test__construct_class_attr_string(test_input, expected_result):
+    assert _construct_class_attr_string(test_input) == expected_result
 
 
 @pytest.mark.parametrize(
@@ -60,8 +52,8 @@ def test__construct_class_atr_string(test_input, expected_result):
             'x="y"',
         ),
         (
-            {"x": "y", "checked": None, "a": "b", "valid": None},
-            'x="y" checked a="b" valid',
+            {"x": "y", "checked": None, "a": "b c", "valid": None},
+            'x="y" checked a="b c" valid',
         ),
     ],
 )
@@ -69,188 +61,241 @@ def test__construct_attrs_str(test_input, expected_result):
     assert _construct_attrs_str(test_input) == expected_result
 
 
-@pytest.mark.parametrize(
-    "patch_env,input_args,input_kwargs,expected_result",
-    [
-        (
-            False,
-            ["a"],
-            {"tag": "x", "cl": None, "attrs": None, "sep": ""},
-            "a",
-        ),
-        (
-            False,
-            [1],
-            {"tag": "x", "cl": None, "attrs": None, "sep": ""},
-            "1",
-        ),
-        (
-            True,
-            ["abc"],
-            {"tag": "x", "cl": None, "attrs": None, "sep": ""},
-            "<x>abc</x>",
-        ),
-        (
-            True,
-            [2351],
-            {"tag": "x", "cl": None, "attrs": None, "sep": ""},
-            "<x>2351</x>",
-        ),
-        (
-            False,
-            [2351, "hello"],
-            {"tag": "abc", "cl": None, "attrs": None, "sep": "\n"},
-            "2351\nhello",
-        ),
-        (
-            True,
-            [2351, "hello"],
-            {"tag": "abc", "cl": None, "attrs": None, "sep": "\n"},
-            "<abc>2351\nhello</abc>",
-        ),
-        (
-            True,
-            [2351, "hello"],
-            {"tag": "abc", "cl": ["cl1", "cl2"], "attrs": None, "sep": "\n"},
-            '<abc class="cl1 cl2">2351\nhello</abc>',
-        ),
-        (
-            True,
-            [2351, "hello"],
-            {"tag": "abc", "cl": None, "attrs": {"key": "val"}, "sep": "\n"},
-            '<abc key="val">2351\nhello</abc>',
-        ),
-        (
-            True,
-            [2351, "hello"],
-            {"tag": "abc", "cl": ["cl1", "cl2"], "attrs": {"key": "val"}, "sep": "\n"},
-            '<abc class="cl1 cl2" key="val">2351\nhello</abc>',
-        ),
-    ],
-)
-def test__enclose_in_tags(patch_env, input_args, input_kwargs, expected_result):
-    assert_strings_multiple_args(
-        _enclose_in_tags, patch_env, input_args, input_kwargs, expected_result
-    )
-
-
-def test__enclose_in_tags__duplicate_class_setting():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        with pytest.raises(ValueError):
-            _enclose_in_tags(
-                "value", tag="x", cl="my_class", attrs={"class": "my_cl"}, sep=""
-            )
-
-
 def test_bold():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        assert bold("a", "b", sep="\n") == "<b>a\nb</b>"
+    assert bold("a", "b", sep="\n") == "<b>\na\nb\n</b>"
 
 
 def test_em():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        assert em("a", "b", sep="\n") == "<em>a\nb</em>"
-
-
-def test_code():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        assert code("a", "b", sep="\n") == "<code>a\nb</code>"
-
-
-def test_div():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        assert div("a", "b", sep="\n") == "<div>a\nb</div>"
-
-
-def test_span():
-    with patch("pyreball.text.get_parameter_value", return_value=True):
-        assert span("a", "b", sep="\n") == "<span>a\nb</span>"
+    assert em("a", "b", sep="\n") == "<em>\na\nb\n</em>"
 
 
 @pytest.mark.parametrize(
-    "patch_env,test_input,expected_result",
+    "initial_class_list,cl,syntax_highlight,expected_result",
+    [
+        ([], None, None, None),
+        ([], [], None, []),
+        ([], "cl1", None, "cl1"),
+        ([], ["cl1"], None, ["cl1"]),
+        ([], None, "python", ["python"]),
+        ([], [], "python", ["python"]),
+        ([], "cl1", "python", ["cl1", "python"]),
+        ([], ["cl1"], "python", ["cl1", "python"]),
+        (["x"], None, None, None),
+        (["x"], [], None, []),
+        (["x"], "cl1", None, "cl1"),
+        (["x"], ["cl1"], None, ["cl1"]),
+        (["x"], None, "python", ["x", "python"]),
+        (["x"], [], "python", ["x", "python"]),
+        (["x"], "cl1", "python", ["cl1", "x", "python"]),
+        (["x"], ["cl1"], "python", ["cl1", "x", "python"]),
+    ],
+)
+def test__collect_classes_for_code_strings(
+    initial_class_list, cl, syntax_highlight, expected_result
+):
+    original_cl = copy(cl)
+    original_initial_class_list = copy(initial_class_list)
+    original_syntax_highlight = copy(syntax_highlight)
+    result = _collect_classes_for_code_strings(initial_class_list, cl, syntax_highlight)
+    assert result == expected_result
+    # check that input values haven't changed
+    assert original_cl == cl
+    assert original_initial_class_list == initial_class_list
+    assert original_syntax_highlight == syntax_highlight
+
+
+def test_code__without_syntax_highlight():
+    expected_result = "<code>\na\nb\n</code>"
+    assert code("a", "b", sep="\n", syntax_highlight=None) == expected_result
+
+
+def test_code__with_syntax_highlight():
+    expected_result = '<code class="inline-highlight python">\na\nb\n</code>'
+    assert code("a", "b", sep="\n", syntax_highlight="python") == expected_result
+
+
+def test_code__unsupported_syntax_highlight():
+    with pytest.raises(ValueError):
+        code("a", "b", sep="\n", syntax_highlight="my_new_lang")
+
+
+def test_code_block__without_syntax_highlight():
+    expected_result = "<pre><code>\na\nb\n</code></pre>"
+    assert code_block("a", "b", sep="\n", syntax_highlight=None) == expected_result
+
+
+def test_code_block__with_syntax_highlight():
+    expected_result = '<pre><code class="python">\na\nb\n</code></pre>'
+    assert code_block("a", "b", sep="\n", syntax_highlight="python") == expected_result
+
+
+def test_code_block__unsupported_syntax_highlight():
+    with pytest.raises(ValueError):
+        code_block("a", "b", sep="\n", syntax_highlight="my_new_lang")
+
+
+def test_div():
+    assert div("a", "b", sep="\n") == "<div>\na\nb\n</div>"
+
+
+def test_span():
+    assert span("a", "b", sep="\n") == "<span>\na\nb\n</span>"
+
+
+def test_a():
+    expected_result = '<a href="www.example.com">\na\nb\n</a>'
+    assert a("a", "b", attrs={"href": "www.example.com"}, sep="\n") == expected_result
+
+
+def test_link():
+    assert link("my text", "myurl") == '<a href="myurl">my text</a>'
+
+
+@pytest.mark.parametrize(
+    "test_input,expected_result",
     [
         (
-            False,
-            ["a", "b", "c"],
-            "['a', 'b', 'c']",
-        ),
-        (
-            False,
-            ["a", 53, "<ul><li>b</li></ul>"],
-            "['a', 53, '<ul><li>b</li></ul>']",
-        ),
-        (
-            True,
             ["a", "b", "c"],
             "<ul><li>a</li><li>b</li><li>c</li></ul>",
         ),
         (
-            True,
             ["a", 43, 42],
             "<ul><li>a</li><li>43</li><li>42</li></ul>",
         ),
         (
-            True,
-            ["a", "<ul><li>b</li></ul>"],
-            "<ul><li>a</li><ul><li>b</li></ul></ul>",
+            [("a", "<ul><li>b</li></ul>")],
+            "<ul><li>a<ul><li>b</li></ul></li></ul>",
         ),
         (
-            True,
-            ["<ol><li>x</li></ol>", "a", "<ul><li>y</li><li>z</li></ul>"],
-            "<ul><ol><li>x</li></ol><li>a</li><ul><li>y</li><li>z</li></ul></ul>",
+            [("b", "<ol><li>x</li></ol>"), ("a", "<ul><li>y</li><li>z</li></ul>")],
+            "<ul><li>b<ol><li>x</li></ol></li><li>a<ul><li>y</li><li>z</li></ul></li></ul>",
         ),
     ],
 )
-def test_ul(patch_env, test_input, expected_result):
-    assert_strings_multiple_args(ul, patch_env, test_input, {}, expected_result)
+def test_ulist__without_parameters(test_input, expected_result):
+    assert ulist(*test_input) == expected_result
+
+
+def test_ulist__with_parameters():
+    input_kwargs = {
+        "cl": "ul_class",
+        "attrs": {"x": "y"},
+        "li_cl": "li_class",
+        "li_attrs": {"a": "b"},
+    }
+    test_input = ["value1", "value2", "value3"]
+    expected_result = (
+        '<ul class="ul_class" x="y">'
+        '<li class="li_class" a="b">value1</li>'
+        '<li class="li_class" a="b">value2</li>'
+        '<li class="li_class" a="b">value3</li>'
+        "</ul>"
+    )
+    assert ulist(*test_input, **input_kwargs) == expected_result
 
 
 @pytest.mark.parametrize(
-    "patch_env,test_input,expected_result",
+    "test_input,expected_result",
     [
         (
-            False,
-            ["a", "b", "c"],
-            "['a', 'b', 'c']",
-        ),
-        (
-            False,
-            ["a", 53, "<ol><li>b</li></ol>"],
-            "['a', 53, '<ol><li>b</li></ol>']",
-        ),
-        (
-            True,
             ["a", "b", "c"],
             "<ol><li>a</li><li>b</li><li>c</li></ol>",
         ),
         (
-            True,
             ["a", 43, 42],
             "<ol><li>a</li><li>43</li><li>42</li></ol>",
         ),
         (
-            True,
-            ["a", "<ol><li>b</li></ol>"],
-            "<ol><li>a</li><ol><li>b</li></ol></ol>",
+            [("a", "<ol><li>b</li></ol>")],
+            "<ol><li>a<ol><li>b</li></ol></li></ol>",
         ),
         (
-            True,
-            ["<ol><li>x</li></ol>", "a", "<ol><li>y</li><li>z</li></ol>"],
-            "<ol><ol><li>x</li></ol><li>a</li><ol><li>y</li><li>z</li></ol></ol>",
+            [("b", "<ol><li>x</li></ol>"), ("a", "<ol><li>y</li><li>z</li></ol>")],
+            "<ol><li>b<ol><li>x</li></ol></li><li>a<ol><li>y</li><li>z</li></ol></li></ol>",
         ),
     ],
 )
-def test_ol(patch_env, test_input, expected_result):
-    assert_strings_multiple_args(ol, patch_env, test_input, {}, expected_result)
+def test_olist__without_parameters(test_input, expected_result):
+    assert olist(*test_input) == expected_result
+
+
+def test_olist__with_parameters():
+    input_kwargs = {
+        "cl": "ul_class",
+        "attrs": {"x": "y"},
+        "li_cl": "li_class",
+        "li_attrs": {"a": "b"},
+    }
+    test_input = ["value1", "value2", "value3"]
+    expected_result = (
+        '<ol class="ul_class" x="y">'
+        '<li class="li_class" a="b">value1</li>'
+        '<li class="li_class" a="b">value2</li>'
+        '<li class="li_class" a="b">value3</li>'
+        "</ol>"
+    )
+    assert olist(*test_input, **input_kwargs) == expected_result
 
 
 @pytest.mark.parametrize(
-    "patch_env,test_input,expected_result",
+    "input_args,input_kwargs,expected_result",
     [
-        (False, ["my text", "myurl"], '<a href="myurl">my text</a>'),
-        (True, ["my text", "myurl"], '<a href="myurl">my text</a>'),
+        (
+            ["abc"],
+            {"name": "x", "cl": None, "attrs": None, "sep": ""},
+            "<x>abc</x>",
+        ),
+        (
+            [2351],
+            {"name": "x", "cl": None, "attrs": None, "sep": ""},
+            "<x>2351</x>",
+        ),
+        (
+            [2351, "hello"],
+            {"name": "abc", "cl": None, "attrs": None, "sep": "\n"},
+            "<abc>\n2351\nhello\n</abc>",
+        ),
+        (
+            [2351, "hello"],
+            {"name": "abc", "cl": "cl1", "attrs": None, "sep": "\n"},
+            '<abc class="cl1">\n2351\nhello\n</abc>',
+        ),
+        (
+            [2351, "hello"],
+            {"name": "abc", "cl": "cl1 cl2", "attrs": None, "sep": "\n"},
+            '<abc class="cl1 cl2">\n2351\nhello\n</abc>',
+        ),
+        (
+            [2351, "hello"],
+            {"name": "abc", "cl": ["cl1", "cl2"], "attrs": None, "sep": "\n"},
+            '<abc class="cl1 cl2">\n2351\nhello\n</abc>',
+        ),
+        (
+            [2351, "hello"],
+            {"name": "abc", "cl": None, "attrs": {"key": "val"}, "sep": "\n"},
+            '<abc key="val">\n2351\nhello\n</abc>',
+        ),
+        (
+            [2351, "hello"],
+            {"name": "abc", "cl": ["cl1", "cl2"], "attrs": {"key": "val"}, "sep": "\n"},
+            '<abc class="cl1 cl2" key="val">\n2351\nhello\n</abc>',
+        ),
+        (
+            [],
+            {
+                "name": "abc",
+                "cl": ["cl1", "cl2"],
+                "attrs": {"key": "val"},
+                "paired": False,
+            },
+            '<abc class="cl1 cl2" key="val">',
+        ),
     ],
 )
-def test_link(patch_env, test_input, expected_result):
-    assert_strings_multiple_args(link, patch_env, test_input, {}, expected_result)
+def test_tag(input_args, input_kwargs, expected_result):
+    assert tag(*input_args, **input_kwargs) == expected_result
+
+
+def test_tag__duplicate_class_setting():
+    with pytest.raises(ValueError):
+        tag("value", name="x", cl="my_class", attrs={"class": "my_cl"}, sep="")

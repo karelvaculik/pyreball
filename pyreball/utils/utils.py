@@ -275,7 +275,7 @@ def _map_env_value(value):
 
 
 def get_parameter_value(key: str) -> Any:
-    if not "params" in _parameter_cache:
+    if "params" not in _parameter_cache:
         _parameter_cache["params"] = {
             k: _map_env_value(v)
             for k, v in json.loads(
