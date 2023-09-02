@@ -1,10 +1,10 @@
-__version__ = "0.2.0-alpha.1"
+__version__ = "1.0.0-alpha.1"
 
 from pyreball.html import (
-    Reference,
     plot_graph,
     plot_multi_graph,
     print,
+    print_code_block,
     print_div,
     print_h1,
     print_h2,
@@ -12,19 +12,19 @@ from pyreball.html import (
     print_h4,
     print_h5,
     print_h6,
-    print_code_block,
     print_table,
+    Reference,
     set_title,
 )
 from pyreball.text import (
     a,
     bold,
     code,
+    code_block,
     div,
     em,
     link,
     olist,
-    code_block,
     span,
     tag,
     ulist,

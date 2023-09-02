@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 (2023-08-18)
+## 1.0.0 (2023-09-02)
 
 - Updated to newer versions of optional dependencies.
 - Created documentation at readthedocs.
