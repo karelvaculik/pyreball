@@ -30,7 +30,8 @@ def get_css(filename: str, directory: Path, page_width: int = 60) -> str:
             css_string = f.read()
     except OSError:
         logger.error(
-            f"There was a problem reading file {filename} in {directory}. Try re-installing pyreball."
+            f"There was a problem reading file {filename} in {directory}. "
+            f"Try re-installing pyreball."
         )
         sys.exit(1)
     css_string = re.sub(r"{{page_width}}", str(int(page_width)), css_string)

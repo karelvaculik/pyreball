@@ -114,7 +114,8 @@ JAVASCRIPT_SORTABLE_TABLE = """
 
 
 def _replace_ids(html_path: Path) -> None:
-    """Replace IDs of HTML elements to create working anchors based on references.
+    """
+    Replace IDs of HTML elements to create working anchors based on references.
 
     Args:
         html_path: Path to the HTML file.
@@ -153,14 +154,14 @@ def _replace_ids(html_path: Path) -> None:
             # this must be first
             replacements.append(
                 (
-                    "ref-" + re_results.group(2),
-                    re_results.group(1) + "-" + re_results.group(3),
+                    f"ref-{re_results.group(2)}",
+                    f"{re_results.group(1)}-{re_results.group(3)}",
                 )
             )
             # this must be second (because it would catch the first case as well)
             replacements.append(
                 (
-                    re_results.group(2) + "(-" + re_results.group(3) + ")?",
+                    f"{re_results.group(2)}(-{re_results.group(3)})?",
                     re_results.group(3),
                 )
             )
@@ -171,8 +172,8 @@ def _replace_ids(html_path: Path) -> None:
             # this must be first
             replacements.append(
                 (
-                    "ref-" + re_results.group(1),
-                    "ch_" + re_results.group(2),
+                    f"ref-{re_results.group(1)}",
+                    f"ch_{re_results.group(2)}",
                 )
             )
             # this must be second (because it would catch the first case as well)
@@ -208,7 +209,7 @@ def _parse_heading_info(line: str) -> Optional[Tuple[int, str, str]]:
         heading_level = m.group(1)
 
         doc = parseString(m.group(0))
-        heading = doc.getElementsByTagName("h" + heading_level)[0]
+        heading = doc.getElementsByTagName(f"h{heading_level}")[0]
         heading_id = heading.getAttribute("id")
         content = _get_node_text(heading).replace("¶", "")
         return int(heading_level), heading_id, content
@@ -242,7 +243,8 @@ def insert_heading_title_and_toc(filename: Path, include_toc: bool = True):
                 headings.append(heading_info)
 
     if len(headings) > 0 and report_title is None:
-        # only when headings were collected (only when include_toc=True) and there was not title set manually
+        # only when headings were collected (only when include_toc=True)
+        # and there was not title set manually
         report_title = "Table of Contents"
 
     lines_index = container_start_index + 1
@@ -251,7 +253,10 @@ def insert_heading_title_and_toc(filename: Path, include_toc: bool = True):
     if report_title is not None:
         lines.insert(
             lines_index,
-            f'<h1 id="toc_generated_0">{report_title}<a class="anchor-link" href="#toc_generated_0">¶</a></h1>\n',
+            (
+                f'<h1 id="toc_generated_0">{report_title}'
+                f'<a class="anchor-link" href="#toc_generated_0">¶</a></h1>\n'
+            ),
         )
         lines_index += 1
     current_level = 1
@@ -270,9 +275,9 @@ def insert_heading_title_and_toc(filename: Path, include_toc: bool = True):
 
         # prepare the line:
         if h[0] == 1:
-            current_line = '<a href="#' + h[1] + '">' + h[2] + "</a><br/>\n"
+            current_line = f'<a href="#{h[1]}">{h[2]}</a><br/>\n'
         else:
-            current_line = '<li><a href="#' + h[1] + '">' + h[2] + "</a></li>\n"
+            current_line = f'<li><a href="#{h[1]}">{h[2]}</a></li>\n'
         lines.insert(lines_index, current_line)
         lines_index += 1
 
@@ -348,7 +353,10 @@ parameter_specifications = [
         "--matplotlib-embedded",
         choices=["yes", "no"],
         default="no",
-        help="Whether to embedded matplotlib plots directly into HTML. Only for svg format.",
+        help=(
+            "Whether to embedded matplotlib plots directly into HTML. "
+            "Only for svg format."
+        ),
     ),
     ChoiceParameter(
         "--numbered-headings",
@@ -361,7 +369,8 @@ parameter_specifications = [
         boundaries=(40, 100),
         default=80,
         help=(
-            "Width of the page container in percentage. An integer in the range 40..100. "
+            "Width of the page container in percentage. "
+            "An integer in the range 40..100. "
             "If set outside the range, the value will be shifted towards the range."
         ),
     ),
@@ -386,7 +395,8 @@ def _check_existence_of_config_files(
     for filename in required_filename:
         if not (config_dir_path / filename).exists():
             raise FileNotFoundError(
-                f"Config directory '{config_dir_path}' does not contain all necessary files: "
+                f"Config directory '{config_dir_path}' "
+                f"does not contain all necessary files: "
                 f"{', '.join(required_filename)}. {recommendation_msg}"
             )
 
@@ -396,12 +406,14 @@ def _get_config_directory(config_dir_path: Optional[Path] = None) -> Path:
 
     If config path is provided by user, it is used primarily.
     If not, pyreball will try to check if config under home directory exists.
-    If it does not exist, it will fall back to the default config directory in installation directory.
+    If it does not exist, it will fall back to the default config directory
+    in installation directory.
     In all cases, tbe function checks whether all config files exist.
 
     Args:
-        config_dir_path: Optional path to the config file set by user through CLI argument.
-            Can be a relative or absolute path and can contain ~ for home dir.
+        config_dir_path: Optional path to the config file set by user
+            through CLI argument. Can be a relative or absolute path
+            and can contain ~ for home dir.
 
     Returns:
         An absolute path to the config directory.
@@ -444,13 +456,16 @@ def _get_output_dir_and_file_stem(
     Obtain the output directory for the HTML file and output filename stem.
 
     Args:
-        input_path: Path to the input script. Can be a relative or absolute path and can contain ~ for home dir.
-        output_path_str: Optional path denoting the output path. Either as path to an HTML file or a directory.
+        input_path: Path to the input script. Can be a relative or absolute path
+            and can contain ~ for home dir.
+        output_path_str: Optional path denoting the output path.
+            Either as path to an HTML file or a directory.
             Can be a relative or absolute path and can contain ~ for home dir.
 
     Returns:
-        A tuple of (output_dir_path, filename_stem) where output_dir_path is an absolute path
-        to the output directory, and filename_stem is the output filename stem.
+        A tuple of (output_dir_path, filename_stem) where output_dir_path
+        is an absolute path to the output directory, and filename_stem
+        is the output filename stem.
     """
     if not input_path.is_file():
         raise FileNotFoundError(f"File {input_path} does not exist.")
@@ -486,7 +501,8 @@ def parse_arguments(args) -> Dict[str, Optional[Union[str, int]]]:
         description=(
             "Generate Python report. "
             "All pyreball options must be specified before input-path argument. "
-            "Any options or arguments after input-path are passed to the processed Python script. "
+            "Any options or arguments after input-path are passed "
+            "to the processed Python script. "
         )
     )
     for input_param in parameter_specifications:
@@ -495,7 +511,8 @@ def parse_arguments(args) -> Dict[str, Optional[Union[str, int]]]:
         "--output-path",
         help=(
             "Output path. Either path representing an HTML file or a directory. "
-            "Any path with suffix different from '.html' will be considered a directory path. "
+            "Any path with suffix different from '.html' will be considered "
+            "a directory path. "
             "All parent directories are automatically created if they do not exist."
         ),
         action=PathAction,
@@ -505,7 +522,8 @@ def parse_arguments(args) -> Dict[str, Optional[Union[str, int]]]:
         help=(
             "Path to config directory. "
             "If not provided, Pyreball will try to use $HOME/.pyreball directory. "
-            "If it does not exist, it will then try to use the default config directory in installation directory. "
+            "If it does not exist, it will then try to use the default "
+            "config directory in installation directory. "
         ),
         action=PathAction,
     )
@@ -534,7 +552,8 @@ def main() -> None:
         input_path, output_path
     )
     # Directory, where HTML's images would be stored;
-    # It basically contains both the output directory and HTML filename stem in one value.
+    # It basically contains both the output directory and HTML filename stem
+    # in one value.
     html_dir_path_str = str(output_dir_path / filename_stem)
     html_path = output_dir_path / f"{filename_stem}.html"
 
@@ -594,7 +613,8 @@ def main() -> None:
     with open(html_path, "w") as f:
         f.write(html_begin)
     try:
-        # Use {sys.executable} instead of just "python" command as it may not work correctly as a PyCharm external tool
+        # Use {sys.executable} instead of just "python" command as it may not work
+        # correctly as a PyCharm external tool
         os.system(f"{sys.executable} {input_path} {script_args_string}")
     finally:
         with open(html_path, "a") as f:

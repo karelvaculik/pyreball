@@ -1,5 +1,4 @@
 """Text utils for creating strings with HTML elements."""
-import warnings
 from typing import Any, List, Literal, Optional
 
 from pyreball._common import AttrsParameter, ClParameter
@@ -30,12 +29,17 @@ def bold(
     Create a `<bold>` element string with given values.
 
     Args:
-        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
-        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
-            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        *values: Zero or more values to be enclosed in the tag.
+            All values are converted to strings.
+        cl: One or more class names to be added to the tag.
+            If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space.
+            If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
-            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
+        attrs: Additional attributes to be added to the tag.
+            Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`.
+            To construct boolean HTML attributes,
             set None for given key. Any quotes in values are not escaped.
         sep: String separator of the values. Defaults to an empty string.
 
@@ -52,14 +56,19 @@ def em(
     Create a `<em>` element string with given values.
 
     Args:
-        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
-        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
-            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        *values: Zero or more values to be enclosed in the tag.
+            All values are converted to strings.
+        cl: One or more class names to be added to the tag.
+            If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space.
+            If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
-            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
+        attrs: Additional attributes to be added to the tag.
+            Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`.
+            To construct boolean HTML attributes,
             set None for given key. Any quotes in values are not escaped.
-        sep: Separator string to concatenate the values with.
+        sep: String separator of the values. Defaults to an empty string.
 
     Returns:
         HTML string representing the tag with given values.
@@ -100,19 +109,26 @@ def code(
     Create a `<code>` element string with given values.
 
     This element is used to display a source code inline.
-    It is possible to highlight the code syntax by setting `syntax_highlight` parameter to an appropriate string.
+    It is possible to highlight the code syntax by setting `syntax_highlight`
+    parameter to an appropriate string.
 
     Args:
-        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
-        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
-            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        *values: Zero or more values to be enclosed in the tag.
+            All values are converted to strings.
+        cl: One or more class names to be added to the tag.
+            If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space.
+            If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
-            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
+        attrs: Additional attributes to be added to the tag.
+            Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`.
+            To construct boolean HTML attributes,
             set None for given key. Any quotes in values are not escaped.
-        sep: Separator string to concatenate the values with.
-        syntax_highlight: Syntax highlighting language. Currently only "python" is supported. If None,
-            no highlight is applied. When highlight is turned on, classes "inline-highlight" and "<language>"
+        sep: String separator of the values. Defaults to an empty string.
+        syntax_highlight: Syntax highlighting language.
+            Currently only "python" is supported. If None, no highlight is applied.
+            When highlight is turned on, classes "inline-highlight" and "<language>"
             are added to the element.
 
     Returns:
@@ -133,19 +149,27 @@ def code_block(
     Create a `<pre><code>` pair element string with given values.
 
     This element is used to display a source code in a block.
-    It is possible to highlight the code syntax by setting `syntax_highlight` parameter to an appropriate string.
+    It is possible to highlight the code syntax by setting `syntax_highlight`
+    parameter to an appropriate string.
 
     Args:
-        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
-        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
-            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        *values: Zero or more values to be enclosed in the tag.
+            All values are converted to strings.
+        cl: One or more class names to be added to the tag.
+            If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space.
+            If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
-            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
+        attrs: Additional attributes to be added to the tag.
+            Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`.
+            To construct boolean HTML attributes,
             set None for given key. Any quotes in values are not escaped.
-        sep: Separator string to concatenate the values with.
-        syntax_highlight: Syntax highlighting language. Currently only "python" is supported. If None,
-            no highlight is applied. When highlight is turned on, class "<language>" is added to the `<code>` element.
+        sep: String separator of the values. Defaults to an empty string.
+        syntax_highlight: Syntax highlighting language.
+            Currently only "python" is supported. If None, no highlight is applied.
+            When highlight is turned on, class "<language>" is added
+            to the `<code>` element.
 
     Returns:
         HTML string representing the tag with given values.
@@ -162,14 +186,19 @@ def div(
     Create a `<div>` element string with given values.
 
     Args:
-        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
-        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
-            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        *values: Zero or more values to be enclosed in the tag.
+            All values are converted to strings.
+        cl: One or more class names to be added to the tag.
+            If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space.
+            If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
-            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
+        attrs: Additional attributes to be added to the tag.
+            Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`.
+            To construct boolean HTML attributes,
             set None for given key. Any quotes in values are not escaped.
-        sep: Separator string to concatenate the values with.
+        sep: String separator of the values. Defaults to an empty string.
 
     Returns:
         HTML string representing the tag with given values.
@@ -184,14 +213,19 @@ def span(
     Create a `<span>` element string with given values.
 
     Args:
-        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
-        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
-            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        *values: Zero or more values to be enclosed in the tag.
+            All values are converted to strings.
+        cl: One or more class names to be added to the tag.
+            If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space.
+            If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
-            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
+        attrs: Additional attributes to be added to the tag.
+            Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`.
+            To construct boolean HTML attributes,
             set None for given key. Any quotes in values are not escaped.
-        sep: Separator string to concatenate the values with.
+        sep: String separator of the values. Defaults to an empty string.
 
     Returns:
         HTML string representing the tag with given values.
@@ -206,14 +240,19 @@ def a(
     Create a `<a>` element string with given values.
 
     Args:
-        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
-        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
-            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        *values: Zero or more values to be enclosed in the tag.
+            All values are converted to strings.
+        cl: One or more class names to be added to the tag.
+            If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space.
+            If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
-            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
+        attrs: Additional attributes to be added to the tag.
+            Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`.
+            To construct boolean HTML attributes,
             set None for given key. Any quotes in values are not escaped.
-        sep: Separator string to concatenate the values with.
+        sep: String separator of the values. Defaults to an empty string.
 
     Returns:
         HTML string representing the tag with given values.
@@ -264,13 +303,18 @@ def ulist(
     Create a `<ul>` element string with values being enclosed into `<li>` tags.
 
     Args:
-        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
-        cl: One or more class names to be added to the `<ul>` tag. If string is provided, it is used as it is.
-            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        *values: Zero or more values to be enclosed in the tag.
+            All values are converted to strings.
+        cl: One or more class names to be added to the `<ul>` tag.
+            If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space.
+            If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the `<ul>` tag. Dictionary
-            `{"key1": "value1", ..., "keyN": "valueN"}` is converted to `key1="value1" ... keyN="valueN"`.
-            To construct boolean HTML attributes, set None for given key. Any quotes in values are not escaped.
+        attrs: Additional attributes to be added to the `<ul>` tag.
+            Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`.
+            To construct boolean HTML attributes,
+            set None for given key. Any quotes in values are not escaped.
         li_cl: The same as `cl` parameter, but for the `<li>` tag.
         li_attrs: The same as `attrs` parameter, but for the `<li>` tag.
         sep: Separator string to concatenate the values with.
@@ -278,9 +322,7 @@ def ulist(
     Returns:
         HTML string representing the tag with given values.
     """
-    inner_content = _enclose_into_li_tags(
-        *values, cl=li_cl, attrs=li_attrs, sep=sep
-    )
+    inner_content = _enclose_into_li_tags(*values, cl=li_cl, attrs=li_attrs, sep=sep)
     return tag(inner_content, name="ul", cl=cl, attrs=attrs, sep=sep)
 
 
@@ -296,13 +338,18 @@ def olist(
     Create a `<ol>` element string with values being enclosed into `<li>` tags.
 
     Args:
-        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
-        cl: One or more class names to be added to the `<ol>` tag. If string is provided, it is used as it is.
-            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        *values: Zero or more values to be enclosed in the tag.
+            All values are converted to strings.
+        cl: One or more class names to be added to the `<ol>` tag.
+            If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space.
+            If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the `<ol>` tag. Dictionary
-            `{"key1": "value1", ..., "keyN": "valueN"}` is converted to `key1="value1" ... keyN="valueN"`.
-            To construct boolean HTML attributes, set None for given key. Any quotes in values are not escaped.
+        attrs: Additional attributes to be added to the `<ol>` tag.
+            Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`.
+            To construct boolean HTML attributes,
+            set None for given key. Any quotes in values are not escaped.
         li_cl: The same as `cl` parameter, but for the `<li>` tag.
         li_attrs: The same as `attrs` parameter, but for the `<li>` tag.
         sep: Separator string to concatenate the values with.
@@ -310,9 +357,7 @@ def olist(
     Returns:
         HTML string representing the tag with given values.
     """
-    inner_content = _enclose_into_li_tags(
-        *values, cl=li_cl, attrs=li_attrs, sep=sep
-    )
+    inner_content = _enclose_into_li_tags(*values, cl=li_cl, attrs=li_attrs, sep=sep)
     return tag(inner_content, name="ol", cl=cl, attrs=attrs, sep=sep)
 
 
@@ -328,16 +373,23 @@ def tag(
     Create a tag string with given values.
 
     Args:
-        *values: Zero or more values to be enclosed in the tag. All values are converted to strings.
+
+        *values: Zero or more values to be enclosed in the tag.
+            All values are converted to strings.
         name: Name of the tag.
-        cl: One or more class names to be added to the tag. If string is provided, it is used as it is.
-            If a list of strings is provided, the strings are joined with space. If None, no class is added.
+        cl: One or more class names to be added to the tag.
+            If string is provided, it is used as it is.
+            If a list of strings is provided, the strings are joined with space.
+            If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag. Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
-            is converted to `key1="value1" ... keyN="valueN"`. To construct boolean HTML attributes,
+        attrs: Additional attributes to be added to the tag.
+            Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
+            is converted to `key1="value1" ... keyN="valueN"`.
+            To construct boolean HTML attributes,
             set None for given key. Any quotes in values are not escaped.
-        sep: Separator string to concatenate the values with.
-        paired: If True, the values are enclosed in a pair of tags. Otherwise, unpaired tag is created.
+        sep: String separator of the values. Defaults to an empty string.
+        paired: If True, the values are enclosed in a pair of tags.
+            Otherwise, unpaired tag is created.
 
     Returns:
         HTML string representing the tag with given values.
@@ -345,10 +397,13 @@ def tag(
     cl_str = _construct_class_attr_string(cl)
     if cl_str and attrs is not None and "class" in attrs:
         raise ValueError(
-            "class attribute cannot be set through cl and attrs parameters at the same time!"
+            "class attribute cannot be set through cl and attrs parameters "
+            "at the same time!"
         )
     attrs_str = _construct_attrs_str(attrs)
-    opening_tag = f"{name}{f' {cl_str}' if cl_str else ''}{f' {attrs_str}' if attrs_str else ''}"
+    opening_tag = (
+        f"{name}{f' {cl_str}' if cl_str else ''}{f' {attrs_str}' if attrs_str else ''}"
+    )
     if paired:
         inner_contents = sep.join(map(str, values))
         return f"<{opening_tag}>{sep}{inner_contents}{sep}</{name}>"

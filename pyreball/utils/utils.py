@@ -215,7 +215,8 @@ def read_file_config(filename: str, directory: Path) -> configparser.ConfigParse
         return config
     else:
         logger.error(
-            f"Could not find file {filename} in {directory}. Try re-generating configs by "
+            f"Could not find file {filename} in {directory}. "
+            f"Try re-generating configs by "
             f"pyreball-generate-config command or re-installing pyreball."
         )
         sys.exit(1)
@@ -303,12 +304,14 @@ def carefully_remove_directory_if_exists(directory: Path) -> None:
     :param directory: path to a directory.
     """
     if directory.exists():
-        # check that the folder contains only png and jpg files. Otherwise raise an error.
+        # check that the folder contains only png and jpg files.
+        # Otherwise, raise an error.
         for filename in directory.iterdir():
             if not re.search(r".(png|jpg|svg)$", filename.name):
                 raise ValueError(
                     f"Cannot delete the original html directory {directory}. "
-                    f"It contains file {filename} and only png, jpg and svg files are assumed."
+                    f"It contains file {filename} and only png, jpg and svg "
+                    f"files are allowed."
                 )
         try:
             shutil.rmtree(directory)
