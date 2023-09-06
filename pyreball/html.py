@@ -1,6 +1,7 @@
 """Main functions that serve as building blocks of the final html file."""
 import builtins
 import io
+import json
 import os
 import random
 import re
@@ -443,32 +444,117 @@ def _prepare_caption_element(
     )
 
 
+def _compute_length_menu_for_datatables(
+    paging_sizes: List[Union[int, str]]
+) -> Tuple[List[int], List[Union[int, str]]]:
+    arr_1 = []
+    arr_2 = []
+    for size in paging_sizes:
+        if isinstance(size, int):
+            arr_1.append(size)
+            arr_2.append(size)
+        elif isinstance(size, str) and size.lower() == "all":
+            arr_1.append(-1)
+            arr_2.append(size)
+        else:
+            raise ValueError(f"Unsupported value in paging_sizes: {size}")
+    return arr_1, arr_2
+
+
+def _gather_datatables_setup(
+    display_option: str = "full",
+    scroll_y_height: str = "300px",
+    scroll_x: bool = True,
+    sortable: bool = False,
+    sorting_definition: Optional[List[Tuple[int, str]]] = None,
+    paging_sizes: Optional[List[Union[int, str]]] = None,
+    show_search_box: bool = False,
+    datatables_definition: Optional[Dict[str, Any]] = None,
+) -> Optional[Dict[str, Any]]:
+    if datatables_definition is not None:
+        return datatables_definition
+
+    datatables_setup = {}
+    if display_option == "scrolling":
+        datatables_setup["paging"] = False
+        datatables_setup["scrollCollapse"] = True
+        datatables_setup["scrollY"] = scroll_y_height
+    elif display_option == "paging":
+        datatables_setup["paging"] = True
+        if paging_sizes is None:
+            paging_sizes = [10, 25, 100, "All"]
+        datatables_setup["lengthMenu"] = _compute_length_menu_for_datatables(
+            paging_sizes
+        )
+    elif display_option == "full":
+        datatables_setup["paging"] = False
+    if scroll_x:
+        datatables_setup["scrollX"] = True
+
+    # if show_search_box:
+    datatables_setup["searching"] = show_search_box
+
+    if sortable or sorting_definition is not None:
+        if sorting_definition is None:
+            datatables_setup["order"] = []
+        else:
+            datatables_setup["order"] = sorting_definition
+    else:
+        datatables_setup["ordering"] = False
+
+    return datatables_setup
+
+
 def _prepare_table_html(
     df: "pandas.DataFrame",
+    tab_index: int = 0,
     caption: Optional[str] = None,
+    reference: Optional[Reference] = None,
     align: str = "center",
     caption_position: str = "top",
-    full_table: bool = True,
     numbered: bool = True,
-    reference: Optional[Reference] = None,
+    display_option: str = "full",
+    scroll_y_height: str = "300px",
+    scroll_x: bool = True,
     sortable: bool = False,
-    tab_index: int = 0,
-    sorting_definition: Optional[Tuple[str, str]] = None,
+    sorting_definition: Optional[List[Tuple[int, str]]] = None,
+    paging_sizes: Optional[List[Union[int, str]]] = None,
+    show_search_box: bool = False,
+    datatables_style: Union[str, List[str]] = "display",
+    datatables_definition: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
 ) -> str:
+    # TODO: add a small margin between table caption and the table itself.
+
+    # TODO: when creating an example with sorting_definition, use and recommend get_loc method
+    #  https://saturncloud.io/blog/how-to-get-column-index-from-column-name-in-python-pandas/#method-1-using-the-get_loc-method
+    #  Show that also for complex headers
     align_mapping = {
         "center": "centered",
         "left": "left-aligned",
         "right": "right-aligned",
     }
-
-    if sorting_definition:
-        # if we have sorting definition, we turn on sortable
-        sortable = True
     table_classes = ["centered"]
-    if sortable and not sorting_definition:
-        # add this class only to sortable tables that don't have sorting definition
-        table_classes.append("sortable_table")
+    if isinstance(datatables_style, list):
+        table_classes += datatables_style
+    else:
+        table_classes.append(datatables_style)
+
+    datatables_setup = _gather_datatables_setup(
+        display_option=display_option,
+        scroll_y_height=scroll_y_height,
+        scroll_x=scroll_x,
+        sortable=sortable,
+        sorting_definition=sorting_definition,
+        paging_sizes=paging_sizes,
+        show_search_box=show_search_box,
+        datatables_definition=datatables_definition,
+    )
+
+    if "border" not in kwargs:
+        # If border is not set explicitly,
+        # turn it off because it would clash with datatables styling
+        kwargs["border"] = 0
     df_html = df.to_html(classes=table_classes, **kwargs)
     if reference:
         _check_and_mark_reference(reference)
@@ -483,59 +569,39 @@ def _prepare_table_html(
         index=tab_index,
         anchor_link=anchor_link,
     )
-    # div that is scrollable
-    scroller_id = "table-scroller-" + str(tab_index)
-    # div button that expands the table
-    expander_id = "table-expander-" + str(tab_index)
-    if full_table:
-        enclosing_div_class = "table-scroller"
-        style_attr = 'style="display: none;" '
-    else:
-        enclosing_div_class = "table-scroller-collapsed"
-        style_attr = " "
     if caption_position == "top":
         table_html = caption_element
     else:
         table_html = ""
-    table_html += (
-        f'<div id="{scroller_id}" class="{enclosing_div_class}">\n{df_html}\n</div>\n'
-    )
-    table_html += (
-        f'<div class="text-centered table-expander" {style_attr}id="{expander_id}" '
-        f"onclick=\"change_expand(this, '{scroller_id}')\">⟱</div>"
-    )
+
+    table_html += df_html
+
     if caption_position == "bottom":
         table_html += caption_element
     else:
         table_html += ""
 
+    table_wrapper_inner_id = "table-wrapper-inner-" + str(tab_index)
     table_html = (
-        f'<div class="table-wrapper-inner {align_mapping[align]}">'
-        + table_html
-        + "</div>"
+        f'<div id="{table_wrapper_inner_id}" class="table-wrapper-inner {align_mapping[align]}">'
+        f"{table_html}\n"
+        f"</div>"
     )
-    table_html = '<div class="table-wrapper">' + table_html + "</div>"
-    if sorting_definition:
-        if sorting_definition[0] not in df.columns:
-            raise ValueError(
-                f"{sorting_definition[0]} is not a column in provided data frame."
-            )
-        if sorting_definition[1] not in ["asc", "desc"]:
-            raise ValueError(
-                "sorting_definition must be either None "
-                "or a pair (<column_name>, <sorting>), "
-                "where <sorting> is either 'asc' or 'desc'."
-            )
-        column_index = df.columns.get_loc(sorting_definition[0]) + 1  # (+ index)
-        table_init = (
-            '{"retrieve": true, "paging": false, "searching": false, "info": false}'
-        )
-        js = (
-            f"var table = $('#{scroller_id} > table').DataTable({table_init});"
-            f"table.order( [ {column_index}, '{sorting_definition[1]}' ] ).draw();"
-        )
+    table_html = f'<div class="table-wrapper">\n{table_html}\n</div>'
+
+    if datatables_setup is not None:
+        # table_init = '{"retrieve": true, "paging": false, "searching": false, "info": false}'
+        table_init = json.dumps(datatables_setup)
+        js = f"var table = $('#{table_wrapper_inner_id} > table').DataTable({table_init});"
         table_html += f"\n<script>{js}</script>"
+
     return table_html
+
+
+def _parse_tables_paging_sizes(sizes: str) -> List[Union[int, str]]:
+    return [
+        value if value.lower() == "all" else int(value) for value in sizes.split(",")
+    ]
 
 
 def print_table(
@@ -545,9 +611,15 @@ def print_table(
     align: Optional[str] = None,
     caption_position: Optional[str] = None,
     numbered: Optional[bool] = None,
-    full_table: Optional[bool] = None,
+    display_option: Optional[str] = None,
+    paging_sizes: Optional[List[Union[int, str]]] = None,
+    scroll_y_height: Optional[str] = None,
+    scroll_x: Optional[bool] = None,
     sortable: Optional[bool] = None,
-    sorting_definition: Optional[Tuple[str, str]] = None,
+    sorting_definition: Optional[List[Tuple[int, str]]] = None,
+    show_search_box: Optional[bool] = None,
+    datatables_style: Optional[Union[str, List[str]]] = None,
+    datatables_definition: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
 ) -> None:
     """Print pandas DataFrame into HTML.
@@ -567,14 +639,41 @@ def print_table(
             Defaults to settings from config or CLI arguments if None.
         numbered: Whether the caption should be numbered.
             Defaults to settings from config or CLI arguments if None.
-        full_table: Whether to show the table expanded.
+
+        display_option: How to display table. This option is useful for long tables,
+            which should not be displayed fully. Acceptable values are: 'full' (show the full table),
+            'scrolling' (show the table in scrolling mode on y-axis), 'paging' (show the table in paging mode).
             Defaults to settings from config or CLI arguments if None.
+        paging_sizes: A list of page sizes to display in paging mode.
+            Allowed values in the list are integer values and string "All" (the case is not important).
+            When `display_option` is not `"paging"`, the value is ignored.
+            Defaults to settings from config or CLI arguments if None.
+            If it still remains None, values `[10, 25, 100, "All"]` are used.
+        scroll_y_height: Height of the tables when `display_option` is set to `"scrolling"`.
+            Ignored with other display options.
+            Defaults to settings from config or CLI arguments if None.
+            # TODO add more details what values can be passed in scroll_y_height
+        scroll_x: Whether to allow scrolling on the x-axis. If set to False, a wide table
+            is allowed to overflow the main container. It is recommended to set this to True,
+            especially with display_option="scrolling", because otherwise the table header
+            won't interact properly when scrolling horizontally.
         sortable: Whether to allow sortable columns.
             Defaults to settings from config or CLI arguments if None.
-        sorting_definition: How to sort the table initially,
-            in the form (<column_name>, <sorting>),
+        sorting_definition: How to sort the table columns initially,
+            in the form of a list of tuples (<column_index>, <sorting>),
             where <sorting> is either 'asc' or 'desc'.
-        **kwargs: Other parameters to pandas to_html method.
+            When None, the columns are not pre-sorted.
+        show_search_box: Whether to show the search box for the table.
+            Defaults to settings from config or CLI arguments if None.
+        datatables_style: One or more class names for styling tables using Datatables styling.
+            See https://datatables.net/manual/styling/classes for possible values.
+            Can be either a string with the class name, or a list of class name strings.
+        datatables_definition: Custom setup for datatables in the form of a dictionary.
+            This dictionary is serialized to json and passed to `DataTable` JavaScript object as it is.
+            If set (i.e. not None), values of parameters `display_option`, `scroll_y_height`, `scroll_x`,
+            `sortable`, `sorting_definition`, `paging_sizes`, and `show_search_box` are ignored.
+            Note that `datatables_style` is independent of this parameter.
+        **kwargs: Other parameters to pandas `to_html()` method.
     """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
         builtins.print(df)
@@ -602,29 +701,67 @@ def print_table(
                 secondary_value=get_parameter_value("numbered_tables"),
             )
         )
+        display_option = str(
+            merge_values(
+                primary_value=display_option,
+                secondary_value=get_parameter_value("tables_display_option"),
+            )
+        )
+        scroll_y_height = str(
+            merge_values(
+                primary_value=scroll_y_height,
+                secondary_value=get_parameter_value("tables_scroll_y_height"),
+            )
+        )
+        scroll_x = bool(
+            merge_values(
+                primary_value=scroll_x,
+                secondary_value=get_parameter_value("tables_scroll_x"),
+            )
+        )
         sortable = bool(
             merge_values(
                 primary_value=sortable,
                 secondary_value=get_parameter_value("sortable_tables"),
             )
         )
-        full_table = bool(
+        paging_sizes = merge_values(
+            primary_value=paging_sizes,
+            secondary_value=_parse_tables_paging_sizes(
+                get_parameter_value("tables_paging_sizes")
+            ),
+        )
+        show_search_box = bool(
             merge_values(
-                primary_value=full_table,
-                secondary_value=get_parameter_value("full_tables"),
+                primary_value=show_search_box,
+                secondary_value=get_parameter_value("tables_search_box"),
             )
         )
+        conf_datatables_style = get_parameter_value("tables_datatables_style")
+        if conf_datatables_style:
+            conf_datatables_style = re.split(r"[, ]", conf_datatables_style)
+        datatables_style = merge_values(
+            primary_value=datatables_style,
+            secondary_value=conf_datatables_style,
+        )
+
         table_html = _prepare_table_html(
             df=df,
+            tab_index=table_index,
             caption=caption,
+            reference=reference,
             align=align,
             caption_position=caption_position,
-            full_table=full_table,
             numbered=numbered,
-            reference=reference,
+            display_option=display_option,
+            scroll_y_height=scroll_y_height,
+            scroll_x=scroll_x,
             sortable=sortable,
-            tab_index=table_index,
             sorting_definition=sorting_definition,
+            paging_sizes=paging_sizes,
+            show_search_box=show_search_box,
+            datatables_style=datatables_style,
+            datatables_definition=datatables_definition,
             **kwargs,
         )
         _write_to_html(table_html)

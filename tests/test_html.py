@@ -14,11 +14,14 @@ from matplotlib import pyplot as plt
 
 from pyreball.html import (
     _check_and_mark_reference,
+    _compute_length_menu_for_datatables,
     _construct_plot_anchor_link,
+    _gather_datatables_setup,
     _get_heading_number,
     _graph_memory,
     _heading_memory,
     _multi_graph_memory,
+    _parse_tables_paging_sizes,
     _plot_graph,
     _prepare_altair_plot_element,
     _prepare_bokeh_plot_element,
@@ -663,16 +666,233 @@ def test__prepare_caption_element(
     )
 
 
-def test__prepare_table_html__wrong_sorting_definitions(
-    pre_test_check_and_mark_reference_cleanup, simple_dataframe
+@pytest.mark.parametrize(
+    "paging_sizes,expected_result",
+    [
+        ([1], ([1], [1])),
+        ([10, "all", 100], ([10, -1, 100], [10, "all", 100])),
+        (["ALL", 100], ([-1, 100], ["ALL", 100])),
+        (["All", 100], ([-1, 100], ["All", 100])),
+    ],
+)
+def test__compute_length_menu_for_datatables__valid_values(
+    paging_sizes, expected_result
 ):
-    with pytest.raises(ValueError) as excinfo:
-        _prepare_table_html(simple_dataframe, sorting_definition=("unknown", "asc"))
-    assert "is not a column in provided data frame" in str(excinfo.value)
+    assert _compute_length_menu_for_datatables(paging_sizes) == expected_result
 
-    with pytest.raises(ValueError) as excinfo2:
-        _prepare_table_html(simple_dataframe, sorting_definition=("x1", "unknown"))
-    assert "sorting_definition must be either None or a pair" in str(excinfo2.value)
+
+@pytest.mark.parametrize(
+    "paging_sizes",
+    [
+        [1, "UNK"],
+        [{"x": "y"}],
+    ],
+)
+def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
+    with pytest.raises(ValueError):
+        assert _compute_length_menu_for_datatables(paging_sizes)
+
+
+@pytest.mark.parametrize(
+    "display_option,"
+    "scroll_y_height,"
+    "scroll_x,"
+    "sortable,"
+    "sorting_definition,"
+    "paging_sizes,"
+    "show_search_box,"
+    "datatables_definition,"
+    "expected_result",
+    [
+        # display_option = scrolling
+        (
+            "scrolling",
+            "300px",
+            True,
+            False,
+            None,
+            None,
+            False,
+            None,
+            {
+                "paging": False,
+                "scrollCollapse": True,
+                "scrollY": "300px",
+                "scrollX": True,
+                "ordering": False,
+                "searching": False,
+            },
+        ),
+        # display_option = scrolling; different height
+        (
+            "scrolling",
+            "500px",
+            True,
+            False,
+            None,
+            None,
+            False,
+            None,
+            {
+                "paging": False,
+                "scrollCollapse": True,
+                "scrollY": "500px",
+                "scrollX": True,
+                "ordering": False,
+                "searching": False,
+            },
+        ),
+        # display_option = paging
+        (
+            "paging",
+            "300px",
+            True,
+            False,
+            None,
+            None,
+            False,
+            None,
+            {
+                "paging": True,
+                "lengthMenu": ([10, 25, 100, -1], [10, 25, 100, "All"]),
+                "scrollX": True,
+                "ordering": False,
+                "searching": False,
+            },
+        ),
+        # display_option = paging + custom page sizes
+        (
+            "paging",
+            "300px",
+            True,
+            False,
+            None,
+            [20, "All"],
+            False,
+            None,
+            {
+                "paging": True,
+                "lengthMenu": ([20, -1], [20, "All"]),
+                "scrollX": True,
+                "ordering": False,
+                "searching": False,
+            },
+        ),
+        # display_option = full
+        (
+            "full",
+            "300px",
+            True,
+            False,
+            None,
+            None,
+            False,
+            None,
+            {
+                "paging": False,
+                "scrollX": True,
+                "ordering": False,
+                "searching": False,
+            },
+        ),
+        # display_option = full; scroll_x = False, show_search_box = True
+        (
+            "full",
+            "300px",
+            False,
+            False,
+            None,
+            None,
+            True,
+            None,
+            {
+                "paging": False,
+                "ordering": False,
+                "searching": True,
+            },
+        ),
+        # display_option = full; sortable
+        (
+            "full",
+            "300px",
+            True,
+            True,
+            None,
+            None,
+            False,
+            None,
+            {
+                "paging": False,
+                "scrollX": True,
+                "order": [],
+                "searching": False,
+            },
+        ),
+        # display_option = full; sorting_definition
+        (
+            "full",
+            "300px",
+            True,
+            False,
+            [[1, "asc"]],
+            None,
+            False,
+            None,
+            {
+                "paging": False,
+                "scrollX": True,
+                "order": [[1, "asc"]],
+                "searching": False,
+            },
+        ),
+        # display_option = full; datatables_definition => overrides everything
+        (
+            "full",
+            "300px",
+            True,
+            False,
+            None,
+            None,
+            False,
+            {"a": "b"},
+            {"a": "b"},
+        ),
+        # display_option = full; datatables_definition => overrides everything (even as empty dict)
+        (
+            "full",
+            "300px",
+            True,
+            False,
+            None,
+            None,
+            False,
+            {},
+            {},
+        ),
+    ],
+)
+def test__gather_datatables_setup(
+    display_option,
+    scroll_y_height,
+    scroll_x,
+    sortable,
+    sorting_definition,
+    paging_sizes,
+    show_search_box,
+    datatables_definition,
+    expected_result,
+):
+    result = _gather_datatables_setup(
+        display_option,
+        scroll_y_height,
+        scroll_x,
+        sortable,
+        sorting_definition,
+        paging_sizes,
+        show_search_box,
+        datatables_definition,
+    )
+    assert result == expected_result
 
 
 def test__prepare_table_html__reused_reference_error(
@@ -695,13 +915,6 @@ def test__prepare_table_html__reused_reference_error(
     ],
 )
 @pytest.mark.parametrize(
-    "full_table",
-    [
-        False,
-        True,
-    ],
-)
-@pytest.mark.parametrize(
     "use_reference",
     [
         True,
@@ -716,19 +929,25 @@ def test__prepare_table_html__reused_reference_error(
     ],
 )
 @pytest.mark.parametrize(
-    "sorting_definition",
+    "caption_position",
     [
-        None,
-        ("x2", "desc"),
-        ("x1", "asc"),
+        "top",
+        "bottom",
+    ],
+)
+@pytest.mark.parametrize(
+    "datatables_style",
+    [
+        "display",
+        ["display", "compact"],
     ],
 )
 def test__prepare_table_html(
     align,
-    full_table,
     use_reference,
     sortable,
-    sorting_definition,
+    caption_position,
+    datatables_style,
     pre_test_check_and_mark_reference_cleanup,
     simple_dataframe,
 ):
@@ -742,32 +961,32 @@ def test__prepare_table_html(
         df=simple_dataframe,
         caption="mycap",
         align=align,
-        full_table=full_table,
+        caption_position=caption_position,
         numbered=True,
         reference=reference,
         sortable=sortable,
         tab_index=5,
-        sorting_definition=sorting_definition,
+        datatables_style=datatables_style,
     )
 
-    if sorting_definition is not None:
-        # ET cannot parse the the <script> tag, so check sorting here and then continue with rest
-        result, script_tag = result.rsplit("\n", 1)
-        ind = simple_dataframe.columns.get_loc(sorting_definition[0]) + 1
-        assert f"table.order( [ {ind}, '{sorting_definition[1]}' ] )" in script_tag
-
+    assert "<script>" in result
+    # Remove the final row with script, because it cannot be parsed by ET
+    result = re.sub("<script.*", "", result)
     html_root = ET.fromstring(result)
 
-    assert (
-        len(html_root.findall(f"./div/div[2]/table/tbody/tr"))
-        == simple_dataframe.shape[0]
-    )
+    assert len(html_root.findall(f"./div/table/tbody/tr")) == simple_dataframe.shape[0]
 
-    sortable_table_class = (
-        " sortable_table" if sortable and not sorting_definition else ""
+    if caption_position == "top":
+        assert html_root.findall("./div/")[0].tag == "div"
+    elif caption_position == "bottom":
+        assert html_root.findall("./div/")[1].tag == "div"
+
+    expected_table_classes = ["dataframe", "centered"]
+    expected_table_classes.extend(
+        [datatables_style] if isinstance(datatables_style, str) else datatables_style
     )
     assert html_root.findall(
-        f"./div/div[2]/table[@class='dataframe centered{sortable_table_class}']"
+        f"./div/table[@class='{' '.join(expected_table_classes)}']"
     )
 
     align_class = {
@@ -777,13 +996,23 @@ def test__prepare_table_html(
     }[align]
     assert html_root.findall(f"./div[@class='table-wrapper-inner {align_class}']")
 
-    table_wrapper_div_class = (
-        "table-scroller" if full_table else "table-scroller-collapsed"
-    )
-    assert html_root.findall(f"./div/div[2][@class='{table_wrapper_div_class}']")
-
     anchor = "table-123-5" if use_reference else "table-5"
     assert html_root.findall(f"./div/div[1]/a[@name='{anchor}']")
+
+
+@pytest.mark.parametrize(
+    "sizes,expected_result",
+    [
+        ("20", [20]),
+        ("20,30", [20, 30]),
+        ("20,30,100", [20, 30, 100]),
+        ("20,30,100,All", [20, 30, 100, "All"]),
+        ("20,all,100", [20, "all", 100]),
+        ("ALL", ["ALL"]),
+    ],
+)
+def test__parse_tables_paging_sizes(sizes, expected_result):
+    assert _parse_tables_paging_sizes(sizes) == expected_result
 
 
 def test_print_table__stdout(capsys, simple_dataframe):
@@ -816,68 +1045,55 @@ def test_print_table__stdout(capsys, simple_dataframe):
 
 @pytest.mark.parametrize("keep_stdout", [False, True])
 @pytest.mark.parametrize(
-    "align,param_align,expected_used_align",
+    "function_param_name,function_param_value,param_name,param_value,expected_param_value",
     [
-        ("left", "center", "left"),
-        (None, "right", "right"),
-    ],
-)
-@pytest.mark.parametrize(
-    "caption_position,param_caption_position,expected_caption_position",
-    [
-        ("top", "bottom", "top"),
-        (None, "bottom", "bottom"),
-    ],
-)
-@pytest.mark.parametrize(
-    "numbered,param_numbered,expected_used_numbered",
-    [
-        (True, False, True),
-        (None, True, True),
-        (None, False, False),
-    ],
-)
-@pytest.mark.parametrize(
-    "full_table,param_full_table,expected_used_full_table",
-    [
-        (True, False, True),
-        (None, True, True),
-        (None, False, False),
-    ],
-)
-@pytest.mark.parametrize(
-    "sortable,param_sortable,expected_used_sortable",
-    [
-        (True, False, True),
-        (None, True, True),
-        (None, False, False),
+        ("align", "left", "align_tables", "center", "left"),
+        ("align", None, "align_tables", "right", "right"),
+        ("caption_position", "top", "table_captions_position", "bottom", "top"),
+        ("caption_position", None, "table_captions_position", "bottom", "bottom"),
+        ("numbered", True, "numbered_tables", False, True),
+        ("numbered", None, "numbered_tables", True, True),
+        ("numbered", None, "numbered_tables", False, False),
+        ("display_option", "scrolling", "tables_display_option", "paging", "scrolling"),
+        ("display_option", None, "tables_display_option", "paging", "paging"),
+        ("scroll_y_height", "200px", "tables_scroll_y_height", "500px", "200px"),
+        ("scroll_y_height", None, "tables_scroll_y_height", "500px", "500px"),
+        ("scroll_x", True, "tables_scroll_x", False, True),
+        ("scroll_x", None, "tables_scroll_x", True, True),
+        ("scroll_x", None, "tables_scroll_x", False, False),
+        ("sortable", True, "sortable_tables", False, True),
+        ("sortable", None, "sortable_tables", True, True),
+        ("sortable", None, "sortable_tables", False, False),
+        ("paging_sizes", [100, 200], "tables_paging_sizes", "20,All", [100, 200]),
+        ("paging_sizes", None, "tables_paging_sizes", "20,All", [20, "All"]),
+        ("show_search_box", True, "tables_search_box", False, True),
+        ("show_search_box", None, "tables_search_box", True, True),
+        ("show_search_box", None, "tables_search_box", False, False),
+        (
+            "datatables_style",
+            "display",
+            "tables_datatables_style",
+            "compact",
+            "display",
+        ),
+        ("datatables_style", None, "tables_datatables_style", "compact", "compact"),
     ],
 )
 @pytest.mark.parametrize(
     "sorting_definition",
     [
         None,
-        ("x1", "asc"),
+        [(0, "asc")],
     ],
 )
 def test_print_table__file_output(
-    align,
-    param_align,
-    expected_used_align,
-    caption_position,
-    param_caption_position,
-    expected_caption_position,
-    numbered,
-    param_numbered,
-    expected_used_numbered,
-    full_table,
-    param_full_table,
-    expected_used_full_table,
-    sortable,
-    param_sortable,
-    expected_used_sortable,
-    sorting_definition,
     keep_stdout,
+    function_param_name,
+    function_param_value,
+    param_name,
+    param_value,
+    expected_param_value,
+    sorting_definition,
     capsys,
     simple_html_file,
     simple_dataframe,
@@ -888,16 +1104,11 @@ def test_print_table__file_output(
             return simple_html_file
         elif key == "keep_stdout":
             return keep_stdout
-        elif key == "align_tables":
-            return param_align
-        elif key == "table_captions_position":
-            return param_caption_position
-        elif key == "numbered_tables":
-            return param_numbered
-        elif key == "full_tables":
-            return param_full_table
-        elif key == "sortable_tables":
-            return param_sortable
+        elif key == param_name:
+            return param_value
+        elif key == "tables_paging_sizes":
+            # let's provide some values here, so _parse_tables_paging_sizes doesn't fail
+            return "10,20,all"
         else:
             return None
 
@@ -908,34 +1119,42 @@ def test_print_table__file_output(
             "pyreball.html._prepare_table_html", return_value="<table>x</table>"
         ) as _prepare_table_html_mock:
             ref = Reference()
-            print_table(
-                simple_dataframe,
+
+            default_function_params = dict(
                 caption="cap",
                 reference=ref,
-                align=align,
-                caption_position=caption_position,
-                numbered=numbered,
-                full_table=full_table,
-                sortable=sortable,
+                align="center",
+                caption_position="top",
+                numbered=True,
+                display_option="full",
+                scroll_y_height="300px",
+                scroll_x=True,
+                sortable=False,
                 sorting_definition=sorting_definition,
+                paging_sizes=None,
+                show_search_box=False,
+                datatables_style="display",
+                datatables_definition=None,
                 additional_kwarg=42,
+            )
+            default_function_params[function_param_name] = function_param_value
+            if param_name != "tables_paging_sizes":
+                default_function_params["paging_sizes"] = [10, 20]
+
+            print_table(
+                simple_dataframe,
+                **default_function_params,
             )
             with open(simple_html_file, "r") as f:
                 result = f.read()
                 assert result == "<html>\n<table>x</table>\n"
 
+            default_function_params[function_param_name] = expected_param_value
+
             _prepare_table_html_mock.assert_called_with(
                 df=simple_dataframe,
-                caption="cap",
-                align=expected_used_align,
-                caption_position=expected_caption_position,
-                full_table=expected_used_full_table,
-                numbered=expected_used_numbered,
-                reference=ref,
-                sortable=expected_used_sortable,
                 tab_index=1,
-                sorting_definition=sorting_definition,
-                additional_kwarg=42,
+                **default_function_params,
             )
 
             # after writing the first table, the index is already incremented
@@ -1260,8 +1479,13 @@ def test__plot_graph__stdout__not_bokeh(simple_dataframe):
             assert show_mock.call_count == 2
 
 
+@pytest.mark.parametrize("caption_position", ["top", "bottom"])
 def test__plot_graph__file_output(
-    simple_html_file, simple_dataframe, pre_test_plot_graph_cleanup
+    caption_position,
+    simple_html_file,
+    simple_dataframe,
+    pre_test_plot_graph_cleanup,
+    pre_test_check_and_mark_reference_cleanup,
 ):
     # just test one fig to go through the pipeline
     def fake_get_parameter_value(key):
@@ -1282,6 +1506,7 @@ def test__plot_graph__file_output(
                 caption="cap",
                 reference=ref,
                 align="left",
+                caption_position=caption_position,
                 numbered=True,
                 matplotlib_format="does_not_matter",
                 embedded=True,
@@ -1296,6 +1521,7 @@ def test__plot_graph__file_output(
                 caption="cap",
                 reference=Reference(),
                 align="left",
+                caption_position=caption_position,
                 numbered=True,
                 matplotlib_format="does_not_matter",
                 embedded=True,
@@ -1310,6 +1536,7 @@ def test__plot_graph__file_output(
                     caption="cap",
                     reference=ref,
                     align="left",
+                    caption_position=caption_position,
                     numbered=True,
                     matplotlib_format="does_not_matter",
                     embedded=True,

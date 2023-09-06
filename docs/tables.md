@@ -42,6 +42,8 @@ Tables can be horizontally aligned by `align` parameter, as shown in the followi
 
 ## Sorting
 
+TODO: update this section.
+
 It is possible to make the table sortable on all columns by setting `sortable` parameter to `True`,
 or by setting `sorting_definition` parameter, which also sorts the table initially on the specified column.
 
@@ -52,3 +54,10 @@ or by setting `sorting_definition` parameter, which also sorts the table initial
 ## Dealing with Large Tables
 
 TBD
+
+## Styling
+
+TBD
+
+For more options, see the styling reference
+in [Datatables documentation](https://datatables.net/manual/styling/classes). 

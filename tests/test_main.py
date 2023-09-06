@@ -384,9 +384,9 @@ def test__get_output_dir_and_file_stem__valid_inputs(
 @pytest.mark.parametrize(
     "args",
     [
-        # missing required input-path
+        # missing required input_path
         [],
-        # Empty string as input-path
+        # Empty string as input_path
         [""],
         # wrong param value
         ["--numbered-plots", "hello", "scripts/report.py"],
@@ -408,7 +408,25 @@ def test_parse_arguments__invalid_arguments(args):
         # only the required argument
         (
             ["scripts/report.py"],
-            {"input-path": Path("scripts/report.py")},
+            {"input_path": Path("scripts/report.py")},
+        ),
+        # with some table parameters
+        (
+            [
+                "--tables-display-option",
+                "paging",
+                "--tables-scroll-y-height",
+                "500px",
+                "--tables-paging-sizes",
+                "20,all",
+                "scripts/report.py",
+            ],
+            {
+                "tables_display_option": "paging",
+                "tables_scroll_y_height": "500px",
+                "tables_paging_sizes": "20,all",
+                "input_path": Path("scripts/report.py"),
+            },
         ),
         # with path arguments
         (
@@ -422,7 +440,7 @@ def test_parse_arguments__invalid_arguments(args):
             {
                 "output_path": Path("my_output.html"),
                 "config_path": Path("dir/my_config/"),
-                "input-path": Path("scripts/report.py"),
+                "input_path": Path("scripts/report.py"),
             },
         ),
         # --output-path can also link to a directory
@@ -434,56 +452,61 @@ def test_parse_arguments__invalid_arguments(args):
             ],
             {
                 "output_path": Path("my_dir/my_subdir"),
-                "input-path": Path("scripts/report.py"),
+                "input_path": Path("scripts/report.py"),
             },
         ),
         (
             ["--align-tables", "left", "scripts/report.py"],
-            {"align_tables": "left", "input-path": Path("scripts/report.py")},
+            {"align_tables": "left", "input_path": Path("scripts/report.py")},
         ),
         # now --align-tables is considered scripts-args
         (
             ["scripts/report.py", "--align-tables", "left"],
             {
-                "input-path": Path("scripts/report.py"),
-                "script-args": ["--align-tables", "left"],
+                "input_path": Path("scripts/report.py"),
+                "script_args": ["--align-tables", "left"],
             },
         ),
-        # with script-args
+        # with script_args
         (
             ["scripts/report.py", "-p", "20", "img.png"],
             {
-                "input-path": Path("scripts/report.py"),
-                "script-args": ["-p", "20", "img.png"],
+                "input_path": Path("scripts/report.py"),
+                "script_args": ["-p", "20", "img.png"],
             },
         ),
         # wrong page-width will be parsed as it is, but fixed later
         (
             ["--page-width", "20", "scripts/report.py"],
-            {"page_width": 20, "input-path": Path("scripts/report.py")},
+            {"page_width": 20, "input_path": Path("scripts/report.py")},
         ),
     ],
 )
 def test_parse_arguments__valid_arguments(args, expected_non_empty_result):
     expected_result = {
-        "align_plots": None,
-        "align_tables": None,
-        "config_path": None,
-        "full_tables": None,
-        "input-path": None,
-        "keep_stdout": None,
-        "matplotlib_embedded": None,
-        "matplotlib_format": None,
-        "numbered_headings": None,
-        "numbered_plots": None,
-        "numbered_tables": None,
-        "output_path": None,
-        "page_width": None,
-        "plot_captions_position": None,
-        "script-args": [],
-        "sortable_tables": None,
-        "table_captions_position": None,
         "toc": None,
+        "align_tables": None,
+        "table_captions_position": None,
+        "numbered_tables": None,
+        "tables_display_option": None,
+        "tables_scroll_y_height": None,
+        "tables_scroll_x": None,
+        "sortable_tables": None,
+        "tables_paging_sizes": None,
+        "tables_search_box": None,
+        "tables_datatables_style": None,
+        "align_plots": None,
+        "plot_captions_position": None,
+        "numbered_plots": None,
+        "matplotlib_format": None,
+        "matplotlib_embedded": None,
+        "numbered_headings": None,
+        "page_width": None,
+        "keep_stdout": None,
+        "output_path": None,
+        "config_path": None,
+        "input_path": None,
+        "script_args": [],
     }
     expected_result.update(**expected_non_empty_result)
     assert parse_arguments(args) == expected_result
