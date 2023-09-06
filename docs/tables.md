@@ -19,7 +19,7 @@ via `numbered` parameter.
 
 {{ inline_source("docs/examples/table_captions.py") }}
 
-<iframe style="border:2px solid;" src="../examples/table_captions.html" height="800" width="100%" title="Iframe Example"></iframe>
+<iframe style="border:2px solid;" src="../examples/table_captions.html" height="1000" width="100%" title="Iframe Example"></iframe>
 
 Note that internally all tables are numbered, even though the numbering might be turned off.
 
@@ -30,7 +30,7 @@ The position can be controlled by `caption_position`  parameter, which can be se
 
 {{ inline_source("docs/examples/table_caption_position.py") }}
 
-<iframe style="border:2px solid;" src="../examples/table_caption_position.html" height="440" width="100%" title="Iframe Example"></iframe>
+<iframe style="border:2px solid;" src="../examples/table_caption_position.html" height="600" width="100%" title="Iframe Example"></iframe>
 
 ## Aligning
 
@@ -38,18 +38,29 @@ Tables can be horizontally aligned by `align` parameter, as shown in the followi
 
 {{ inline_source("docs/examples/table_align.py") }}
 
-<iframe style="border:2px solid;" src="../examples/table_align.html" height="700" width="100%" title="Iframe Example"></iframe>
+<iframe style="border:2px solid;" src="../examples/table_align.html" height="800" width="100%" title="Iframe Example"></iframe>
 
 ## Sorting
 
-TODO: update this section.
-
 It is possible to make the table sortable on all columns by setting `sortable` parameter to `True`,
-or by setting `sorting_definition` parameter, which also sorts the table initially on the specified column.
+or by setting `sorting_definition` parameter, which also sorts the table initially on the specified column(s).
+
+Parameter `sorting_definition` expects a list of tuples, where each tuple contains a column index and string `asc`
+or `desc`. The table is primarily sorted according to the first tuple, secondarily according to the second tuple, and so
+on.
+
+The following snippet shows the usage of both parameters.
+
+!!! note
+
+    Although the columns in `sorting_definition` are indexed from 0, it is necessary to take into account
+    also the index when it is displayed. To hide the index, set `index` parameter 
+    of [`print_table()`](../api/pyreball_html/#pyreball.html.print_table) method to `False`. 
+    `index` parameter is one of the `kwargs` that are passed to pandas `to_html()` method.
 
 {{ inline_source("docs/examples/table_sorting.py") }}
 
-<iframe style="border:2px solid;" src="../examples/table_sorting.html" height="800" width="100%" title="Iframe Example"></iframe>
+<iframe style="border:2px solid;" src="../examples/table_sorting.html" height="900" width="100%" title="Iframe Example"></iframe>
 
 ## Dealing with Large Tables
 

@@ -52,16 +52,6 @@
     };
 
 
-    $(document).ready(function () {
-        $('.sortable_table').DataTable({
-            "paging": false,
-            "searching": false,
-            "info": false,
-        });
-    });
-
-
-
     function next(div_id, button_next_id, button_prev_id) {
         var qElems = document.querySelectorAll(div_id + '>div');
         for (var i = 0; i < qElems.length; i++) {
@@ -101,7 +91,7 @@ body {
 }
 
 .main_container {
-    width: 90%;
+    width: 80%;
     margin-left: auto;
     margin-right: auto;
 }
@@ -119,14 +109,6 @@ img, svg, canvas.marks, div.vega-embed {
     display: block;
 }
 
-table.dataframe  {
-    border-style: none;
-    border-width: 0px;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 80%;
-}
-
 .text-centered {
     text-align: center;
 }
@@ -134,41 +116,15 @@ table.dataframe  {
 .table-wrapper
 {
     width: 100%;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
-
-.table-wrapper-inner {
+.table-fit-content {
     width: fit-content;
     max-width: 100%;
-}
-
-.table-scroller
-{
-    overflow: auto;    /* scrollable */
     margin-top: 10px;
-    max-height: none;    /* don't show all cells - the last one should be hidden a bit */
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 100%;
-}
-
-.table-scroller-collapsed
-{
-    overflow: auto;    /* scrollable */
-    margin-top: 10px;
-    max-height: 390px;    /* don't show all cells - the last one should be hidden a bit */
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 100%;
-}
-
-.table-expander {
-    background: rgb(250, 250, 250);
-    cursor: pointer;
+    margin-bottom: 10px;
 }
 
 .centered {
@@ -188,49 +144,6 @@ table.dataframe  {
 
 .dataframe caption {
     font-weight: bold;
-}
-
-.dataframe tbody tr th:only-of-type {
-    vertical-align: middle;
-    border-width: 0px;
-    padding: 6px;
-}
-
-.dataframe tbody tr th {
-    border-width: 0px;
-}
-
-.dataframe tbody > tr:nth-child(odd) {
-    background: rgb(245, 245, 245);
-}
-
-.dataframe tbody > tr:hover {
-    background: #c4e3f3;
-}
-
-.dataframe td {
-    vertical-align: top;
-    border-width: 0px;
-    padding: 6px;
-}
-
-.dataframe thead th {
-    border-bottom-width: 1px;
-    border-top-width: 0px;
-    border-left-width: 0px;
-    border-right-width: 0px;
-    /*top: 0; */
-    position: sticky;
-    background: white;
-}
-
-.dataframe thead tr:nth-child(1) th { position: sticky; top: 0; }    /* first row of table header */
-.dataframe thead tr:nth-child(2) th { position: sticky; top: 28px; }  /* second row of table header */
-
-.dataframe tr, th {
-    text-align: right;
-    vertical-align: middle;
-    padding: 6px;
 }
 
 a.anchor-link:link {
@@ -260,7 +173,6 @@ h6:hover .anchor-link {
 <body>
 <div class="main_container">
 <h1 id="toc_generated_0">Custom Arguments<a class="anchor-link" href="#toc_generated_0">¶</a></h1>
-<div>The sum of the arg values is 72.</div>
 </div>
 </body>
 <script>

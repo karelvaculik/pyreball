@@ -447,8 +447,8 @@ def _prepare_caption_element(
 def _compute_length_menu_for_datatables(
     paging_sizes: List[Union[int, str]]
 ) -> Tuple[List[int], List[Union[int, str]]]:
-    arr_1 = []
-    arr_2 = []
+    arr_1: List[int] = []
+    arr_2: List[Union[int, str]] = []
     for size in paging_sizes:
         if isinstance(size, int):
             arr_1.append(size)
@@ -474,7 +474,7 @@ def _gather_datatables_setup(
     if datatables_definition is not None:
         return datatables_definition
 
-    datatables_setup = {}
+    datatables_setup: Dict[str, Any] = {}
     if display_option == "scrolling":
         datatables_setup["paging"] = False
         datatables_setup["scrollCollapse"] = True
@@ -490,6 +490,8 @@ def _gather_datatables_setup(
         datatables_setup["paging"] = False
     if scroll_x:
         datatables_setup["scrollX"] = True
+
+    datatables_setup['info'] = False
 
     # if show_search_box:
     datatables_setup["searching"] = show_search_box
@@ -524,17 +526,12 @@ def _prepare_table_html(
     datatables_definition: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
 ) -> str:
-    # TODO: add a small margin between table caption and the table itself.
-
-    # TODO: when creating an example with sorting_definition, use and recommend get_loc method
-    #  https://saturncloud.io/blog/how-to-get-column-index-from-column-name-in-python-pandas/#method-1-using-the-get_loc-method
-    #  Show that also for complex headers
     align_mapping = {
         "center": "centered",
         "left": "left-aligned",
         "right": "right-aligned",
     }
-    table_classes = ["centered"]
+    table_classes = []
     if isinstance(datatables_style, list):
         table_classes += datatables_style
     else:
@@ -569,30 +566,31 @@ def _prepare_table_html(
         index=tab_index,
         anchor_link=anchor_link,
     )
-    if caption_position == "top":
-        table_html = caption_element
-    else:
-        table_html = ""
-
-    table_html += df_html
-
-    if caption_position == "bottom":
-        table_html += caption_element
-    else:
-        table_html += ""
 
     table_wrapper_inner_id = "table-wrapper-inner-" + str(tab_index)
     table_html = (
-        f'<div id="{table_wrapper_inner_id}" class="table-wrapper-inner {align_mapping[align]}">'
-        f"{table_html}\n"
+        f'<div id="{table_wrapper_inner_id}" class="table-fit-content centered">'
+        f"{df_html}\n"
         f"</div>"
     )
+
+    if caption_position == "top":
+        table_html = caption_element + table_html
+    else:
+        table_html = table_html + caption_element
+
+    table_html = (
+        f'<div class="table-fit-content {align_mapping[align]}">{table_html}</div>'
+    )
+
     table_html = f'<div class="table-wrapper">\n{table_html}\n</div>'
 
     if datatables_setup is not None:
-        # table_init = '{"retrieve": true, "paging": false, "searching": false, "info": false}'
         table_init = json.dumps(datatables_setup)
-        js = f"var table = $('#{table_wrapper_inner_id} > table').DataTable({table_init});"
+        js = (
+            f"var table = $('#{table_wrapper_inner_id} > table')"
+            f".DataTable({table_init});"
+        )
         table_html += f"\n<script>{js}</script>"
 
     return table_html
@@ -641,21 +639,24 @@ def print_table(
             Defaults to settings from config or CLI arguments if None.
 
         display_option: How to display table. This option is useful for long tables,
-            which should not be displayed fully. Acceptable values are: 'full' (show the full table),
-            'scrolling' (show the table in scrolling mode on y-axis), 'paging' (show the table in paging mode).
+            which should not be displayed fully. Acceptable values are:
+            'full' (show the full table), 'scrolling' (show the table in scrolling mode
+            on y-axis), 'paging' (show the table in paging mode).
             Defaults to settings from config or CLI arguments if None.
         paging_sizes: A list of page sizes to display in paging mode.
-            Allowed values in the list are integer values and string "All" (the case is not important).
+            Allowed values in the list are integer values and string
+            "All" (the case is not important).
             When `display_option` is not `"paging"`, the value is ignored.
             Defaults to settings from config or CLI arguments if None.
             If it still remains None, values `[10, 25, 100, "All"]` are used.
-        scroll_y_height: Height of the tables when `display_option` is set to `"scrolling"`.
-            Ignored with other display options.
+        scroll_y_height: Height of the tables when `display_option` is set to
+            `"scrolling"`. Any string compatible with CSS sizing can be used,
+            e.g. "300px", "20em", etc. Ignored with other display options.
             Defaults to settings from config or CLI arguments if None.
-            # TODO add more details what values can be passed in scroll_y_height
-        scroll_x: Whether to allow scrolling on the x-axis. If set to False, a wide table
-            is allowed to overflow the main container. It is recommended to set this to True,
-            especially with display_option="scrolling", because otherwise the table header
+        scroll_x: Whether to allow scrolling on the x-axis. If set to False,
+            a wide table is allowed to overflow the main container.
+            It is recommended to set this to True, especially with
+            display_option="scrolling", because otherwise the table header
             won't interact properly when scrolling horizontally.
         sortable: Whether to allow sortable columns.
             Defaults to settings from config or CLI arguments if None.
@@ -665,13 +666,15 @@ def print_table(
             When None, the columns are not pre-sorted.
         show_search_box: Whether to show the search box for the table.
             Defaults to settings from config or CLI arguments if None.
-        datatables_style: One or more class names for styling tables using Datatables styling.
-            See https://datatables.net/manual/styling/classes for possible values.
-            Can be either a string with the class name, or a list of class name strings.
+        datatables_style: One or more class names for styling tables using
+            Datatables styling. See https://datatables.net/manual/styling/classes
+            for possible values. Can be either a string with the class name,
+            or a list of class name strings.
         datatables_definition: Custom setup for datatables in the form of a dictionary.
-            This dictionary is serialized to json and passed to `DataTable` JavaScript object as it is.
-            If set (i.e. not None), values of parameters `display_option`, `scroll_y_height`, `scroll_x`,
-            `sortable`, `sorting_definition`, `paging_sizes`, and `show_search_box` are ignored.
+            This dictionary is serialized to json and passed to `DataTable` JavaScript
+            object as it is. If set (i.e. not None), values of parameters
+            `display_option`, `scroll_y_height`, `scroll_x`, `sortable`,
+            `sorting_definition`, `paging_sizes`, and `show_search_box` are ignored.
             Note that `datatables_style` is independent of this parameter.
         **kwargs: Other parameters to pandas `to_html()` method.
     """
@@ -740,9 +743,12 @@ def print_table(
         conf_datatables_style = get_parameter_value("tables_datatables_style")
         if conf_datatables_style:
             conf_datatables_style = re.split(r"[, ]", conf_datatables_style)
-        datatables_style = merge_values(
-            primary_value=datatables_style,
-            secondary_value=conf_datatables_style,
+        datatables_style = cast(
+            Union[str, List[str]],
+            merge_values(
+                primary_value=datatables_style,
+                secondary_value=conf_datatables_style,
+            ),
         )
 
         table_html = _prepare_table_html(

@@ -721,6 +721,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
                 "scrollX": True,
                 "ordering": False,
                 "searching": False,
+                "info": False,
             },
         ),
         # display_option = scrolling; different height
@@ -740,6 +741,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
                 "scrollX": True,
                 "ordering": False,
                 "searching": False,
+                "info": False,
             },
         ),
         # display_option = paging
@@ -758,6 +760,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
                 "scrollX": True,
                 "ordering": False,
                 "searching": False,
+                "info": False,
             },
         ),
         # display_option = paging + custom page sizes
@@ -776,6 +779,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
                 "scrollX": True,
                 "ordering": False,
                 "searching": False,
+                "info": False,
             },
         ),
         # display_option = full
@@ -793,6 +797,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
                 "scrollX": True,
                 "ordering": False,
                 "searching": False,
+                "info": False,
             },
         ),
         # display_option = full; scroll_x = False, show_search_box = True
@@ -809,6 +814,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
                 "paging": False,
                 "ordering": False,
                 "searching": True,
+                "info": False,
             },
         ),
         # display_option = full; sortable
@@ -826,6 +832,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
                 "scrollX": True,
                 "order": [],
                 "searching": False,
+                "info": False,
             },
         ),
         # display_option = full; sorting_definition
@@ -843,6 +850,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
                 "scrollX": True,
                 "order": [[1, "asc"]],
                 "searching": False,
+                "info": False,
             },
         ),
         # display_option = full; datatables_definition => overrides everything
@@ -857,7 +865,8 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
             {"a": "b"},
             {"a": "b"},
         ),
-        # display_option = full; datatables_definition => overrides everything (even as empty dict)
+        # display_option = full; datatables_definition
+        # => overrides everything (even as empty dict)
         (
             "full",
             "300px",
@@ -974,19 +983,21 @@ def test__prepare_table_html(
     result = re.sub("<script.*", "", result)
     html_root = ET.fromstring(result)
 
-    assert len(html_root.findall(f"./div/table/tbody/tr")) == simple_dataframe.shape[0]
+    assert (
+        len(html_root.findall(f"./div/div/table/tbody/tr")) == simple_dataframe.shape[0]
+    )
 
     if caption_position == "top":
         assert html_root.findall("./div/")[0].tag == "div"
     elif caption_position == "bottom":
         assert html_root.findall("./div/")[1].tag == "div"
 
-    expected_table_classes = ["dataframe", "centered"]
+    expected_table_classes = ["dataframe"]
     expected_table_classes.extend(
         [datatables_style] if isinstance(datatables_style, str) else datatables_style
     )
     assert html_root.findall(
-        f"./div/table[@class='{' '.join(expected_table_classes)}']"
+        f"./div/div/table[@class='{' '.join(expected_table_classes)}']"
     )
 
     align_class = {
@@ -994,10 +1005,10 @@ def test__prepare_table_html(
         "left": "left-aligned",
         "right": "right-aligned",
     }[align]
-    assert html_root.findall(f"./div[@class='table-wrapper-inner {align_class}']")
+    assert html_root.findall(f"./div[@class='table-fit-content {align_class}']")
 
     anchor = "table-123-5" if use_reference else "table-5"
-    assert html_root.findall(f"./div/div[1]/a[@name='{anchor}']")
+    assert html_root.findall(f"./div/div/a[@name='{anchor}']")
 
 
 @pytest.mark.parametrize(
@@ -1076,7 +1087,7 @@ def test_print_table__stdout(capsys, simple_dataframe):
             "compact",
             "display",
         ),
-        ("datatables_style", None, "tables_datatables_style", "compact", "compact"),
+        ("datatables_style", None, "tables_datatables_style", "compact", ["compact"]),
     ],
 )
 @pytest.mark.parametrize(

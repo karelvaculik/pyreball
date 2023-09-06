@@ -86,7 +86,7 @@ pb.print_h2("Tables and Plots")
 # Print a table
 N = 10
 df = pd.DataFrame({"x": np.arange(1, N + 1), "y": np.random.random(N) * 4 + 3})
-pb.print_table(df, caption="A data table.")
+pb.print_table(df, caption="A data table.", index=False)
 
 # Plot a graph
 fig, ax = plt.subplots()
@@ -104,11 +104,18 @@ pb.print_div(
     f"For example Table {table_ref} shows sortable columns and Fig. {img_reference} displays a scatterplot."
 )
 pb.print_table(
-    df, caption="A sortable table with a reference", reference=table_ref, sortable=True
+    df,
+    caption="A sortable table with a reference",
+    reference=table_ref,
+    sortable=True,
+    index=False,
 )
 
 pb.print_table(
-    df, caption="A table sorted by y column", sorting_definition=("y", "asc")
+    df,
+    caption="A table sorted by y column",
+    sorting_definition=[(df.columns.get_loc("y"), "asc")],
+    index=False,
 )
 fig, ax = plt.subplots()
 sns.scatterplot(x="x", y="y", ax=ax, data=df)

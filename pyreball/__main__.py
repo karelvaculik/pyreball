@@ -314,18 +314,21 @@ parameter_specifications = [
         default="10,25,100,All",
         help=(
             "The paging sizes that can be selected. "
-            "Allowed values are integers and string 'all' (no matter the case of letters), "
+            "Allowed values are integers and string 'all' "
+            "(no matter the case of letters), "
             "written as a non-empty comma-separated list. "
             "Ignored when tables-display-option is not 'paging'."
         ),
         validation_function=check_paging_sizes_string_parameter,
     ),
-    # TODO add more details what values can be passed here:
     StringParameter(
         "--tables-scroll-y-height",
         default="300px",
         help=(
-            "Height of the tables when 'scrolling' display option is set. Ignored with other display options."
+            "Height of the tables when 'scrolling' display option is set. "
+            "Any string compatible with CSS sizing can be used, "
+            "e.g. '300px', '20em', etc. "
+            "Ignored with other display options."
         ),
     ),
     ChoiceParameter(
@@ -350,7 +353,8 @@ parameter_specifications = [
         "--tables-datatables-style",
         default="display",
         help=(
-            "Datatables class(es) that affect the tables styling. If multiple classes are provided, "
+            "Datatables class(es) that affect the tables styling. "
+            "If multiple classes are provided, "
             "separate them either with commas or spaces."
         ),
     ),
@@ -568,10 +572,10 @@ def parse_arguments(args) -> Dict[str, Optional[Union[str, int]]]:
     )
     variables = vars(parser.parse_args(args))
     # positional arguments must be renamed manually
-    variables['input_path'] = variables['input-path']
-    variables['script_args'] = variables['script-args']
-    del variables['input-path']
-    del variables['script-args']
+    variables["input_path"] = variables["input-path"]
+    variables["script_args"] = variables["script-args"]
+    del variables["input-path"]
+    del variables["script-args"]
     return variables
 
 

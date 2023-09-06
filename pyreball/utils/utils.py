@@ -133,7 +133,9 @@ class StringParameter(Parameter):
         default: str,
         help: str,
         validation_function: Optional[
-            Callable[[str, Any, str, bool, List[str], List[str]], str]
+            Callable[
+                [str, Optional[str], str, bool, List[str], List[str]], Optional[str]
+            ]
         ] = None,
     ):
         super().__init__(option_string=option_string, help=help)
@@ -153,7 +155,7 @@ class StringParameter(Parameter):
 
     def check_and_fix_value(
         self,
-        value: Any,
+        value: Optional[str],
         none_allowed: bool,
         warning_messages: List[str],
         error_messages: List[str],
@@ -191,7 +193,8 @@ def check_paging_sizes_string_parameter(
     elif value is not None and not _matches_paging_sizes_string(value):
         error_messages.append(
             f"Parameter {key} is set to an unsupported value {value}. "
-            "Allowed values are integers and string 'all' (no matter the case of letters), "
+            "Allowed values are integers and string "
+            "'all' (no matter the case of letters), "
             "written as a non-empty comma-separated list."
         )
     return value

@@ -336,14 +336,15 @@ def test_get_file_config__correct_specification(simple_parameter_specifications)
         "do-stuff": "no",
         "highlight": "yes",
         "organize": "yes",
-        "page-size": 22,
+        "page-width": 22,
     }
     expected_config_parameters = {
         "align": "center",
         "do_stuff": "no",
         "highlight": "yes",
         "organize": "yes",
-        "page_size": 20,
+        "page_width": 20,
+        "paging_sizes": "10,25,100,All",
     }
     with mock.patch("pyreball.utils.utils.read_file_config", return_value=config):
         config_parameters = get_file_config(
@@ -392,21 +393,24 @@ def test_merge_values(test_input_1, test_input_2, expected_result):
                 "do_stuff": "no",
                 "highlight": "yes",
                 "organize": None,
-                "page_size": 10,
+                "page_width": 10,
+                "paging_sizes": None,
             },
             {
                 "align": "center",
                 "do_stuff": None,
                 "highlight": "no",
                 "organize": None,
-                "page_size": 20,
+                "page_width": 20,
+                "paging_sizes": "10,25,100,All",
             },
             {
                 "align": "center",
                 "do_stuff": "no",
                 "highlight": "yes",
                 "organize": None,
-                "page_size": 10,
+                "page_width": 10,
+                "paging_sizes": "10,25,100,All",
             },
         ),
     ],
