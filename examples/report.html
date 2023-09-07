@@ -52,16 +52,6 @@
     };
 
 
-    $(document).ready(function () {
-        $('.sortable_table').DataTable({
-            "paging": false,
-            "searching": false,
-            "info": false,
-        });
-    });
-
-
-
     function next(div_id, button_next_id, button_prev_id) {
         var qElems = document.querySelectorAll(div_id + '>div');
         for (var i = 0; i < qElems.length; i++) {
@@ -119,14 +109,6 @@ img, svg, canvas.marks, div.vega-embed {
     display: block;
 }
 
-table.dataframe  {
-    border-style: none;
-    border-width: 0px;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 80%;
-}
-
 .text-centered {
     text-align: center;
 }
@@ -134,41 +116,15 @@ table.dataframe  {
 .table-wrapper
 {
     width: 100%;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
-
-.table-wrapper-inner {
+.table-fit-content {
     width: fit-content;
     max-width: 100%;
-}
-
-.table-scroller
-{
-    overflow: auto;    /* scrollable */
     margin-top: 10px;
-    max-height: none;    /* don't show all cells - the last one should be hidden a bit */
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 100%;
-}
-
-.table-scroller-collapsed
-{
-    overflow: auto;    /* scrollable */
-    margin-top: 10px;
-    max-height: 390px;    /* don't show all cells - the last one should be hidden a bit */
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 100%;
-}
-
-.table-expander {
-    background: rgb(250, 250, 250);
-    cursor: pointer;
+    margin-bottom: 10px;
 }
 
 .centered {
@@ -188,49 +144,6 @@ table.dataframe  {
 
 .dataframe caption {
     font-weight: bold;
-}
-
-.dataframe tbody tr th:only-of-type {
-    vertical-align: middle;
-    border-width: 0px;
-    padding: 6px;
-}
-
-.dataframe tbody tr th {
-    border-width: 0px;
-}
-
-.dataframe tbody > tr:nth-child(odd) {
-    background: rgb(245, 245, 245);
-}
-
-.dataframe tbody > tr:hover {
-    background: #c4e3f3;
-}
-
-.dataframe td {
-    vertical-align: top;
-    border-width: 0px;
-    padding: 6px;
-}
-
-.dataframe thead th {
-    border-bottom-width: 1px;
-    border-top-width: 0px;
-    border-left-width: 0px;
-    border-right-width: 0px;
-    /*top: 0; */
-    position: sticky;
-    background: white;
-}
-
-.dataframe thead tr:nth-child(1) th { position: sticky; top: 0; }    /* first row of table header */
-.dataframe thead tr:nth-child(2) th { position: sticky; top: 28px; }  /* second row of table header */
-
-.dataframe tr, th {
-    text-align: right;
-    vertical-align: middle;
-    padding: 6px;
 }
 
 a.anchor-link:link {
@@ -265,12 +178,12 @@ h6:hover .anchor-link {
 <h1 id="ch_1_introduction_1">1  Introduction<a class="anchor-link" href="#ch_1_introduction_1">¶</a></h1>
 <div>Pyreball has many features, among others:<ul><li>Plots in altair, plotly, bokeh, and matplotlib (and thus also seaborn etc.).</li><li>Sortable and scrollable tables from pandas DataFrame.</li><li>Basic text formatting such as <b>headings</b>, <em>emphasis</em>, and <code class="inline-highlight python">lists</code>.</li><li><a href="https://www.python.org/">hyperlinks</a>, references and table of contents.</li></ul></div>
 <h1 id="ch_2_tables_and_plots_2">2  Tables and Plots<a class="anchor-link" href="#ch_2_tables_and_plots_2">¶</a></h1>
-<div class="table-wrapper"><div class="table-wrapper-inner centered">
+<div class="table-wrapper">
+<div class="table-fit-content centered">
 <div class="text-centered"><a name="table-1"><b>
 Table 1: A data table.
 </b></a></div>
-<div id="table-scroller-1" class="table-scroller">
-<table border="1" class="dataframe centered">
+<div id="table-wrapper-inner-1" class="table-fit-content centered"><table class="dataframe display">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -296,8 +209,9 @@ Table 1: A data table.
     </tr>
   </tbody>
 </table>
+</div></div>
 </div>
-<div class="text-centered table-expander" style="display: none;" id="table-expander-1" onclick="change_expand(this, 'table-scroller-1')">⟱</div></div></div>
+<script>var table = $('#table-wrapper-inner-1 > table').DataTable({"paging": false, "scrollX": true, "info": false, "searching": false, "ordering": false});</script>
 <div class="image-wrapper"><div align="center"><div style="display: inline-block;"><?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -306,7 +220,7 @@ Table 1: A data table.
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2023-09-01T16:35:07.234528</dc:date>
+    <dc:date>2023-09-07T08:56:01.582977</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -342,12 +256,12 @@ z
     <g id="xtick_1">
      <g id="line2d_1">
       <defs>
-       <path id="m3eedace360" d="M 0 0 
+       <path id="me96e54445d" d="M 0 0 
 L 0 3.5 
 " style="stroke: #000000; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#m3eedace360" x="73.832727" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me96e54445d" x="73.832727" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_1">
@@ -407,7 +321,7 @@ z
     <g id="xtick_2">
      <g id="line2d_2">
       <g>
-       <use xlink:href="#m3eedace360" x="114.414545" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me96e54445d" x="114.414545" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_2">
@@ -474,7 +388,7 @@ z
     <g id="xtick_3">
      <g id="line2d_3">
       <g>
-       <use xlink:href="#m3eedace360" x="154.996364" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me96e54445d" x="154.996364" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_3">
@@ -490,7 +404,7 @@ z
     <g id="xtick_4">
      <g id="line2d_4">
       <g>
-       <use xlink:href="#m3eedace360" x="195.578182" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me96e54445d" x="195.578182" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_4">
@@ -518,7 +432,7 @@ z
     <g id="xtick_5">
      <g id="line2d_5">
       <g>
-       <use xlink:href="#m3eedace360" x="236.16" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me96e54445d" x="236.16" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_5">
@@ -534,7 +448,7 @@ z
     <g id="xtick_6">
      <g id="line2d_6">
       <g>
-       <use xlink:href="#m3eedace360" x="276.741818" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me96e54445d" x="276.741818" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_6">
@@ -550,7 +464,7 @@ z
     <g id="xtick_7">
      <g id="line2d_7">
       <g>
-       <use xlink:href="#m3eedace360" x="317.323636" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me96e54445d" x="317.323636" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_7">
@@ -566,7 +480,7 @@ z
     <g id="xtick_8">
      <g id="line2d_8">
       <g>
-       <use xlink:href="#m3eedace360" x="357.905455" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me96e54445d" x="357.905455" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_8">
@@ -582,7 +496,7 @@ z
     <g id="xtick_9">
      <g id="line2d_9">
       <g>
-       <use xlink:href="#m3eedace360" x="398.487273" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me96e54445d" x="398.487273" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_9">
@@ -657,12 +571,12 @@ z
     <g id="ytick_1">
      <g id="line2d_10">
       <defs>
-       <path id="m5437563c1e" d="M 0 0 
+       <path id="m27b448c43e" d="M 0 0 
 L -3.5 0 
 " style="stroke: #000000; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#m5437563c1e" x="57.6" y="295.488" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m27b448c43e" x="57.6" y="295.488" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_11">
@@ -699,7 +613,7 @@ z
     <g id="ytick_2">
      <g id="line2d_11">
       <g>
-       <use xlink:href="#m5437563c1e" x="57.6" y="265.248" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m27b448c43e" x="57.6" y="265.248" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_12">
@@ -715,7 +629,7 @@ z
     <g id="ytick_3">
      <g id="line2d_12">
       <g>
-       <use xlink:href="#m5437563c1e" x="57.6" y="235.008" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m27b448c43e" x="57.6" y="235.008" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_13">
@@ -731,7 +645,7 @@ z
     <g id="ytick_4">
      <g id="line2d_13">
       <g>
-       <use xlink:href="#m5437563c1e" x="57.6" y="204.768" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m27b448c43e" x="57.6" y="204.768" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_14">
@@ -747,7 +661,7 @@ z
     <g id="ytick_5">
      <g id="line2d_14">
       <g>
-       <use xlink:href="#m5437563c1e" x="57.6" y="174.528" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m27b448c43e" x="57.6" y="174.528" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_15">
@@ -763,7 +677,7 @@ z
     <g id="ytick_6">
      <g id="line2d_15">
       <g>
-       <use xlink:href="#m5437563c1e" x="57.6" y="144.288" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m27b448c43e" x="57.6" y="144.288" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_16">
@@ -779,7 +693,7 @@ z
     <g id="ytick_7">
      <g id="line2d_16">
       <g>
-       <use xlink:href="#m5437563c1e" x="57.6" y="114.048" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m27b448c43e" x="57.6" y="114.048" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_17">
@@ -795,7 +709,7 @@ z
     <g id="ytick_8">
      <g id="line2d_17">
       <g>
-       <use xlink:href="#m5437563c1e" x="57.6" y="83.808" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m27b448c43e" x="57.6" y="83.808" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_18">
@@ -811,7 +725,7 @@ z
     <g id="ytick_9">
      <g id="line2d_18">
       <g>
-       <use xlink:href="#m5437563c1e" x="57.6" y="53.568" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m27b448c43e" x="57.6" y="53.568" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_19">
@@ -886,7 +800,7 @@ z
     <path d="M 73.832727 295.488 
 L 236.16 53.568 
 L 398.487273 174.528 
-" clip-path="url(#p20eccff6ba)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+" clip-path="url(#pb2b7a2aa60)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="patch_3">
     <path d="M 57.6 307.584 
@@ -911,7 +825,7 @@ L 414.72 41.472
   </g>
  </g>
  <defs>
-  <clipPath id="p20eccff6ba">
+  <clipPath id="pb2b7a2aa60">
    <rect x="57.6" y="41.472" width="357.12" height="266.112"/>
   </clipPath>
  </defs>

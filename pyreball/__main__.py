@@ -22,10 +22,12 @@ from pyreball.utils.template_utils import get_css, get_html_begin, get_html_end
 from pyreball.utils.utils import (
     carefully_remove_directory_if_exists,
     check_and_fix_parameters,
+    check_paging_sizes_string_parameter,
     ChoiceParameter,
     get_file_config,
     IntegerParameter,
     merge_parameter_dictionaries,
+    StringParameter,
     Substitutor,
 )
 
@@ -97,18 +99,6 @@ JAVASCRIPT_ROLLING_PLOTS = """
             }
         }
     }
-
-"""
-
-JAVASCRIPT_SORTABLE_TABLE = """
-
-    $(document).ready(function () {
-        $('.sortable_table').DataTable({
-            "paging": false,
-            "searching": false,
-            "info": false,
-        });
-    });
 
 """
 
@@ -314,16 +304,59 @@ parameter_specifications = [
         help="Number the tables.",
     ),
     ChoiceParameter(
+        "--tables-display-option",
+        choices=["full", "paging", "scrolling"],
+        default="full",
+        help="How to display tables. Either full, with scrollbar, or with paging.",
+    ),
+    StringParameter(
+        "--tables-paging-sizes",
+        default="10,25,100,All",
+        help=(
+            "The paging sizes that can be selected. "
+            "Allowed values are integers and string 'all' "
+            "(no matter the case of letters), "
+            "written as a non-empty comma-separated list. "
+            "Ignored when tables-display-option is not 'paging'."
+        ),
+        validation_function=check_paging_sizes_string_parameter,
+    ),
+    StringParameter(
+        "--tables-scroll-y-height",
+        default="300px",
+        help=(
+            "Height of the tables when 'scrolling' display option is set. "
+            "Any string compatible with CSS sizing can be used, "
+            "e.g. '300px', '20em', etc. "
+            "Ignored with other display options."
+        ),
+    ),
+    ChoiceParameter(
+        "--tables-scroll-x",
+        choices=["yes", "no"],
+        default="yes",
+        help="Whether to allow horizontal scrolling on tables.",
+    ),
+    ChoiceParameter(
         "--sortable-tables",
         choices=["yes", "no"],
         default="no",
-        help="Make the tables sortable.",
+        help="Whether to make the tables sortable.",
     ),
     ChoiceParameter(
-        "--full-tables",
+        "--tables-search-box",
         choices=["yes", "no"],
         default="no",
-        help="Force all tables to be expanded.",
+        help="Whether to show search box for tables.",
+    ),
+    StringParameter(
+        "--tables-datatables-style",
+        default="display",
+        help=(
+            "Datatables class(es) that affect the tables styling. "
+            "If multiple classes are provided, "
+            "separate them either with commas or spaces."
+        ),
     ),
     ChoiceParameter(
         "--align-plots",
@@ -537,13 +570,19 @@ def parse_arguments(args) -> Dict[str, Optional[Union[str, int]]]:
         nargs=argparse.REMAINDER,
         help="Remaining arguments that are passed to the Python script.",
     )
-    return vars(parser.parse_args(args))
+    variables = vars(parser.parse_args(args))
+    # positional arguments must be renamed manually
+    variables["input_path"] = variables["input-path"]
+    variables["script_args"] = variables["script-args"]
+    del variables["input-path"]
+    del variables["script-args"]
+    return variables
 
 
 def main() -> None:
     args_dict = parse_arguments(sys.argv[1:])
-    script_args_string = " ".join(cast(List[str], args_dict.pop("script-args")))
-    input_path = cast(Path, args_dict.pop("input-path"))
+    script_args_string = " ".join(cast(List[str], args_dict.pop("script_args")))
+    input_path = cast(Path, args_dict.pop("input_path"))
     input_path = input_path.expanduser().resolve()
     output_path = cast(Optional[Path], args_dict.pop("output_path"))
     config_path = cast(Optional[Path], args_dict.pop("config_path"))
@@ -584,10 +623,7 @@ def main() -> None:
     carefully_remove_directory_if_exists(directory=Path(html_dir_path_str))
 
     script_definitions = (
-        JAVASCRIPT_CHANGE_EXPAND
-        + JAVASCRIPT_ON_LOAD
-        + JAVASCRIPT_SORTABLE_TABLE
-        + JAVASCRIPT_ROLLING_PLOTS
+        JAVASCRIPT_CHANGE_EXPAND + JAVASCRIPT_ON_LOAD + JAVASCRIPT_ROLLING_PLOTS
     )
 
     css_definitions = get_css(

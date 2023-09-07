@@ -8,10 +8,12 @@ import pytest
 
 from pyreball.utils.utils import (
     _map_env_value,
+    _matches_paging_sizes_string,
     carefully_remove_directory_if_exists,
     check_and_fix_parameters,
     check_choice_string_parameter,
     check_integer_within_range,
+    check_paging_sizes_string_parameter,
     ChoiceParameter,
     get_file_config,
     get_parameter_value,
@@ -20,6 +22,7 @@ from pyreball.utils.utils import (
     merge_parameter_dictionaries,
     merge_values,
     read_file_config,
+    StringParameter,
     Substitutor,
 )
 
@@ -33,8 +36,65 @@ def simple_parameter_specifications():
         ChoiceParameter("--do-stuff", choices=["yes", "no"], default="yes", help=""),
         ChoiceParameter("--highlight", choices=["yes", "no"], default="no", help=""),
         ChoiceParameter("--organize", choices=["yes", "no"], default="no", help=""),
-        IntegerParameter("--page-size", boundaries=(10, 20), default=15, help=""),
+        IntegerParameter("--page-width", boundaries=(10, 20), default=15, help=""),
+        StringParameter(
+            "--paging-sizes",
+            default="10,25,100,All",
+            help="",
+            validation_function=check_paging_sizes_string_parameter,
+        ),
     ]
+
+
+@pytest.mark.parametrize(
+    "test_input,expected_result",
+    [
+        ("", False),
+        ("23", True),
+        ("23,452", True),
+        ("23,452,100", True),
+        ("23,452,100,All", True),
+        ("23,all,100", True),
+        ("ALL", True),
+        ("unknown", False),
+        ("23,452 100", False),
+        ("23_452,100", False),
+        ("Allright", False),
+        ("23,", False),
+        (",23", False),
+        (",", False),
+    ],
+)
+def test__matches_paging_sizes_string(test_input, expected_result):
+    assert _matches_paging_sizes_string(test_input) == expected_result
+
+
+@pytest.mark.parametrize(
+    "value,none_allowed,err_msg,expected_result",
+    [
+        ("10,ALL", True, None, "10,ALL"),
+        ("10,ALL", False, None, "10,ALL"),
+        (None, True, None, None),
+        (None, False, None, "30,40"),
+        ("hello", True, "Parameter param1 is set to an unsupported", "hello"),
+        ("hello", False, "Parameter param1 is set to an unsupported", "hello"),
+    ],
+)
+def test_check_paging_sizes_string_parameter(
+    value, none_allowed, err_msg, expected_result
+):
+    error_messages = []
+    result_value = check_paging_sizes_string_parameter(
+        "param1",
+        value,
+        "30,40",
+        none_allowed,
+        [],
+        error_messages,
+    )
+    assert result_value == expected_result
+    contains_error_msg = any(map(lambda msg: err_msg in msg, error_messages))
+    assert contains_error_msg if err_msg else not contains_error_msg
 
 
 @pytest.mark.parametrize(
@@ -142,7 +202,8 @@ def test_check_integer_within_range(
                 "do_stuff": "no",
                 "highlight": "yes",
                 "organize": "yes",
-                "page_size": 10,
+                "page_width": 10,
+                "paging_sizes": "All,100",
             },
             True,
             [],
@@ -152,7 +213,8 @@ def test_check_integer_within_range(
                 "do_stuff": "no",
                 "highlight": "yes",
                 "organize": "yes",
-                "page_size": 10,
+                "page_width": 10,
+                "paging_sizes": "All,100",
             },
         ),
         # None values are used for the missing ones
@@ -160,17 +222,18 @@ def test_check_integer_within_range(
             {
                 "do_stuff": "no",
                 "highlight": "yes",
-                "page_size": 30,
+                "page_width": 30,
             },
             True,
-            ["Parameter page_size is more than"],
+            ["Parameter page_width is more than"],
             [],
             {
                 "align": None,
                 "do_stuff": "no",
                 "highlight": "yes",
                 "organize": None,
-                "page_size": 20,
+                "page_width": 20,
+                "paging_sizes": None,
             },
         ),
         # Default values are used for the missing ones
@@ -178,13 +241,14 @@ def test_check_integer_within_range(
             {
                 "do_stuff": "no",
                 "highlight": "yes",
-                "page_size": 4,
+                "page_width": 4,
             },
             False,
             [
                 "Parameter align was not set",
                 "Parameter organize was not set",
-                "Parameter page_size is less than",
+                "Parameter page_width is less than",
+                "Parameter paging_sizes was not set",
             ],
             [],
             {
@@ -192,7 +256,8 @@ def test_check_integer_within_range(
                 "do_stuff": "no",
                 "highlight": "yes",
                 "organize": "no",
-                "page_size": 10,
+                "page_width": 10,
+                "paging_sizes": "10,25,100,All",
             },
         ),
         # Unsupported values
@@ -201,13 +266,14 @@ def test_check_integer_within_range(
                 "do_stuff": "maybe",
                 "highlight": "yes",
                 "organize": "no",
-                "page_size": "not_a_number",
+                "page_width": "not_a_number",
+                "paging_sizes": "All,100",
             },
             False,
             ["Parameter align was not set"],
             [
                 "Parameter do_stuff is set to an unsupported",
-                "Could not parse page_size parameter as an integer",
+                "Could not parse page_width parameter as an integer",
             ],
             "result_does_not_matter",
         ),
@@ -270,14 +336,15 @@ def test_get_file_config__correct_specification(simple_parameter_specifications)
         "do-stuff": "no",
         "highlight": "yes",
         "organize": "yes",
-        "page-size": 22,
+        "page-width": 22,
     }
     expected_config_parameters = {
         "align": "center",
         "do_stuff": "no",
         "highlight": "yes",
         "organize": "yes",
-        "page_size": 20,
+        "page_width": 20,
+        "paging_sizes": "10,25,100,All",
     }
     with mock.patch("pyreball.utils.utils.read_file_config", return_value=config):
         config_parameters = get_file_config(
@@ -326,21 +393,24 @@ def test_merge_values(test_input_1, test_input_2, expected_result):
                 "do_stuff": "no",
                 "highlight": "yes",
                 "organize": None,
-                "page_size": 10,
+                "page_width": 10,
+                "paging_sizes": None,
             },
             {
                 "align": "center",
                 "do_stuff": None,
                 "highlight": "no",
                 "organize": None,
-                "page_size": 20,
+                "page_width": 20,
+                "paging_sizes": "10,25,100,All",
             },
             {
                 "align": "center",
                 "do_stuff": "no",
                 "highlight": "yes",
                 "organize": None,
-                "page_size": 10,
+                "page_width": 10,
+                "paging_sizes": "10,25,100,All",
             },
         ),
     ],

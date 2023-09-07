@@ -13,8 +13,8 @@ Pyreball is a Python reporting tool that generates HTML reports from Python scri
 
 Main features:
 
-- Plots in altair, plotly, bokeh, and matplotlib (and thus also seaborn etc.).
-- Sortable and scrollable tables from pandas DataFrame.
+- Plots in [Vega-Altair](https://altair-viz.github.io/index.html), [Plotly](https://plotly.com/), [Bokeh](https://bokeh.org/), and [Matplotlib](https://matplotlib.org/) (and thus also [Seaborn](https://seaborn.pydata.org/) etc.).
+- Interactive tables based on [DataTables](https://datatables.net/) library and created from [pandas DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html).
 - Basic text formatting such as headings, emphasis, and lists.
 - Hyperlinks, references and table of contents.
 
@@ -25,9 +25,6 @@ be refactored quickly through various IDEs, etc.
 
 Pyreball is designed not to require any dependencies, unless you decide to use them. For example, if you decide to print
 pandas DataFrames to HTML tables and plot altair charts, you need to install pandas and altair.
-
-Note that Pyreball is still in early stages of development, so there can be some breaking changes between released
-versions.
 
 ## Install
 
@@ -105,7 +102,7 @@ Although the versions are fixed in these requirements files, Pyreball works with
 
 ## Documentation
 
-See [documentation](https://pyreball.readthedocs.io/) for more information about Pyreball.
+See [documentation](https://pyreball.readthedocs.io/) for more examples and information about Pyreball.
 
 ## Setting up Pyreball in PyCharm
 

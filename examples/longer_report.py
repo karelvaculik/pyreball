@@ -18,11 +18,11 @@ pb.print_div(
 pb.print("<br>")
 pb.print_div(
     "It is possible to pass several values and optionally a separator.",
-    "The values will be joined and automatically converted to strings, as with the following number and list.",
+    "The values will be joined and automatically converted to strings, "
+    "as with the following number and list. ",
     42,
     [11, 13, 19],
-    "Newline characters can be converted to &lt;br&gt; elements by using replace_newlines_with_br parameter.",
-    sep="\n",
+    sep="<br>",
 )
 
 pb.print_h2("Basic String-wrapping Formatting Functions")
@@ -74,9 +74,10 @@ import inspect
 pb.print_code_block(inspect.getsource(factorial))
 
 pb.print_div(
-    f"Before going further, let's return to the very first function we used: {pb.code('set_title')}. "
-    f"As the name suggests, it sets the title of the HTML page. It is optional and can be actually placed "
-    f"in any part of the report."
+    f"Before going further, let's return to the very first function we used: "
+    f"{pb.code('set_title')}. "
+    f"As the name suggests, it sets the title of the HTML page. "
+    f"It is optional and can be actually placed in any part of the report."
 )
 
 pb.print_h1("Inspecting Data")
@@ -86,7 +87,7 @@ pb.print_h2("Tables and Plots")
 # Print a table
 N = 10
 df = pd.DataFrame({"x": np.arange(1, N + 1), "y": np.random.random(N) * 4 + 3})
-pb.print_table(df, caption="A data table.")
+pb.print_table(df, caption="A data table.", index=False)
 
 # Plot a graph
 fig, ax = plt.subplots()
@@ -101,14 +102,22 @@ img_reference = pb.Reference()
 table_ref = pb.Reference()
 pb.print_div(
     f"It is also possible to create references to tables and figures. "
-    f"For example Table {table_ref} shows sortable columns and Fig. {img_reference} displays a scatterplot."
+    f"For example Table {table_ref} shows sortable columns and Fig. {img_reference} "
+    f"displays a scatterplot."
 )
 pb.print_table(
-    df, caption="A sortable table with a reference", reference=table_ref, sortable=True
+    df,
+    caption="A sortable table with a reference",
+    reference=table_ref,
+    sortable=True,
+    index=False,
 )
 
 pb.print_table(
-    df, caption="A table sorted by y column", sorting_definition=("y", "asc")
+    df,
+    caption="A table sorted by y column",
+    sorting_definition=[(df.columns.get_loc("y"), "asc")],
+    index=False,
 )
 fig, ax = plt.subplots()
 sns.scatterplot(x="x", y="y", ax=ax, data=df)

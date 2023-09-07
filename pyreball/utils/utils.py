@@ -7,7 +7,7 @@ import shutil
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, cast, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, cast, Dict, List, Optional, Tuple, Union
 
 from pyreball.utils.logger import get_logger
 
@@ -19,6 +19,12 @@ _parameter_cache = {}
 
 
 class Parameter(ABC):
+    def __init__(self, option_string: str, help: str):
+        self.option_string = option_string
+        self._config_param_key = option_string.replace("--", "")
+        self._param_key = self._config_param_key.replace("-", "_")
+        self.help = help
+
     @property
     @abstractmethod
     def param_key(self):
@@ -46,12 +52,9 @@ class Parameter(ABC):
 
 class ChoiceParameter(Parameter):
     def __init__(self, option_string: str, choices: List[str], default: str, help: str):
-        self.option_string = option_string
-        self._config_param_key = option_string.replace("--", "")
-        self._param_key = self._config_param_key.replace("-", "_")
-        self.choices = choices
+        super().__init__(option_string=option_string, help=help)
         self.default = default
-        self.help = help
+        self.choices = choices
 
     @property
     def param_key(self):
@@ -90,12 +93,9 @@ class IntegerParameter(Parameter):
         default: int,
         help: str,
     ):
-        self.option_string = option_string
-        self._config_param_key = option_string.replace("--", "")
-        self._param_key = self._config_param_key.replace("-", "_")
+        super().__init__(option_string=option_string, help=help)
         self.boundaries = boundaries
         self.default = default
-        self.help = help
 
     @property
     def param_key(self):
@@ -124,6 +124,80 @@ class IntegerParameter(Parameter):
             warning_messages=warning_messages,
             error_messages=error_messages,
         )
+
+
+class StringParameter(Parameter):
+    def __init__(
+        self,
+        option_string: str,
+        default: str,
+        help: str,
+        validation_function: Optional[
+            Callable[
+                [str, Optional[str], str, bool, List[str], List[str]], Optional[str]
+            ]
+        ] = None,
+    ):
+        super().__init__(option_string=option_string, help=help)
+        self.default = default
+        self.validation_function = validation_function
+
+    @property
+    def param_key(self):
+        return self._param_key
+
+    @property
+    def config_param_key(self):
+        return self._config_param_key
+
+    def add_argument_to_parser(self, parser: argparse.ArgumentParser) -> None:
+        parser.add_argument(self.option_string, type=str, help=self.help)
+
+    def check_and_fix_value(
+        self,
+        value: Optional[str],
+        none_allowed: bool,
+        warning_messages: List[str],
+        error_messages: List[str],
+    ) -> Any:
+        if self.validation_function is not None:
+            return self.validation_function(
+                self.param_key,
+                value,
+                self.default,
+                none_allowed,
+                warning_messages,
+                error_messages,
+            )
+        else:
+            return value
+
+
+def _matches_paging_sizes_string(value: str) -> bool:
+    return bool(re.match(r"^(all|[\d]+)(,(all|[\d]+))*$", value, re.IGNORECASE))
+
+
+def check_paging_sizes_string_parameter(
+    key: str,
+    value: Optional[str],
+    default_value: str,
+    none_allowed: bool,
+    warning_messages: List[str],
+    error_messages: List[str],
+) -> Optional[str]:
+    if value is None and not none_allowed:
+        warning_messages.append(
+            f'Parameter {key} was not set, setting its value to "{default_value}".'
+        )
+        return default_value
+    elif value is not None and not _matches_paging_sizes_string(value):
+        error_messages.append(
+            f"Parameter {key} is set to an unsupported value {value}. "
+            "Allowed values are integers and string "
+            "'all' (no matter the case of letters), "
+            "written as a non-empty comma-separated list."
+        )
+    return value
 
 
 def check_choice_string_parameter(
