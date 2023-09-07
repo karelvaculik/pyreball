@@ -18,3 +18,9 @@ pb.print_table(
     caption="Table sorted by name (ASC) and age (DESC).",
     sorting_definition=[(1, "asc"), (2, "desc")],
 )
+pb.print_table(
+    df,
+    caption="The same table, but without the index.",
+    index=False,
+    sorting_definition=[(0, "asc"), (1, "desc")],
+)

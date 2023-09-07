@@ -14,7 +14,7 @@ pb.print_h1("Tables", reference=ref_ch_1)
 N = 10
 np.random.seed(1)
 df = pd.DataFrame({"x": np.arange(1, N + 1), "y": np.random.random(N) * 4 + 3})
-pb.print_table(df, caption="A data table.")
+pb.print_table(df, caption="A data table.", index=False)
 
 img_reference = pb.Reference()
 table_ref = pb.Reference()
@@ -28,11 +28,18 @@ pb.print_div(
     f"For example, here is a link to {img_reference('Scatterplot')}."
 )
 pb.print_table(
-    df, caption="A sortable table with a reference", reference=table_ref, sortable=True
+    df,
+    caption="A sortable table with a reference",
+    reference=table_ref,
+    sortable=True,
+    index=False,
 )
 
 pb.print_table(
-    df, caption="A table sorted by y column", sorting_definition=("y", "asc")
+    df,
+    caption="A table sorted by y column",
+    sorting_definition=[(df.columns.get_loc("y"), "asc")],
+    index=False,
 )
 
 pb.print_h1("Charts")

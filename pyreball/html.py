@@ -637,7 +637,6 @@ def print_table(
             Defaults to settings from config or CLI arguments if None.
         numbered: Whether the caption should be numbered.
             Defaults to settings from config or CLI arguments if None.
-
         display_option: How to display table. This option is useful for long tables,
             which should not be displayed fully. Acceptable values are:
             'full' (show the full table), 'scrolling' (show the table in scrolling mode

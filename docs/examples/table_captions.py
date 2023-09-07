@@ -10,7 +10,4 @@ df = pd.DataFrame(
 pb.print_table(df, caption="People with their age.")
 pb.print_table(df, caption="People with their age.", numbered=False)
 pb.print_table(df, numbered=False)
-pb.print_table(
-    df,
-    caption="The table with numbering again. But much bigger caption.",
-)
+pb.print_table(df, caption="The table with numbering again.")
