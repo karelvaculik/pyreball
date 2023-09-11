@@ -4,7 +4,7 @@ Pyreball is a Python reporting tool that generates HTML reports from Python scri
 
 Main features:
 
-- Plots in [Vega-Altair](https://altair-viz.github.io/index.html), [Plotly](https://plotly.com/), [Bokeh](https://bokeh.org/), and [Matplotlib](https://matplotlib.org/) (and thus also [Seaborn](https://seaborn.pydata.org/) etc.).
+- Charts in [Vega-Altair](https://altair-viz.github.io/index.html), [Plotly](https://plotly.com/), [Bokeh](https://bokeh.org/), and [Matplotlib](https://matplotlib.org/) (and thus also [Seaborn](https://seaborn.pydata.org/) etc.).
 - Interactive tables based on [DataTables](https://datatables.net/) library and created from [pandas DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html).
 - Basic text formatting such as headings, emphasis, and lists.
 - Hyperlinks, references and table of contents.
@@ -39,13 +39,13 @@ pyreball report.py
 
 <iframe style="border:2px solid;" src="examples/example_init.html" height="300" width="100%" title="Iframe Example"></iframe>
 
-## Adding Tables and Plots
+## Adding Tables and Figures
 
 The core functionality of `pyreball` does not require any 3rd party dependencies.
 However, it is possible to generate other types of elements with the help of libraries such
 as [pandas](https://pandas.pydata.org/) or [seaborn](https://seaborn.pydata.org/).
 
-Let's create another python script called `report_plot.py`:
+Let's create another python script called `report_chart.py`:
 
 {{ inline_source("docs/examples/example_init_deps.py") }}
 
@@ -53,9 +53,9 @@ Install `pandas` and `seaborn`, then run `pyreball`:
 
 ```
 pip install pandas seaborn
-pyreball report_plot.py
+pyreball report_chart.py
 ```
 
-`report_plot.html` should look like this:
+`report_chart.html` should look like this:
 
 <iframe style="border:2px solid;" src="examples/example_init_deps.html" height="800" width="100%" title="Iframe Example"></iframe>

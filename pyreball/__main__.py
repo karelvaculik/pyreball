@@ -359,35 +359,35 @@ parameter_specifications = [
         ),
     ),
     ChoiceParameter(
-        "--align-plots",
+        "--align-figures",
         choices=["left", "center", "right"],
         default="center",
-        help="Alignment of plots.",
+        help="Alignment of figures.",
     ),
     ChoiceParameter(
-        "--plot-captions-position",
+        "--figure-captions-position",
         choices=["top", "bottom"],
         default="bottom",
-        help="Position of the plot captions.",
+        help="Position of the figure captions.",
     ),
     ChoiceParameter(
-        "--numbered-plots",
+        "--numbered-figures",
         choices=["yes", "no"],
         default="no",
-        help="Number the plots.",
+        help="Number the figures.",
     ),
     ChoiceParameter(
         "--matplotlib-format",
         choices=["png", "svg"],
         default="svg",
-        help="Format of matplotlib plots.",
+        help="Format of matplotlib figures.",
     ),
     ChoiceParameter(
         "--matplotlib-embedded",
         choices=["yes", "no"],
         default="no",
         help=(
-            "Whether to embedded matplotlib plots directly into HTML. "
+            "Whether to embedded matplotlib figures directly into HTML. "
             "Only for svg format."
         ),
     ),

@@ -23,4 +23,4 @@ fig = (
         height=400,
     )
 )
-pb.plot_graph(fig, caption="Vega-Altair barchart.")
+pb.print_figure(fig, caption="Vega-Altair barchart.")

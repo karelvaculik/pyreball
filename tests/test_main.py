@@ -389,7 +389,7 @@ def test__get_output_dir_and_file_stem__valid_inputs(
         # Empty string as input_path
         [""],
         # wrong param value
-        ["--numbered-plots", "hello", "scripts/report.py"],
+        ["--numbered-figures", "hello", "scripts/report.py"],
         # empty string for path option
         # white-space string for path option
         ["--output-path", "\n    \n", "scripts/report.py"],
@@ -495,9 +495,9 @@ def test_parse_arguments__valid_arguments(args, expected_non_empty_result):
         "tables_paging_sizes": None,
         "tables_search_box": None,
         "tables_datatables_style": None,
-        "align_plots": None,
-        "plot_captions_position": None,
-        "numbered_plots": None,
+        "align_figures": None,
+        "figure_captions_position": None,
+        "numbered_figures": None,
         "matplotlib_format": None,
         "matplotlib_embedded": None,
         "numbered_headings": None,

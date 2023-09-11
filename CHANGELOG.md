@@ -1,16 +1,19 @@
 # Changelog
 
-## 1.0.0 (2023-09-02)
+## 1.0.0 (2023-09-11)
 
-- Updated to newer versions of optional dependencies.
-- Created documentation at readthedocs.
 - Added new text elements `div()` and `span()`. Added new parameters to HTML elements - in particular `cl` and `attrs`.
-- Deprecated `print_html()` function. New `print()` should be used instead.
-- Deprecated `print_code()` function. New `print_source_code()` should be used instead.
+- Replaced `print_html()` function with `print()`.
+- Replaced `print_code()` function with `print_source_code()`.
+- Replaced `plot_graph()` with `print_figure()`.
+- Removed `plot_multi_graph`.
 - Replaced code-prettify with highlight.js for code blocks.
 - `print_h1`, ..., `print_h6` functions can now take a `Reference` object.
 - Added `--config-path` CLI option, changed how `pyreball-generate-config` command works and how the config paths are
   handled.
+- Updated CLI arguments and config parameters for tables and figures.
+- Updated to newer versions of 3rd party dependencies for example.
+- Created documentation at readthedocs.
 
 ## 0.1.1 (2021-09-14)
 

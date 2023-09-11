@@ -5,7 +5,7 @@ fig, ax = plt.subplots()
 plt.bar([1, 2, 3], [4, 3, 6])
 plt.xlabel("x")
 plt.ylabel("y")
-pb.plot_graph(
+pb.print_figure(
     fig,
     caption="Matplotlib barchart as png.",
     matplotlib_format="png",

@@ -1,8 +1,7 @@
 __version__ = "1.0.0-alpha.1"
 
 from pyreball.html import (
-    plot_graph,
-    plot_multi_graph,
+    print_figure,
     print,
     print_code_block,
     print_div,
@@ -31,8 +30,7 @@ from pyreball.text import (
 )
 
 __all__ = [
-    "plot_graph",
-    "plot_multi_graph",
+    "print_figure",
     "print",
     "print_code_block",
     "print_div",

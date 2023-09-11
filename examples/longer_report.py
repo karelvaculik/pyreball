@@ -93,7 +93,7 @@ pb.print_table(df, caption="A data table.", index=False)
 fig, ax = plt.subplots()
 sns.lineplot(x="x", y="y", ax=ax, data=df)
 ax.set(xlabel="x", ylabel="y")
-pb.plot_graph(fig, caption="The first plot.")
+pb.print_figure(fig, caption="The first plot.")
 
 pb.print_h2("References to Plots and Tables")
 
@@ -122,7 +122,7 @@ pb.print_table(
 fig, ax = plt.subplots()
 sns.scatterplot(x="x", y="y", ax=ax, data=df)
 ax.set(xlabel="x", ylabel="y")
-pb.plot_graph(fig, caption="A plot with a reference.", reference=img_reference)
+pb.print_figure(fig, caption="A plot with a reference.", reference=img_reference)
 
 
 pb.print_div(

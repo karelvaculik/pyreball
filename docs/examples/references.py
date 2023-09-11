@@ -5,7 +5,7 @@ import pandas as pd
 import pyreball as pb
 import seaborn as sns
 
-pb.set_title("References to Plots and Tables")
+pb.set_title("References to Figures and Tables")
 
 ref_ch_1 = pb.Reference()
 
@@ -47,7 +47,7 @@ pb.print_h1("Charts")
 fig, ax = plt.subplots()
 sns.scatterplot(x="x", y="y", ax=ax, data=df)
 ax.set(xlabel="x", ylabel="y")
-pb.plot_graph(fig, caption="A plot with a reference.", reference=img_reference)
+pb.print_figure(fig, caption="A figure with a reference.", reference=img_reference)
 
 pb.print_div(
     f"Note that you can use the references in your text multiple times, "

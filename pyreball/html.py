@@ -116,8 +116,8 @@ class Reference:
 def _check_and_mark_reference(reference: Reference) -> None:
     """Check and save a reference.
 
-    This function is used when references are added to tables or plots.
-    If a table or plot is about to get a reference that was already used
+    This function is used when references are added to tables or figures.
+    If a table or a figure is about to get a reference that was already used
     for another object, an error is raised.
     """
     if reference.id in _references:
@@ -491,7 +491,7 @@ def _gather_datatables_setup(
     if scroll_x:
         datatables_setup["scrollX"] = True
 
-    datatables_setup['info'] = False
+    datatables_setup["info"] = False
 
     # if show_search_box:
     datatables_setup["searching"] = show_search_box
@@ -773,15 +773,17 @@ def print_table(
         _table_memory["table_index"] += 1
 
 
-def _construct_plot_anchor_link(reference: Optional[Reference], plot_ind: int) -> str:
+def _construct_image_anchor_link(reference: Optional[Reference], fig_index: int) -> str:
     if reference:
         _check_and_mark_reference(reference)
-        return f"img-{reference.id}-{plot_ind}"
+        return f"img-{reference.id}-{fig_index}"
     else:
-        return f"img-{plot_ind}"
+        return f"img-{fig_index}"
 
 
-def _wrap_plot_element_by_outer_divs(img_element: str, align: str, hidden: bool) -> str:
+def _wrap_image_element_by_outer_divs(
+    img_element: str, align: str, hidden: bool
+) -> str:
     img_element = (
         f'<div align="{align}"><div style="display: inline-block;">'
         f"{img_element}"
@@ -793,17 +795,17 @@ def _wrap_plot_element_by_outer_divs(img_element: str, align: str, hidden: bool)
         return f'<div class="image-wrapper">{img_element}</div>'
 
 
-def _prepare_matplotlib_plot_element(
+def _prepare_matplotlib_image_element(
     fig: "matplotlib.figure.Figure",
-    l_plot_index: int,
-    plot_format: Optional[str] = None,
+    fig_index: int,
+    image_format: Optional[str] = None,
     embedded: Optional[bool] = None,
 ) -> str:
-    if plot_format is not None and plot_format not in ["svg", "png"]:
+    if image_format is not None and image_format not in ["svg", "png"]:
         raise ValueError('Matplotlib format can be only "svg" or "png".')
 
-    plot_format = merge_values(
-        primary_value=plot_format,
+    image_format = merge_values(
+        primary_value=image_format,
         secondary_value=get_parameter_value("matplotlib_format"),
     )
     embedded = merge_values(
@@ -812,20 +814,20 @@ def _prepare_matplotlib_plot_element(
     )
 
     if embedded:
-        if plot_format == "svg":
+        if image_format == "svg":
             f = io.BytesIO()
             fig.savefig(f, format="svg")
             img_element = f.getvalue().decode("utf-8")
         else:
             raise ValueError(
-                "Only svg format can be used for embedded matplotlib plots."
+                "Only svg format can be used for embedded matplotlib figures."
             )
     elif get_parameter_value("html_dir_path") and get_parameter_value("html_dir_name"):
         make_sure_dir_exists(get_parameter_value("html_dir_path"))
-        img_file_name = f"img_{l_plot_index:03d}.{plot_format}"
+        img_file_name = f"img_{fig_index:03d}.{image_format}"
         fig.savefig(
             os.path.join(get_parameter_value("html_dir_path"), img_file_name),
-            format=plot_format,
+            format=image_format,
             bbox_inches="tight",
         )
         img_element = (
@@ -838,8 +840,8 @@ def _prepare_matplotlib_plot_element(
     return img_element
 
 
-def _prepare_altair_plot_element(fig: AltairFigType, l_plot_index: int) -> str:
-    vis_id = "altairvis" + str(l_plot_index)
+def _prepare_altair_image_element(fig: AltairFigType, fig_index: int) -> str:
+    vis_id = "altairvis" + str(fig_index)
     img_element = (
         f'<div id="{vis_id}">'
         f'</div><script type="text/javascript">\nvar spec = {fig.to_json()};\n'
@@ -850,11 +852,11 @@ def _prepare_altair_plot_element(fig: AltairFigType, l_plot_index: int) -> str:
     return img_element
 
 
-def _prepare_plotly_plot_element(fig: "plotly.graph_objs.Figure") -> str:
+def _prepare_plotly_image_element(fig: "plotly.graph_objs.Figure") -> str:
     return fig.to_html(full_html=False, include_plotlyjs=False)
 
 
-def _prepare_bokeh_plot_element(fig: "bokeh.plotting._figure.figure") -> str:
+def _prepare_bokeh_image_element(fig: "bokeh.plotting._figure.figure") -> str:
     # noinspection PyPackageRequirements
     from bokeh.embed import components  # type: ignore
 
@@ -864,7 +866,7 @@ def _prepare_bokeh_plot_element(fig: "bokeh.plotting._figure.figure") -> str:
 
 def _prepare_image_element(
     fig: FigType,
-    plot_index: int,
+    fig_index: int,
     matplotlib_format: Optional[str] = None,
     embedded: Optional[bool] = None,
 ):
@@ -875,10 +877,10 @@ def _prepare_image_element(
     ) or (
         type(fig).__name__ == "PairGrid" and type(fig).__module__ == "seaborn.axisgrid"
     ):
-        img_element = _prepare_matplotlib_plot_element(
+        img_element = _prepare_matplotlib_image_element(
             fig=fig,
-            l_plot_index=plot_index,
-            plot_format=matplotlib_format,
+            fig_index=fig_index,
+            image_format=matplotlib_format,
             embedded=embedded,
         )
     elif type(fig).__name__ in [
@@ -890,24 +892,24 @@ def _prepare_image_element(
         "RepeatChart",
         "VConcatChart",
     ]:
-        img_element = _prepare_altair_plot_element(fig=fig, l_plot_index=plot_index)
+        img_element = _prepare_altair_image_element(fig=fig, fig_index=fig_index)
     elif (
         type(fig).__name__ == "Figure"
         and type(fig).__module__ == "plotly.graph_objs._figure"
     ):
-        img_element = _prepare_plotly_plot_element(fig=fig)
+        img_element = _prepare_plotly_image_element(fig=fig)
     elif type(fig).__name__.lower() == "figure" and type(fig).__module__ in [
         "bokeh.plotting.figure",
         "bokeh.plotting._figure",
     ]:
-        img_element = _prepare_bokeh_plot_element(fig=fig)
+        img_element = _prepare_bokeh_image_element(fig=fig)
     else:
         raise ValueError(f"Unknown figure type {type(fig)}.")
 
     return img_element
 
 
-def _plot_graph(
+def _print_figure(
     fig: FigType,
     caption: Optional[str] = None,
     reference: Optional[Reference] = None,
@@ -930,17 +932,17 @@ def _plot_graph(
         else:
             fig.show()
     else:
-        if "plot_index" not in _graph_memory:
-            _graph_memory["plot_index"] = 1
-        plot_index = _graph_memory["plot_index"]
+        if "fig_index" not in _graph_memory:
+            _graph_memory["fig_index"] = 1
+        fig_index = _graph_memory["fig_index"]
 
-        anchor_link = _construct_plot_anchor_link(
-            reference=reference, plot_ind=plot_index
+        anchor_link = _construct_image_anchor_link(
+            reference=reference, fig_index=fig_index
         )
         if caption_position == "bottom":
             img_element = _prepare_image_element(
                 fig=fig,
-                plot_index=plot_index,
+                fig_index=fig_index,
                 matplotlib_format=matplotlib_format,
                 embedded=embedded,
             )
@@ -948,7 +950,7 @@ def _plot_graph(
                 prefix="Figure",
                 caption=caption,
                 numbered=numbered,
-                index=plot_index,
+                index=fig_index,
                 anchor_link=anchor_link,
             )
         elif caption_position == "top":
@@ -956,12 +958,12 @@ def _plot_graph(
                 prefix="Figure",
                 caption=caption,
                 numbered=numbered,
-                index=plot_index,
+                index=fig_index,
                 anchor_link=anchor_link,
             )
             img_element += _prepare_image_element(
                 fig=fig,
-                plot_index=plot_index,
+                fig_index=fig_index,
                 matplotlib_format=matplotlib_format,
                 embedded=embedded,
             )
@@ -969,15 +971,15 @@ def _plot_graph(
             raise ValueError(
                 f"caption_position must be 'top' or 'bottom', not {caption_position}."
             )
-        img_html = _wrap_plot_element_by_outer_divs(
+        img_html = _wrap_image_element_by_outer_divs(
             img_element=img_element, align=align, hidden=hidden
         )
 
         _write_to_html(img_html)
-        _graph_memory["plot_index"] += 1
+        _graph_memory["fig_index"] += 1
 
 
-def plot_graph(
+def print_figure(
     fig: FigType,
     caption: Optional[str] = None,
     reference: Optional[Reference] = None,
@@ -988,11 +990,11 @@ def plot_graph(
     embedded: Optional[bool] = None,
 ) -> None:
     """
-    Plot a graph.
+    Print a figure.
 
     Args:
-        fig: Plot object.
-        caption: Caption of the plot.
+        fig: A figure object.
+        caption: Caption of the figure.
         reference: Reference object for link creation.
         align: How to align the graph horizontally.
             Acceptable values are 'left', 'center', and 'right'.
@@ -1002,10 +1004,10 @@ def plot_graph(
             Defaults to settings from config or CLI arguments if None.
         numbered: Whether the caption should be numbered.
             Defaults to settings from config or CLI arguments if None.
-        matplotlib_format: Format for matplotlib plots.
+        matplotlib_format: Format for matplotlib figures.
             Acceptable values are "svg", and "png".
             Defaults to settings from config or CLI arguments if None.
-        embedded: Whether to embed the plot directly into HTML;
+        embedded: Whether to embed the figure directly into HTML;
             Only applicable for matplotlib "svg" images.
             Defaults to settings from config or CLI arguments if None.
     """
@@ -1013,24 +1015,24 @@ def plot_graph(
     align = cast(
         str,
         merge_values(
-            primary_value=align, secondary_value=get_parameter_value("align_plots")
+            primary_value=align, secondary_value=get_parameter_value("align_figures")
         ),
     )
     caption_position = cast(
         str,
         merge_values(
             primary_value=caption_position,
-            secondary_value=get_parameter_value("plot_captions_position"),
+            secondary_value=get_parameter_value("figure_captions_position"),
         ),
     )
     numbered = bool(
         merge_values(
             primary_value=numbered,
-            secondary_value=get_parameter_value("numbered_plots"),
+            secondary_value=get_parameter_value("numbered_figures"),
         )
     )
 
-    _plot_graph(
+    _print_figure(
         fig=fig,
         caption=caption,
         reference=reference,
@@ -1041,60 +1043,3 @@ def plot_graph(
         embedded=embedded,
         hidden=False,
     )
-
-
-def plot_multi_graph(
-    figs: List[FigType],
-    captions: Optional[List[Optional[str]]] = None,
-    align: Optional[str] = None,
-    numbered: Optional[bool] = None,
-) -> None:
-    if captions is None:
-        captions = [None] * len(figs)
-
-    if len(figs) != len(captions):
-        raise ValueError("There must be the same number of captions and figs.")
-
-    align = cast(
-        str,
-        merge_values(
-            primary_value=align, secondary_value=get_parameter_value("align_plots")
-        ),
-    )
-    numbered = bool(
-        merge_values(
-            primary_value=numbered,
-            secondary_value=get_parameter_value("numbered_plots"),
-        )
-    )
-
-    if len(figs) > 0:
-        if "multi_plot_index" not in _multi_graph_memory:
-            _multi_graph_memory["multi_plot_index"] = 1
-        multi_plot_index = _multi_graph_memory["multi_plot_index"]
-
-        b_prev_id = f"button_prev_{multi_plot_index}"
-        b_next_id = f"button_next_{multi_plot_index}"
-        div_id = f"image-multi-panel-{multi_plot_index}"
-        disable_next = "disabled " if len(figs) == 1 else ""
-        _write_to_html(
-            f'<button id="{b_prev_id}" disabled onclick='
-            f"\"previous('#{div_id}', '{b_next_id}', '{b_prev_id}')\">&lt;</button>"
-        )
-        _write_to_html(
-            f'<button id="{b_next_id}" {disable_next}onclick='
-            f"\"next('#{div_id}', '{b_next_id}', '{b_prev_id}')\">&gt;</button>"
-        )
-        _write_to_html(f'<div id="{div_id}">')
-
-        for i in range(len(figs)):
-            _plot_graph(
-                fig=figs[i],
-                caption=captions[i],
-                align=align,
-                numbered=numbered,
-                hidden=i > 0,
-            )
-
-        _write_to_html("</div>")
-        _multi_graph_memory["multi_plot_index"] += 1

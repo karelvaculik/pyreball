@@ -7,7 +7,7 @@ class.
 Specifically, one can create a reference object by calling `pb.Reference()`.
 This object can be then passed to a function that creates a
 table ([`print_table()`](../api/pyreball_html/#pyreball.html.print_table)),
-a plot ([`plot_graph()`](../api/pyreball_html/#pyreball.html.plot_graph)), or
+a figure ([`print_figure()`](../api/pyreball_html/#pyreball.html.print_figure)), or
 a heading ([`print_h1()`](../api/pyreball_html/#pyreball.html.print_h1), ...,
 [`print_h6()`](../api/pyreball_html/#pyreball.html.print_h6)).
 Each such function then creates a target for the link.
@@ -31,8 +31,8 @@ a parameter that is used to override the default link
 text.
 
 When default link text is not provided through the constructor, Pyreball uses table numbers as texts for links pointing
-to tables. The same is applied for links pointing to plots. In case of headings, the default link text would be the text
-of the heading itself.
+to tables. The same is applied for links pointing to figures. 
+In case of headings, the default link text would be the text of the heading itself.
 
 The artificial example below demonstrates some of these features.
 

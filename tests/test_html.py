@@ -15,33 +15,32 @@ from matplotlib import pyplot as plt
 from pyreball.html import (
     _check_and_mark_reference,
     _compute_length_menu_for_datatables,
-    _construct_plot_anchor_link,
+    _construct_image_anchor_link,
     _gather_datatables_setup,
     _get_heading_number,
     _graph_memory,
     _heading_memory,
     _multi_graph_memory,
     _parse_tables_paging_sizes,
-    _plot_graph,
-    _prepare_altair_plot_element,
-    _prepare_bokeh_plot_element,
+    _prepare_altair_image_element,
+    _prepare_bokeh_image_element,
     _prepare_caption_element,
     _prepare_image_element,
-    _prepare_matplotlib_plot_element,
-    _prepare_plotly_plot_element,
+    _prepare_matplotlib_image_element,
+    _prepare_plotly_image_element,
     _prepare_table_html,
+    _print_figure,
     _print_heading,
     _reduce_whitespaces,
     _references,
     _table_memory,
     _tidy_title,
-    _wrap_plot_element_by_outer_divs,
+    _wrap_image_element_by_outer_divs,
     _write_to_html,
-    plot_graph,
-    plot_multi_graph,
     print as print_html,
     print_code_block,
     print_div,
+    print_figure,
     print_h1,
     print_h2,
     print_h3,
@@ -101,8 +100,8 @@ def pre_test_print_table_cleanup():
 
 
 @pytest.fixture
-def pre_test_plot_graph_cleanup():
-    # _plot_graph is meant to be used only in a single session,
+def pre_test_print_figure_cleanup():
+    # _print_figure is meant to be used only in a single session,
     # but test functions don't respect this so we do manual cleanup
     global _graph_memory
     _graph_memory.clear()
@@ -1183,19 +1182,19 @@ def test_print_table__file_output(
 
 
 @pytest.mark.parametrize(
-    "reference,plot_ind,expected_result",
+    "reference,fig_index,expected_result",
     [
         (Reference("doesnotmatter"), 3, "img-id3553-3"),
         (None, 23, "img-23"),
     ],
 )
-def test__construct_plot_anchor_link(
-    reference, plot_ind, expected_result, pre_test_check_and_mark_reference_cleanup
+def test__construct_image_anchor_link(
+    reference, fig_index, expected_result, pre_test_check_and_mark_reference_cleanup
 ):
     if reference is not None:
         reference.id = "id3553"
     assert (
-        _construct_plot_anchor_link(reference=reference, plot_ind=plot_ind)
+        _construct_image_anchor_link(reference=reference, fig_index=fig_index)
         == expected_result
     )
 
@@ -1226,27 +1225,27 @@ def test__construct_plot_anchor_link(
         ),
     ],
 )
-def test__wrap_plot_element_by_outer_divs(img_element, align, hidden, expected_result):
+def test__wrap_image_element_by_outer_divs(img_element, align, hidden, expected_result):
     assert (
-        _wrap_plot_element_by_outer_divs(img_element, align, hidden) == expected_result
+        _wrap_image_element_by_outer_divs(img_element, align, hidden) == expected_result
     )
 
 
-def test__prepare_matplotlib_plot_element__wrong_format():
+def test__prepare_matplotlib_image_element__wrong_format():
     with pytest.raises(ValueError) as excinfo:
-        _prepare_matplotlib_plot_element(None, 0, "unknown_format", None)
+        _prepare_matplotlib_image_element(None, 0, "unknown_format", None)
     assert "Matplotlib format can be only" in str(excinfo.value)
 
 
-def test__prepare_matplotlib_plot_element__unsupported_param_values():
+def test__prepare_matplotlib_image_element__unsupported_param_values():
     with mock.patch("pyreball.html.get_parameter_value", return_value=False):
         with pytest.raises(RuntimeError) as excinfo:
-            _prepare_matplotlib_plot_element(mock.Mock(), 0, "png", False)
+            _prepare_matplotlib_image_element(mock.Mock(), 0, "png", False)
         assert "Failed to create a matplotlib image." in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
-    "plot_format,param_plot_format,expected_used_plot_format",
+    "image_format,param_image_format,expected_used_image_format",
     [
         ("svg", "png", "svg"),
         (None, "png", "png"),
@@ -1261,10 +1260,10 @@ def test__prepare_matplotlib_plot_element__unsupported_param_values():
         (None, False, False),
     ],
 )
-def test__prepare_matplotlib_plot_element(
-    plot_format,
-    param_plot_format,
-    expected_used_plot_format,
+def test__prepare_matplotlib_image_element(
+    image_format,
+    param_image_format,
+    expected_used_image_format,
     embedded,
     param_embedded,
     expected_used_embedded,
@@ -1278,7 +1277,7 @@ def test__prepare_matplotlib_plot_element(
         elif key == "html_dir_name":
             return os.path.basename(html_dir_path)
         elif key == "matplotlib_format":
-            return param_plot_format
+            return param_image_format
         elif key == "matplotlib_embedded":
             return param_embedded
         else:
@@ -1297,33 +1296,34 @@ def test__prepare_matplotlib_plot_element(
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        if expected_used_embedded and expected_used_plot_format != "svg":
+        if expected_used_embedded and expected_used_image_format != "svg":
             with pytest.raises(ValueError) as excinfo:
-                _ = _prepare_matplotlib_plot_element(
-                    fig=fig, l_plot_index=4, plot_format=plot_format, embedded=embedded
+                _ = _prepare_matplotlib_image_element(
+                    fig=fig, fig_index=4, image_format=image_format, embedded=embedded
                 )
-            assert "Only svg format can be used for embedded matplotlib plots." in str(
-                excinfo.value
+            assert (
+                "Only svg format can be used for embedded matplotlib figures."
+                in str(excinfo.value)
             )
         else:
-            result = _prepare_matplotlib_plot_element(
-                fig=fig, l_plot_index=4, plot_format=plot_format, embedded=embedded
+            result = _prepare_matplotlib_image_element(
+                fig=fig, fig_index=4, image_format=image_format, embedded=embedded
             )
 
-            if expected_used_plot_format == "svg" and expected_used_embedded:
+            if expected_used_image_format == "svg" and expected_used_embedded:
                 assert result == "io_image_contents"
             else:
                 with open(
-                    os.path.join(html_dir_path, f"img_004.{expected_used_plot_format}")
+                    os.path.join(html_dir_path, f"img_004.{expected_used_image_format}")
                 ) as f:
                     result_file_contents = f.read()
                 assert result_file_contents == "image_contents"
                 assert (
-                    result == f'<img src="report/img_004.{expected_used_plot_format}">'
+                    result == f'<img src="report/img_004.{expected_used_image_format}">'
                 )
 
 
-def test__prepare_altair_plot_element():
+def test__prepare_altair_image_element():
     fig = mock.Mock()
     fig.to_json.return_value = "fig_json"
     expected_result = (
@@ -1332,20 +1332,20 @@ def test__prepare_altair_plot_element():
         'vegaEmbed("#altairvis326", spec, opt);'
         "</script>"
     )
-    assert _prepare_altair_plot_element(fig, 326) == expected_result
+    assert _prepare_altair_image_element(fig, 326) == expected_result
 
 
-def test__prepare_plotly_plot_element():
+def test__prepare_plotly_image_element():
     fig = mock.Mock()
     fig.to_html.return_value = "fig_html"
-    result = _prepare_plotly_plot_element(fig)
+    result = _prepare_plotly_image_element(fig)
     assert result == "fig_html"
     fig.to_html.assert_called_with(full_html=False, include_plotlyjs=False)
 
 
-def test__prepare_bokeh_plot_element():
+def test__prepare_bokeh_image_element():
     with mock.patch("bokeh.embed.components", side_effect=lambda x: x):
-        result = _prepare_bokeh_plot_element(("a", "b"))
+        result = _prepare_bokeh_image_element(("a", "b"))
         assert result == "<div>ba</div>"
 
 
@@ -1353,42 +1353,42 @@ def test__prepare_image_element__unknown_figure_type():
     fig = list()
     with pytest.raises(ValueError) as excinfo:
         _prepare_image_element(
-            fig=fig, plot_index=3, matplotlib_format="svg", embedded=True
+            fig=fig, fig_index=3, matplotlib_format="svg", embedded=True
         )
     assert "Unknown figure type" in str(excinfo.value)
 
 
 @mock.patch(
-    "pyreball.html._prepare_matplotlib_plot_element", return_value="img_element"
+    "pyreball.html._prepare_matplotlib_image_element", return_value="img_element"
 )
-def test__prepare_image_element__matplotlib(_prepare_matplotlib_plot_element_mock):
+def test__prepare_image_element__matplotlib(_prepare_matplotlib_image_element_mock):
     fig, _ = plt.subplots()
     result = _prepare_image_element(
-        fig=fig, plot_index=3, matplotlib_format="svg", embedded=True
+        fig=fig, fig_index=3, matplotlib_format="svg", embedded=True
     )
-    _prepare_matplotlib_plot_element_mock.assert_called_with(
-        fig=fig, l_plot_index=3, plot_format="svg", embedded=True
+    _prepare_matplotlib_image_element_mock.assert_called_with(
+        fig=fig, fig_index=3, image_format="svg", embedded=True
     )
     assert result == "img_element"
 
 
 @mock.patch(
-    "pyreball.html._prepare_matplotlib_plot_element", return_value="img_element"
+    "pyreball.html._prepare_matplotlib_image_element", return_value="img_element"
 )
 def test__prepare_image_element__seaborn(
-    _prepare_matplotlib_plot_element_mock, simple_dataframe
+    _prepare_matplotlib_image_element_mock, simple_dataframe
 ):
     fig = sns.PairGrid(simple_dataframe)
     result = _prepare_image_element(
-        fig=fig, plot_index=3, matplotlib_format="svg", embedded=True
+        fig=fig, fig_index=3, matplotlib_format="svg", embedded=True
     )
-    _prepare_matplotlib_plot_element_mock.assert_called_with(
-        fig=fig, l_plot_index=3, plot_format="svg", embedded=True
+    _prepare_matplotlib_image_element_mock.assert_called_with(
+        fig=fig, fig_index=3, image_format="svg", embedded=True
     )
     assert result == "img_element"
 
 
-@mock.patch("pyreball.html._prepare_altair_plot_element", return_value="img_element")
+@mock.patch("pyreball.html._prepare_altair_image_element", return_value="img_element")
 @pytest.mark.parametrize(
     "fig",
     [
@@ -1401,39 +1401,39 @@ def test__prepare_image_element__seaborn(
         alt.VConcatChart(get_simple_dataframe()),
     ],
 )
-def test__prepare_image_element__altair(_prepare_altair_plot_element_mock, fig):
+def test__prepare_image_element__altair(_prepare_altair_image_element_mock, fig):
     result = _prepare_image_element(
-        fig=fig, plot_index=3, matplotlib_format="svg", embedded=True
+        fig=fig, fig_index=3, matplotlib_format="svg", embedded=True
     )
-    _prepare_altair_plot_element_mock.assert_called_with(fig=fig, l_plot_index=3)
+    _prepare_altair_image_element_mock.assert_called_with(fig=fig, fig_index=3)
     assert result == "img_element"
 
 
-@mock.patch("pyreball.html._prepare_plotly_plot_element", return_value="img_element")
+@mock.patch("pyreball.html._prepare_plotly_image_element", return_value="img_element")
 def test__prepare_image_element__plotly(
-    _prepare_plotly_plot_element_mock, simple_dataframe
+    _prepare_plotly_image_element_mock, simple_dataframe
 ):
     fig = px.bar(simple_dataframe, x="x1", y="x2")
     result = _prepare_image_element(
-        fig=fig, plot_index=3, matplotlib_format="svg", embedded=True
+        fig=fig, fig_index=3, matplotlib_format="svg", embedded=True
     )
-    _prepare_plotly_plot_element_mock.assert_called_with(fig=fig)
+    _prepare_plotly_image_element_mock.assert_called_with(fig=fig)
     assert result == "img_element"
 
 
-@mock.patch("pyreball.html._prepare_bokeh_plot_element", return_value="img_element")
+@mock.patch("pyreball.html._prepare_bokeh_image_element", return_value="img_element")
 def test__prepare_image_element__bokeh(
-    _prepare_bokeh_plot_element_mock, simple_dataframe
+    _prepare_bokeh_image_element_mock, simple_dataframe
 ):
     fig = bokeh_figure(x_range=simple_dataframe["x2"])
     result = _prepare_image_element(
-        fig=fig, plot_index=3, matplotlib_format="svg", embedded=True
+        fig=fig, fig_index=3, matplotlib_format="svg", embedded=True
     )
-    _prepare_bokeh_plot_element_mock.assert_called_with(fig=fig)
+    _prepare_bokeh_image_element_mock.assert_called_with(fig=fig)
     assert result == "img_element"
 
 
-def test__plot_graph__stdout__bokeh(simple_dataframe):
+def test__print_figure__stdout__bokeh(simple_dataframe):
     def fake_get_parameter_value(key):
         return key == "keep_stdout"
 
@@ -1450,7 +1450,7 @@ def test__plot_graph__stdout__bokeh(simple_dataframe):
         with mock.patch(
             "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
         ):
-            _plot_graph(fig)
+            _print_figure(fig)
             show_mock.assert_called_once_with(fig)
 
         # when keep_stdout is set off, but we don't have html file either
@@ -1458,11 +1458,11 @@ def test__plot_graph__stdout__bokeh(simple_dataframe):
             "pyreball.html.get_parameter_value",
             side_effect=fake_get_parameter_value_different,
         ):
-            _plot_graph(fig)
+            _print_figure(fig)
             assert show_mock.call_count == 2
 
 
-def test__plot_graph__stdout__not_bokeh(simple_dataframe):
+def test__print_figure__stdout__not_bokeh(simple_dataframe):
     def fake_get_parameter_value(key):
         return key == "keep_stdout"
 
@@ -1478,7 +1478,7 @@ def test__plot_graph__stdout__not_bokeh(simple_dataframe):
         with mock.patch(
             "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
         ):
-            _plot_graph(fig)
+            _print_figure(fig)
             show_mock.assert_called_once()
 
         # when keep_stdout is set off, but we don't have html file either
@@ -1486,16 +1486,16 @@ def test__plot_graph__stdout__not_bokeh(simple_dataframe):
             "pyreball.html.get_parameter_value",
             side_effect=fake_get_parameter_value_different,
         ):
-            _plot_graph(fig)
+            _print_figure(fig)
             assert show_mock.call_count == 2
 
 
 @pytest.mark.parametrize("caption_position", ["top", "bottom"])
-def test__plot_graph__file_output(
+def test__print_figure__file_output(
     caption_position,
     simple_html_file,
     simple_dataframe,
-    pre_test_plot_graph_cleanup,
+    pre_test_print_figure_cleanup,
     pre_test_check_and_mark_reference_cleanup,
 ):
     # just test one fig to go through the pipeline
@@ -1512,7 +1512,7 @@ def test__plot_graph__file_output(
             fig = alt.Chart(simple_dataframe).mark_bar().encode(x="x2", y="x1")
             ref = Reference()
             ref.id = "id123"
-            _plot_graph(
+            _print_figure(
                 fig=fig,
                 caption="cap",
                 reference=ref,
@@ -1525,9 +1525,9 @@ def test__plot_graph__file_output(
             )
 
             _write_to_html_mock.assert_called_once()
-            assert _graph_memory["plot_index"] == 2
+            assert _graph_memory["fig_index"] == 2
 
-            _plot_graph(
+            _print_figure(
                 fig=fig,
                 caption="cap",
                 reference=Reference(),
@@ -1538,11 +1538,11 @@ def test__plot_graph__file_output(
                 embedded=True,
                 hidden=True,
             )
-            assert _graph_memory["plot_index"] == 3
+            assert _graph_memory["fig_index"] == 3
 
             # try with the same reference one more time
             with pytest.raises(ValueError) as excinfo:
-                _plot_graph(
+                _print_figure(
                     fig=fig,
                     caption="cap",
                     reference=ref,
@@ -1578,7 +1578,7 @@ def test__plot_graph__file_output(
         (None, False, False),
     ],
 )
-def test_plot_graph(
+def test_print_figure(
     align,
     param_align,
     expected_used_align,
@@ -1593,11 +1593,11 @@ def test_plot_graph(
     def fake_get_parameter_value(key):
         if key == "html_file_path":
             return simple_html_file
-        elif key == "align_plots":
+        elif key == "align_figures":
             return param_align
-        elif key == "plot_captions_position":
+        elif key == "figure_captions_position":
             return param_caption_position
-        elif key == "numbered_plots":
+        elif key == "numbered_figures":
             return param_numbered
         else:
             return None
@@ -1605,10 +1605,10 @@ def test_plot_graph(
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        with mock.patch("pyreball.html._plot_graph") as _plot_graph_mock:
+        with mock.patch("pyreball.html._print_figure") as _print_figure_mock:
             ref = Reference()
             fig = alt.Chart(simple_dataframe).mark_bar().encode(x="x2", y="x1")
-            plot_graph(
+            print_figure(
                 fig,
                 caption="cap",
                 reference=ref,
@@ -1619,7 +1619,7 @@ def test_plot_graph(
                 embedded=True,
             )
 
-            _plot_graph_mock.assert_called_with(
+            _print_figure_mock.assert_called_with(
                 fig=fig,
                 caption="cap",
                 reference=ref,
@@ -1630,56 +1630,3 @@ def test_plot_graph(
                 embedded=True,
                 hidden=False,
             )
-
-
-@pytest.mark.parametrize(
-    "align,param_align,expected_used_align",
-    [
-        ("left", "center", "left"),
-        (None, "right", "right"),
-    ],
-)
-@pytest.mark.parametrize(
-    "numbered,param_numbered,expected_used_numbered",
-    [
-        (True, False, True),
-        (None, True, True),
-        (None, False, False),
-    ],
-)
-def test_plot_multi_graph(
-    align,
-    param_align,
-    expected_used_align,
-    numbered,
-    param_numbered,
-    expected_used_numbered,
-    simple_dataframe,
-    pre_test_plot_multi_graph_cleanup,
-):
-    def fake_get_parameter_value(key):
-        if key == "html_file_path":
-            return simple_html_file
-        elif key == "align_plots":
-            return param_align
-        elif key == "numbered_plots":
-            return param_numbered
-        else:
-            return None
-
-    with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
-    ):
-        with mock.patch("pyreball.html._plot_graph") as _plot_graph_mock:
-            with mock.patch("pyreball.html._write_to_html") as _write_to_html_mock:
-                fig = alt.Chart(simple_dataframe).mark_bar().encode(x="x2", y="x1")
-                figs = [fig, fig, fig]
-                plot_multi_graph(
-                    figs,
-                    captions=["cap1", "cap2", "cap3"],
-                    align=align,
-                    numbered=numbered,
-                )
-
-                assert _plot_graph_mock.call_count == 3
-                assert _multi_graph_memory["multi_plot_index"] == 2

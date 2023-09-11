@@ -66,7 +66,7 @@ pb.print_table(df, caption="A data table.")
 fig, ax = plt.subplots()
 sns.lineplot(x="x", y="y", ax=ax, data=df)
 ax.set(xlabel="x", ylabel="y")
-pb.plot_graph(fig, caption="The first plot.")
+pb.print_figure(fig, caption="The first plot.")
 ```
 
 In this particular example, we are using a few 3rd party packages, so let's install them too:

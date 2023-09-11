@@ -24,14 +24,14 @@ pb.print_table(df, caption="Data table.")
 fig, ax = plt.subplots()
 sns.barplot(x="x", y="y", data=df, ax=ax, color=sns.xkcd_rgb["windows blue"])
 ax.set(xlabel="x", ylabel="y")
-pb.plot_graph(
+pb.print_figure(
     fig, caption="Seaborn barchart as png.", matplotlib_format="png", embedded=False
 )
 
 fig, ax = plt.subplots()
 sns.barplot(x="x", y="y", data=df, ax=ax, color=sns.xkcd_rgb["windows blue"])
 ax.set(xlabel="x", ylabel="y")
-pb.plot_graph(fig, caption="Seaborn barchart as embedded svg.")
+pb.print_figure(fig, caption="Seaborn barchart as embedded svg.")
 
 # altair
 fig = (
@@ -48,15 +48,15 @@ fig = (
         height=480,
     )
 )
-pb.plot_graph(fig, caption="Altair barchart.")
+pb.print_figure(fig, caption="Altair barchart.")
 
 # plotly
 fig = px.bar(df, x="x", y="y")
-pb.plot_graph(fig, caption="Plotly graph.")
+pb.print_figure(fig, caption="Plotly graph.")
 
 # bokeh
 df_bokeh = df.copy()
 df_bokeh["x"] = df_bokeh["x"].astype(str)
 fig = figure(x_range=df_bokeh["x"])
 fig.vbar(x="x", top="y", width=0.9, source=ColumnDataSource(data=df_bokeh))
-pb.plot_graph(fig, caption="Bokeh barchart.")
+pb.print_figure(fig, caption="Bokeh barchart.")

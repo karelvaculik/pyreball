@@ -4,23 +4,23 @@ Pyreball currently supports plotting figures created
 by [Matplotlib](https://matplotlib.org/), [Seaborn](https://seaborn.pydata.org/), [Vega-Altair](https://altair-viz.github.io/index.html),
 [Plotly](https://plotly.com/), and [Bokeh](https://bokeh.org/).
 
-There is a single function [`plot_graph()`](../api/pyreball_html/#pyreball.html.plot_graph) for all these libraries.
+There is a single function [`print_figure()`](../api/pyreball_html/#pyreball.html.print_figure) for all these libraries.
 Similarly to [`print_table()`](../api/pyreball_html/#pyreball.html.print_table), it uses
 parameters `caption`, `align`, `caption_position` and `numbered` with the same meaning.
-In contrast to table captions, the default position of plot captions is `bottom`.
+In contrast to table captions, the default position of figure captions is `bottom`.
 
 ## Matplotlib
 
 When plotting with Matplotlib, it is necessary to create a figure object and pass it
-to [`plot_graph()`](../api/pyreball_html/#pyreball.html.plot_graph).
+to [`print_figure()`](../api/pyreball_html/#pyreball.html.print_figure).
 
-In case of Matplotlib, a user can select the format of the plot via `matplotlib_format` parameter: either `"png"`
+In case of Matplotlib, a user can select the format of the figure via `matplotlib_format` parameter: either `"png"`
 or `"svg"`.
-In case of `"svg"`, it is also possible to choose whether the plot should be embedded into the HTML file or saved into a
-separate file and referenced in the HTML file by setting `embedded` accordingly.
-Plots in `"png"` format cannot be embedded into the HTML file.
+In case of `"svg"`, it is also possible to choose whether the figure should be embedded into the HTML file 
+or saved into a separate file and referenced in the HTML file by setting `embedded` accordingly.
+Figures in `"png"` format cannot be embedded into the HTML file.
 
-When the plot is stored into a file, the file is saved in a directory with name equal to the filename stem of the HTML
+When the figure is stored into a file, the file is saved in a directory with name equal to the filename stem of the HTML
 file. For example, for HTML file `report.html`, the image file will be stored in directory `report`.
 
 The following code shows an example of a bar chart created with Matplotlib and stored in a `"png"` format.
@@ -29,7 +29,7 @@ The following code shows an example of a bar chart created with Matplotlib and s
 
 <iframe style="border:2px solid;" src="../examples/plotting_matplotlib_png.html" height="540" width="100%" title="Iframe Example"></iframe>
 
-The next example shows the same plot, but embedded directly into the HTML document in `"svg"` format.
+The next example shows the same chart, but embedded directly into the HTML document in `"svg"` format.
 
 {{ inline_source("docs/examples/plotting_matplotlib_svg.py") }}
 
@@ -58,7 +58,7 @@ e.g. `altair.ConcatChart`, `altair.HConcatChart`.
 
 ## Plotly
 
-Pyreball supports interactive plots created by Plotly, too.
+Pyreball supports interactive charts created by Plotly, too.
 
 {{ inline_source("docs/examples/plotting_plotly.py") }}
 
@@ -66,7 +66,7 @@ Pyreball supports interactive plots created by Plotly, too.
 
 ## Bokeh
 
-Another library for plotting interactive plots supported by Pyreball is Bokeh.
+Another library for plotting interactive charts supported by Pyreball is Bokeh.
 
 {{ inline_source("docs/examples/plotting_bokeh.py") }}
 
