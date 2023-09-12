@@ -174,7 +174,9 @@ def code_block(
     Returns:
         HTML string representing the tag with given values.
     """
-    cl = _collect_classes_for_code_strings([], cl, syntax_highlight)
+    cl = _collect_classes_for_code_strings(
+        ["pyreball-code-block"], cl, syntax_highlight
+    )
     code_text = tag(*values, name="code", cl=cl, attrs=attrs, sep=sep)
     return tag(code_text, name="pre")
 

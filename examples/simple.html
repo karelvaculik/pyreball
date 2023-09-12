@@ -1,102 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <title class="custom_pyreball_title">Simple report</title>
-<meta charset="UTF-16">
-<script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-3.2.2.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.2.2.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.2.2.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.2.2.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.2.2.min.js" crossorigin="anonymous"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
-<script>hljs.highlightAll();</script>
-<script>
 
-    function change_expand(button, table_id){
-        var table = document.getElementById(table_id);
-        if (table.classList.contains("expanded")) {
-            // collapse the table
-            table.style.maxHeight = "390px";
-            button.innerHTML = "⟱";
-        } else {
-            // expand the table
-            table.style.maxHeight = "none";
-            button.innerHTML = "⟰";
-        }
-        table.classList.toggle("expanded");
-    }
-
-
-
-    window.onload = function() {
-    //dom not only ready, but everything is loaded
-      scrollers = document.getElementsByClassName("table-scroller");
-
-      for (i = 0; i < scrollers.length; i++) {
-        if (scrollers[i].scrollHeight == scrollers[i].clientHeight) {
-            // hide the expand button
-            expander_id = scrollers[i].id.replace('scroller', 'expander');
-            expander = document.getElementById(expander_id);
-            expander.style.display = "none";
-        }
-      }
-
-    };
-
-
-    function next(div_id, button_next_id, button_prev_id) {
-        var qElems = document.querySelectorAll(div_id + '>div');
-        for (var i = 0; i < qElems.length; i++) {
-            if (qElems[i].style.display != 'none') {
-                qElems[i].style.display = 'none';
-                qElems[i + 1].style.display = 'block';
-                if (i == qElems.length - 2) {
-                    document.getElementById(button_next_id).disabled = true;
-                }
-                document.getElementById(button_prev_id).disabled = false;
-                break;
-            }
-        }
-    }
-
-    function previous(div_id, button_next_id, button_prev_id) {
-        var qElems = document.querySelectorAll(div_id + '>div');
-        for (var i = 0; i < qElems.length; i++) {
-            if (qElems[i].style.display != 'none') {
-                qElems[i].style.display = 'none';
-                qElems[i - 1].style.display = 'block';
-                if (i == 1) {
-                    document.getElementById(button_prev_id).disabled = true;
-                }
-                document.getElementById(button_next_id).disabled = false;
-                break;
-            }
-        }
-    }
-
-
-</script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
 <style>
 body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-.main_container {
+.pyreball-main-container {
     width: 80%;
     margin-left: auto;
     margin-right: auto;
 }
 
-.image-wrapper {
+.pyreball-image-wrapper {
     margin-left: auto;
     margin-right: auto;
     margin-top: 20px;
@@ -109,44 +28,40 @@ img, svg, canvas.marks, div.vega-embed {
     display: block;
 }
 
-.text-centered {
+.pyreball-text-centered {
     text-align: center;
 }
 
-.table-wrapper
+.pyreball-table-wrapper
 {
     width: 100%;
     margin-top: 30px;
     margin-bottom: 30px;
 }
 
-.table-fit-content {
+.pyreball-table-fit-content {
     width: fit-content;
     max-width: 100%;
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
-.centered {
+.pyreball-centered {
     margin-left:auto;
     margin-right:auto;
 }
 
-.left-aligned {
+.pyreball-left-aligned {
     margin-left:0px;
     margin-right:auto;
 }
 
-.right-aligned {
+.pyreball-right-aligned {
     margin-left:auto;
     margin-right:0px;
 }
 
-.dataframe caption {
-    font-weight: bold;
-}
-
-a.anchor-link:link {
+a.pyreball-anchor-link:link {
     text-decoration: none;
     padding: 0px 20px;
     opacity: 0;
@@ -159,22 +74,21 @@ a[href]:hover {
     color: #001f3f
 }
 
-
-h1:hover .anchor-link,
-h2:hover .anchor-link,
-h3:hover .anchor-link,
-h4:hover .anchor-link,
-h5:hover .anchor-link,
-h6:hover .anchor-link {
+h1:hover .pyreball-anchor-link,
+h2:hover .pyreball-anchor-link,
+h3:hover .pyreball-anchor-link,
+h4:hover .pyreball-anchor-link,
+h5:hover .pyreball-anchor-link,
+h6:hover .pyreball-anchor-link {
     opacity: 1;
 }
 </style>
 </head>
 <body>
-<div class="main_container">
-<h1 id="toc_generated_0">Simple report<a class="anchor-link" href="#toc_generated_0">¶</a></h1>
+<div class="pyreball-main-container">
+<h1 id="toc_generated_0">Simple report<a class="pyreball-anchor-link" href="#toc_generated_0">¶</a></h1>
 <a href="#ch_1_heading_1">1  Heading</a><br/>
-<h1 id="ch_1_heading_1">1  Heading<a class="anchor-link" href="#ch_1_heading_1">¶</a></h1>
+<h1 id="ch_1_heading_1">1  Heading<a class="pyreball-anchor-link" href="#ch_1_heading_1">¶</a></h1>
 <div>This is my div with <b>important</b> text.</div>
 </div>
 </body>
