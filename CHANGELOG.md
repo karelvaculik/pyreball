@@ -12,6 +12,7 @@
 - Added `--config-path` CLI option, changed how `pyreball-generate-config` command works and how the config paths are
   handled.
 - Updated CLI arguments and config parameters for tables and figures.
+- Updated template files.
 - Updated to newer versions of 3rd party dependencies for example.
 - Created documentation at readthedocs.
 

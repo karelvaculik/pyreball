@@ -2,13 +2,13 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-.main_container {
+.pyreball-main-container {
     width: {{page_width}}%;
     margin-left: auto;
     margin-right: auto;
 }
 
-.image-wrapper {
+.pyreball-image-wrapper {
     margin-left: auto;
     margin-right: auto;
     margin-top: 20px;
@@ -21,44 +21,40 @@ img, svg, canvas.marks, div.vega-embed {
     display: block;
 }
 
-.text-centered {
+.pyreball-text-centered {
     text-align: center;
 }
 
-.table-wrapper
+.pyreball-table-wrapper
 {
     width: 100%;
     margin-top: 30px;
     margin-bottom: 30px;
 }
 
-.table-fit-content {
+.pyreball-table-fit-content {
     width: fit-content;
     max-width: 100%;
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
-.centered {
+.pyreball-centered {
     margin-left:auto;
     margin-right:auto;
 }
 
-.left-aligned {
+.pyreball-left-aligned {
     margin-left:0px;
     margin-right:auto;
 }
 
-.right-aligned {
+.pyreball-right-aligned {
     margin-left:auto;
     margin-right:0px;
 }
 
-.dataframe caption {
-    font-weight: bold;
-}
-
-a.anchor-link:link {
+a.pyreball-anchor-link:link {
     text-decoration: none;
     padding: 0px 20px;
     opacity: 0;
@@ -71,12 +67,11 @@ a[href]:hover {
     color: #001f3f
 }
 
-
-h1:hover .anchor-link,
-h2:hover .anchor-link,
-h3:hover .anchor-link,
-h4:hover .anchor-link,
-h5:hover .anchor-link,
-h6:hover .anchor-link {
+h1:hover .pyreball-anchor-link,
+h2:hover .pyreball-anchor-link,
+h3:hover .pyreball-anchor-link,
+h4:hover .pyreball-anchor-link,
+h5:hover .pyreball-anchor-link,
+h6:hover .pyreball-anchor-link {
     opacity: 1;
 }

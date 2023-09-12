@@ -320,6 +320,43 @@ def get_file_config(
     )
 
 
+def _parse_links_from_config(links_str: str) -> List[str]:
+    return [x for x in links_str.split("\n") if x]
+
+
+def get_external_links_from_config(
+    filename: str, directory: Path
+) -> Dict[str, List[str]]:
+    config = read_file_config(filename, directory)
+    section_name = "Links"
+    if section_name not in config:
+        logger.error(
+            f"{section_name} section not found in {directory / filename} "
+            f"configuration file. Fix the file or try re-installing pyreball."
+        )
+        sys.exit(1)
+
+    links = {
+        key: _parse_links_from_config(value)
+        for key, value in config[section_name].items()
+    }
+    required_keys = {
+        "altair",
+        "bokeh",
+        "datatables",
+        "highlight_js",
+        "jquery",
+        "plotly",
+    }
+    if links.keys() != required_keys:
+        logger.error(
+            "Configuration with items must contain links for exactly these keys: "
+            f"{', '.join(sorted(list(required_keys)))}."
+        )
+        sys.exit(1)
+    return links
+
+
 def merge_values(primary_value: Any, secondary_value: Any) -> Any:
     return primary_value if primary_value is not None else secondary_value
 

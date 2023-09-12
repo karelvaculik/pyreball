@@ -3,32 +3,26 @@ from pathlib import Path
 
 import pytest
 
-from pyreball.utils.template_utils import get_css, get_html_begin, get_html_end
+from pyreball.utils.template_utils import get_css, get_html_begin_and_end
 
 
-def test_get_html_begin(tmpdir):
+def test_get_html_begin_and_end(tmpdir):
     filename = "styles"
     template_path = Path(tmpdir) / filename
     with open(template_path, "w") as f:
         f.write(
-            "<html>title: {{title}}, script: {{script_definitions}}, css: {{css_definitions}}"
+            "<html>title: <!--PYREBALL_PAGE_TITLE-->, "
+            "css: <!--PYREBALL_CSS_DEFINITIONS-->"
+            "<!--PYREBALL_REPORT_CONTENTS-->"
+            "</html>"
         )
-    result = get_html_begin(
+    result_begin, result_end = get_html_begin_and_end(
         template_path=template_path,
         title="t1",
-        script_definitions="s1",
         css_definitions="c1",
     )
-    assert result == "<html>title: t1, script: s1, css: c1"
-
-
-def test_get_html_end(tmpdir):
-    filename = "styles"
-    template_path = Path(tmpdir) / filename
-    with open(template_path, "w") as f:
-        f.write("</html>")
-    result = get_html_end(template_path=template_path)
-    assert result == "</html>"
+    assert result_begin == "<html>title: t1, css: c1"
+    assert result_end == "</html>"
 
 
 def test_get_css__existing_file(tmpdir):

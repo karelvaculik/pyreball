@@ -1,102 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <title class="custom_pyreball_title">Pyreball Illustration</title>
-<meta charset="UTF-16">
-<script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-3.2.2.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.2.2.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.2.2.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.2.2.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.2.2.min.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
 <script>hljs.highlightAll();</script>
-<script>
-
-    function change_expand(button, table_id){
-        var table = document.getElementById(table_id);
-        if (table.classList.contains("expanded")) {
-            // collapse the table
-            table.style.maxHeight = "390px";
-            button.innerHTML = "⟱";
-        } else {
-            // expand the table
-            table.style.maxHeight = "none";
-            button.innerHTML = "⟰";
-        }
-        table.classList.toggle("expanded");
-    }
-
-
-
-    window.onload = function() {
-    //dom not only ready, but everything is loaded
-      scrollers = document.getElementsByClassName("table-scroller");
-
-      for (i = 0; i < scrollers.length; i++) {
-        if (scrollers[i].scrollHeight == scrollers[i].clientHeight) {
-            // hide the expand button
-            expander_id = scrollers[i].id.replace('scroller', 'expander');
-            expander = document.getElementById(expander_id);
-            expander.style.display = "none";
-        }
-      }
-
-    };
-
-
-    function next(div_id, button_next_id, button_prev_id) {
-        var qElems = document.querySelectorAll(div_id + '>div');
-        for (var i = 0; i < qElems.length; i++) {
-            if (qElems[i].style.display != 'none') {
-                qElems[i].style.display = 'none';
-                qElems[i + 1].style.display = 'block';
-                if (i == qElems.length - 2) {
-                    document.getElementById(button_next_id).disabled = true;
-                }
-                document.getElementById(button_prev_id).disabled = false;
-                break;
-            }
-        }
-    }
-
-    function previous(div_id, button_next_id, button_prev_id) {
-        var qElems = document.querySelectorAll(div_id + '>div');
-        for (var i = 0; i < qElems.length; i++) {
-            if (qElems[i].style.display != 'none') {
-                qElems[i].style.display = 'none';
-                qElems[i - 1].style.display = 'block';
-                if (i == 1) {
-                    document.getElementById(button_prev_id).disabled = true;
-                }
-                document.getElementById(button_next_id).disabled = false;
-                break;
-            }
-        }
-    }
-
-
-</script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
 <style>
 body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-.main_container {
+.pyreball-main-container {
     width: 80%;
     margin-left: auto;
     margin-right: auto;
 }
 
-.image-wrapper {
+.pyreball-image-wrapper {
     margin-left: auto;
     margin-right: auto;
     margin-top: 20px;
@@ -109,44 +34,40 @@ img, svg, canvas.marks, div.vega-embed {
     display: block;
 }
 
-.text-centered {
+.pyreball-text-centered {
     text-align: center;
 }
 
-.table-wrapper
+.pyreball-table-wrapper
 {
     width: 100%;
     margin-top: 30px;
     margin-bottom: 30px;
 }
 
-.table-fit-content {
+.pyreball-table-fit-content {
     width: fit-content;
     max-width: 100%;
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
-.centered {
+.pyreball-centered {
     margin-left:auto;
     margin-right:auto;
 }
 
-.left-aligned {
+.pyreball-left-aligned {
     margin-left:0px;
     margin-right:auto;
 }
 
-.right-aligned {
+.pyreball-right-aligned {
     margin-left:auto;
     margin-right:0px;
 }
 
-.dataframe caption {
-    font-weight: bold;
-}
-
-a.anchor-link:link {
+a.pyreball-anchor-link:link {
     text-decoration: none;
     padding: 0px 20px;
     opacity: 0;
@@ -159,31 +80,30 @@ a[href]:hover {
     color: #001f3f
 }
 
-
-h1:hover .anchor-link,
-h2:hover .anchor-link,
-h3:hover .anchor-link,
-h4:hover .anchor-link,
-h5:hover .anchor-link,
-h6:hover .anchor-link {
+h1:hover .pyreball-anchor-link,
+h2:hover .pyreball-anchor-link,
+h3:hover .pyreball-anchor-link,
+h4:hover .pyreball-anchor-link,
+h5:hover .pyreball-anchor-link,
+h6:hover .pyreball-anchor-link {
     opacity: 1;
 }
 </style>
 </head>
 <body>
-<div class="main_container">
-<h1 id="toc_generated_0">Pyreball Illustration<a class="anchor-link" href="#toc_generated_0">¶</a></h1>
+<div class="pyreball-main-container">
+<h1 id="toc_generated_0">Pyreball Illustration<a class="pyreball-anchor-link" href="#toc_generated_0">¶</a></h1>
 <a href="#ch_1_introduction_1">1  Introduction</a><br/>
 <a href="#ch_2_tables_and_figures_2">2  Tables and Figures</a><br/>
-<h1 id="ch_1_introduction_1">1  Introduction<a class="anchor-link" href="#ch_1_introduction_1">¶</a></h1>
+<h1 id="ch_1_introduction_1">1  Introduction<a class="pyreball-anchor-link" href="#ch_1_introduction_1">¶</a></h1>
 <div>Pyreball has many features, among others:<ul><li>Charts in altair, plotly, bokeh, and matplotlib (and thus also seaborn etc.).</li><li>Sortable and scrollable tables from pandas DataFrame.</li><li>Basic text formatting such as <b>headings</b>, <em>emphasis</em>, and <code class="inline-highlight python">lists</code>.</li><li><a href="https://www.python.org/">hyperlinks</a>, references and table of contents.</li></ul></div>
-<h1 id="ch_2_tables_and_figures_2">2  Tables and Figures<a class="anchor-link" href="#ch_2_tables_and_figures_2">¶</a></h1>
-<div class="table-wrapper">
-<div class="table-fit-content centered">
-<div class="text-centered"><a name="table-1"><b>
+<h1 id="ch_2_tables_and_figures_2">2  Tables and Figures<a class="pyreball-anchor-link" href="#ch_2_tables_and_figures_2">¶</a></h1>
+<div class="pyreball-table-wrapper">
+<div class="pyreball-table-fit-content pyreball-centered">
+<div class="pyreball-text-centered"><a name="table-1"><b>
 Table 1: A data table.
 </b></a></div>
-<div id="table-wrapper-inner-1" class="table-fit-content centered"><table class="dataframe display">
+<div id="pyreball-table-wrapper-inner-1" class="pyreball-table-fit-content pyreball-centered"><table class="dataframe display">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -211,8 +131,8 @@ Table 1: A data table.
 </table>
 </div></div>
 </div>
-<script>var table = $('#table-wrapper-inner-1 > table').DataTable({"paging": false, "scrollX": true, "info": false, "searching": false, "ordering": false});</script>
-<div class="image-wrapper"><div align="None"><div style="display: inline-block;"><?xml version="1.0" encoding="utf-8" standalone="no"?>
+<script>new DataTable('#pyreball-table-wrapper-inner-1 > table', {"paging": false, "scrollX": true, "info": false, "searching": false, "ordering": false});</script>
+<div class="pyreball-image-wrapper pyreball-matplotlib-fig"><div align="center"><div style="display: inline-block;"><?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns:xlink="http://www.w3.org/1999/xlink" width="460.8pt" height="345.6pt" viewBox="0 0 460.8 345.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
@@ -220,7 +140,7 @@ Table 1: A data table.
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2023-09-11T08:16:07.294369</dc:date>
+    <dc:date>2023-09-12T08:59:34.440927</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -256,12 +176,12 @@ z
     <g id="xtick_1">
      <g id="line2d_1">
       <defs>
-       <path id="m9b52aa9f70" d="M 0 0 
+       <path id="m357fee1f72" d="M 0 0 
 L 0 3.5 
 " style="stroke: #000000; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#m9b52aa9f70" x="73.832727" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m357fee1f72" x="73.832727" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_1">
@@ -321,7 +241,7 @@ z
     <g id="xtick_2">
      <g id="line2d_2">
       <g>
-       <use xlink:href="#m9b52aa9f70" x="114.414545" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m357fee1f72" x="114.414545" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_2">
@@ -388,7 +308,7 @@ z
     <g id="xtick_3">
      <g id="line2d_3">
       <g>
-       <use xlink:href="#m9b52aa9f70" x="154.996364" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m357fee1f72" x="154.996364" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_3">
@@ -404,7 +324,7 @@ z
     <g id="xtick_4">
      <g id="line2d_4">
       <g>
-       <use xlink:href="#m9b52aa9f70" x="195.578182" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m357fee1f72" x="195.578182" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_4">
@@ -432,7 +352,7 @@ z
     <g id="xtick_5">
      <g id="line2d_5">
       <g>
-       <use xlink:href="#m9b52aa9f70" x="236.16" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m357fee1f72" x="236.16" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_5">
@@ -448,7 +368,7 @@ z
     <g id="xtick_6">
      <g id="line2d_6">
       <g>
-       <use xlink:href="#m9b52aa9f70" x="276.741818" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m357fee1f72" x="276.741818" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_6">
@@ -464,7 +384,7 @@ z
     <g id="xtick_7">
      <g id="line2d_7">
       <g>
-       <use xlink:href="#m9b52aa9f70" x="317.323636" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m357fee1f72" x="317.323636" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_7">
@@ -480,7 +400,7 @@ z
     <g id="xtick_8">
      <g id="line2d_8">
       <g>
-       <use xlink:href="#m9b52aa9f70" x="357.905455" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m357fee1f72" x="357.905455" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_8">
@@ -496,7 +416,7 @@ z
     <g id="xtick_9">
      <g id="line2d_9">
       <g>
-       <use xlink:href="#m9b52aa9f70" x="398.487273" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m357fee1f72" x="398.487273" y="307.584" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_9">
@@ -571,12 +491,12 @@ z
     <g id="ytick_1">
      <g id="line2d_10">
       <defs>
-       <path id="mf9cfc3220f" d="M 0 0 
+       <path id="meca978963c" d="M 0 0 
 L -3.5 0 
 " style="stroke: #000000; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#mf9cfc3220f" x="57.6" y="295.488" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#meca978963c" x="57.6" y="295.488" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_11">
@@ -613,7 +533,7 @@ z
     <g id="ytick_2">
      <g id="line2d_11">
       <g>
-       <use xlink:href="#mf9cfc3220f" x="57.6" y="265.248" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#meca978963c" x="57.6" y="265.248" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_12">
@@ -629,7 +549,7 @@ z
     <g id="ytick_3">
      <g id="line2d_12">
       <g>
-       <use xlink:href="#mf9cfc3220f" x="57.6" y="235.008" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#meca978963c" x="57.6" y="235.008" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_13">
@@ -645,7 +565,7 @@ z
     <g id="ytick_4">
      <g id="line2d_13">
       <g>
-       <use xlink:href="#mf9cfc3220f" x="57.6" y="204.768" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#meca978963c" x="57.6" y="204.768" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_14">
@@ -661,7 +581,7 @@ z
     <g id="ytick_5">
      <g id="line2d_14">
       <g>
-       <use xlink:href="#mf9cfc3220f" x="57.6" y="174.528" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#meca978963c" x="57.6" y="174.528" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_15">
@@ -677,7 +597,7 @@ z
     <g id="ytick_6">
      <g id="line2d_15">
       <g>
-       <use xlink:href="#mf9cfc3220f" x="57.6" y="144.288" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#meca978963c" x="57.6" y="144.288" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_16">
@@ -693,7 +613,7 @@ z
     <g id="ytick_7">
      <g id="line2d_16">
       <g>
-       <use xlink:href="#mf9cfc3220f" x="57.6" y="114.048" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#meca978963c" x="57.6" y="114.048" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_17">
@@ -709,7 +629,7 @@ z
     <g id="ytick_8">
      <g id="line2d_17">
       <g>
-       <use xlink:href="#mf9cfc3220f" x="57.6" y="83.808" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#meca978963c" x="57.6" y="83.808" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_18">
@@ -725,7 +645,7 @@ z
     <g id="ytick_9">
      <g id="line2d_18">
       <g>
-       <use xlink:href="#mf9cfc3220f" x="57.6" y="53.568" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#meca978963c" x="57.6" y="53.568" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_19">
@@ -800,7 +720,7 @@ z
     <path d="M 73.832727 295.488 
 L 236.16 53.568 
 L 398.487273 174.528 
-" clip-path="url(#p4d836f0802)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+" clip-path="url(#p307eb919a3)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="patch_3">
     <path d="M 57.6 307.584 
@@ -825,14 +745,14 @@ L 414.72 41.472
   </g>
  </g>
  <defs>
-  <clipPath id="p4d836f0802">
+  <clipPath id="p307eb919a3">
    <rect x="57.6" y="41.472" width="357.12" height="266.112"/>
   </clipPath>
  </defs>
 </svg>
 
-<div class="text-centered"><a name="img-1"><b>
-The first figure.
+<div class="pyreball-text-centered"><a name="img-1"><b>
+Figure 1: The first figure.
 </b></a></div>
 </div></div></div>
 </div>

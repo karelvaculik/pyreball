@@ -5,8 +5,8 @@ from pathlib import Path
 from pyreball.constants import (
     CONFIG_INI_FILENAME,
     DEFAULT_PATH_TO_CONFIG,
-    HTML_BEGIN_TEMPLATE_FILENAME,
-    HTML_END_TEMPLATE_FILENAME,
+    HTML_TEMPLATE_FILENAME,
+    LINKS_INI_FILENAME,
     STYLES_TEMPLATE_FILENAME,
 )
 from pyreball.utils.logger import get_logger
@@ -21,11 +21,9 @@ def copy_config_files(output_directory: Path) -> None:
         )
     output_directory.mkdir(parents=True, exist_ok=True)
     shutil.copy2(DEFAULT_PATH_TO_CONFIG / CONFIG_INI_FILENAME, output_directory)
+    shutil.copy2(DEFAULT_PATH_TO_CONFIG / LINKS_INI_FILENAME, output_directory)
     shutil.copy2(DEFAULT_PATH_TO_CONFIG / STYLES_TEMPLATE_FILENAME, output_directory)
-    shutil.copy2(
-        DEFAULT_PATH_TO_CONFIG / HTML_BEGIN_TEMPLATE_FILENAME, output_directory
-    )
-    shutil.copy2(DEFAULT_PATH_TO_CONFIG / HTML_END_TEMPLATE_FILENAME, output_directory)
+    shutil.copy2(DEFAULT_PATH_TO_CONFIG / HTML_TEMPLATE_FILENAME, output_directory)
 
 
 def main() -> None:

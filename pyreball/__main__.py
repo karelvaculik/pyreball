@@ -13,17 +13,18 @@ import pkg_resources
 from pyreball.constants import (
     CONFIG_INI_FILENAME,
     DEFAULT_PATH_TO_CONFIG,
-    HTML_BEGIN_TEMPLATE_FILENAME,
-    HTML_END_TEMPLATE_FILENAME,
+    HTML_TEMPLATE_FILENAME,
+    LINKS_INI_FILENAME,
     STYLES_TEMPLATE_FILENAME,
 )
 from pyreball.utils.logger import get_logger
-from pyreball.utils.template_utils import get_css, get_html_begin, get_html_end
+from pyreball.utils.template_utils import get_css, get_html_begin_and_end
 from pyreball.utils.utils import (
     carefully_remove_directory_if_exists,
     check_and_fix_parameters,
     check_paging_sizes_string_parameter,
     ChoiceParameter,
+    get_external_links_from_config,
     get_file_config,
     IntegerParameter,
     merge_parameter_dictionaries,
@@ -33,108 +34,40 @@ from pyreball.utils.utils import (
 
 logger = get_logger()
 
-# keep the indentation in the following snippets!!!
-JAVASCRIPT_CHANGE_EXPAND = """
-    function change_expand(button, table_id){
-        var table = document.getElementById(table_id);
-        if (table.classList.contains("expanded")) {
-            // collapse the table
-            table.style.maxHeight = "390px";
-            button.innerHTML = "⟱";
-        } else {
-            // expand the table
-            table.style.maxHeight = "none";
-            button.innerHTML = "⟰";
-        }
-        table.classList.toggle("expanded");
-    }
 
-"""
-JAVASCRIPT_ON_LOAD = """
-
-    window.onload = function() {
-    //dom not only ready, but everything is loaded
-      scrollers = document.getElementsByClassName("table-scroller");
-
-      for (i = 0; i < scrollers.length; i++) {
-        if (scrollers[i].scrollHeight == scrollers[i].clientHeight) {
-            // hide the expand button
-            expander_id = scrollers[i].id.replace('scroller', 'expander');
-            expander = document.getElementById(expander_id);
-            expander.style.display = "none";
-        }
-      }
-
-    };
-"""
-
-JAVASCRIPT_ROLLING_PLOTS = """
-
-    function next(div_id, button_next_id, button_prev_id) {
-        var qElems = document.querySelectorAll(div_id + '>div');
-        for (var i = 0; i < qElems.length; i++) {
-            if (qElems[i].style.display != 'none') {
-                qElems[i].style.display = 'none';
-                qElems[i + 1].style.display = 'block';
-                if (i == qElems.length - 2) {
-                    document.getElementById(button_next_id).disabled = true;
-                }
-                document.getElementById(button_prev_id).disabled = false;
-                break;
-            }
-        }
-    }
-
-    function previous(div_id, button_next_id, button_prev_id) {
-        var qElems = document.querySelectorAll(div_id + '>div');
-        for (var i = 0; i < qElems.length; i++) {
-            if (qElems[i].style.display != 'none') {
-                qElems[i].style.display = 'none';
-                qElems[i - 1].style.display = 'block';
-                if (i == 1) {
-                    document.getElementById(button_prev_id).disabled = true;
-                }
-                document.getElementById(button_next_id).disabled = false;
-                break;
-            }
-        }
-    }
-
-"""
-
-
-def _replace_ids(html_path: Path) -> None:
+def _replace_ids(lines: List[str]) -> List[str]:
     """
     Replace IDs of HTML elements to create working anchors based on references.
 
     Args:
-        html_path: Path to the HTML file.
+        lines: Lines of the html file.
+
+    Returns:
+        Updated lines of the html file.
     """
     # collect all ids in form of "table-N-M", "img-N-M"
     all_table_and_img_ids = set()
     chapter_text_replacemenets = []
-    with open(html_path, "r") as f:
-        for line in f:
-            # note that we don't need to replace only "table" ids by also "img" etc.
-            results = re.findall(r"table-id[\d]+-[\d]+", line)
-            if results:
-                all_table_and_img_ids.update(results)
-            results = re.findall(r"img-id[\d]+-[\d]+", line)
-            if results:
-                all_table_and_img_ids.update(results)
-            # now collect heading references:
-            results = re.findall(r"ch_id[\d]+_[^\"]+", line)
-            if results:
-                all_table_and_img_ids.update(results)
-                # obtain also the heading text
-                search_result_text = re.search(results[0] + r"\">([^<]+)<", line)
-                link_text = search_result_text.group(1) if search_result_text else ""
-                search_result_id = re.search(r"_(id[\d]+)_", results[0])
-                link_id = search_result_id.group(1) if search_result_id else ""
-                if link_id and link_text:
-                    chapter_text_replacemenets.append(
-                        (f">{link_id}<", f">{link_text}<")
-                    )
+    # with open(html_path, "r") as f:
+    for line in lines:
+        # note that we don't need to replace only "table" ids by also "img" etc.
+        results = re.findall(r"table-id[\d]+-[\d]+", line)
+        if results:
+            all_table_and_img_ids.update(results)
+        results = re.findall(r"img-id[\d]+-[\d]+", line)
+        if results:
+            all_table_and_img_ids.update(results)
+        # now collect heading references:
+        results = re.findall(r"ch_id[\d]+_[^\"]+", line)
+        if results:
+            all_table_and_img_ids.update(results)
+            # obtain also the heading text
+            search_result_text = re.search(results[0] + r"\">([^<]+)<", line)
+            link_text = search_result_text.group(1) if search_result_text else ""
+            search_result_id = re.search(r"_(id[\d]+)_", results[0])
+            link_id = search_result_id.group(1) if search_result_id else ""
+            if link_id and link_text:
+                chapter_text_replacemenets.append((f">{link_id}<", f">{link_text}<"))
     # Prepare all replacement definitions for a substitutor below
     replacements = []
     for element_id in all_table_and_img_ids:
@@ -173,13 +106,7 @@ def _replace_ids(html_path: Path) -> None:
 
     # replace all table-N-M with table-M and Table N with Table M
     substitutor = Substitutor(replacements=replacements)
-    modified_lines = []
-    with open(html_path, "r") as f:
-        for line in f:
-            modified_lines.append(substitutor.sub(line))
-
-    with open(html_path, "w") as f:
-        f.writelines(modified_lines)
+    return [substitutor.sub(line) for line in lines]
 
 
 def _get_node_text(node: xml.dom.minidom.Element) -> str:
@@ -207,11 +134,9 @@ def _parse_heading_info(line: str) -> Optional[Tuple[int, str, str]]:
         return None
 
 
-def insert_heading_title_and_toc(filename: Path, include_toc: bool = True):
-    # fetch all lines
-    with open(filename, "r") as f:
-        lines = f.readlines()
-
+def _insert_heading_title_and_toc(
+    lines: List[str], include_toc: bool = True
+) -> List[str]:
     # try to extract the title from <title> element:
     report_title = None
     for line in lines:
@@ -224,7 +149,7 @@ def insert_heading_title_and_toc(filename: Path, include_toc: bool = True):
     container_start_index = 0
     headings = []
     for i, line in enumerate(lines):
-        if '<div class="main_container">' in line:
+        if '<div class="pyreball-main-container">' in line:
             container_start_index = i
 
         if include_toc:
@@ -245,7 +170,7 @@ def insert_heading_title_and_toc(filename: Path, include_toc: bool = True):
             lines_index,
             (
                 f'<h1 id="toc_generated_0">{report_title}'
-                f'<a class="anchor-link" href="#toc_generated_0">¶</a></h1>\n'
+                f'<a class="pyreball-anchor-link" href="#toc_generated_0">¶</a></h1>\n'
             ),
         )
         lines_index += 1
@@ -277,8 +202,82 @@ def insert_heading_title_and_toc(filename: Path, include_toc: bool = True):
         lines_index += 1
         current_level -= 1
 
-    with open(filename, "w") as f:
-        f.writelines(lines)
+    return lines
+
+
+def _contains_class(html_text: str, class_name: str) -> bool:
+    """
+    Check whether the given HTML text contains the given class name in any element.
+
+    Args:
+        html_text: HTML text.
+        class_name: Class to be found.
+
+    Returns:
+        True if the HTML text contains the given class name.
+    """
+    pattern = (
+        r'class\s*=\s*["\']\s*(?:\S+\s+)*'
+        + re.escape(class_name)
+        + r'(?:\s+\S+)*\s*["\']'
+    )
+    return re.search(pattern, html_text) is not None
+
+
+def _insert_js_and_css_links(
+    html_content: str, external_links: Dict[str, List[str]]
+) -> str:
+    groups_of_links_to_add = set()
+    add_jquery = False
+    if _contains_class(
+        html_text=html_content, class_name="inline-highlight"
+    ) or _contains_class(html_text=html_content, class_name="pyreball-code-block"):
+        add_jquery = True
+        groups_of_links_to_add.add("highlight_js")
+    if _contains_class(html_text=html_content, class_name="pyreball-table-wrapper"):
+        add_jquery = True
+        groups_of_links_to_add.add("datatables")
+    if _contains_class(html_text=html_content, class_name="pyreball-altair-fig"):
+        groups_of_links_to_add.add("altair")
+    if _contains_class(html_text=html_content, class_name="pyreball-plotly-fig"):
+        groups_of_links_to_add.add("plotly")
+    if _contains_class(html_text=html_content, class_name="pyreball-bokeh-fig"):
+        groups_of_links_to_add.add("bokeh")
+
+    # gather all links; jquery must be first
+    links_to_add = "\n".join(
+        (external_links["jquery"] if add_jquery else [])
+        + [
+            el
+            for group in sorted(list(groups_of_links_to_add))
+            for el in external_links[group]
+        ]
+    )
+    html_content = re.sub("<!--PYREBALL_HEAD_LINKS-->", links_to_add, html_content)
+    return html_content
+
+
+def _finish_html_file(
+    html_path: Path, include_toc: bool, external_links: Dict[str, List[str]]
+) -> None:
+    """
+    Load the printed HTML and finish substitutions to make it complete.
+
+    Args:
+        html_path: Path to the HTML file.
+        include_toc: Whether to include the table of contents.
+    """
+    with open(html_path, "r") as f:
+        lines = f.readlines()
+
+    lines = _replace_ids(lines)
+    lines = _insert_heading_title_and_toc(lines=lines, include_toc=include_toc)
+
+    html_content = "".join(lines)
+    html_content = _insert_js_and_css_links(html_content, external_links)
+
+    with open(html_path, "w") as f:
+        f.write(html_content)
 
 
 parameter_specifications = [
@@ -421,9 +420,9 @@ def _check_existence_of_config_files(
 ) -> None:
     required_filename = [
         CONFIG_INI_FILENAME,
+        LINKS_INI_FILENAME,
         STYLES_TEMPLATE_FILENAME,
-        HTML_BEGIN_TEMPLATE_FILENAME,
-        HTML_END_TEMPLATE_FILENAME,
+        HTML_TEMPLATE_FILENAME,
     ]
     for filename in required_filename:
         if not (config_dir_path / filename).exists():
@@ -608,6 +607,10 @@ def main() -> None:
         directory=config_directory,
         parameter_specifications=parameter_specifications,
     )
+    external_links = get_external_links_from_config(
+        filename=LINKS_INI_FILENAME,
+        directory=config_directory,
+    )
 
     parameters = merge_parameter_dictionaries(
         primary_parameters=cli_parameters,
@@ -622,28 +625,18 @@ def main() -> None:
     # remove the directory with images if it exists:
     carefully_remove_directory_if_exists(directory=Path(html_dir_path_str))
 
-    script_definitions = (
-        JAVASCRIPT_CHANGE_EXPAND + JAVASCRIPT_ON_LOAD + JAVASCRIPT_ROLLING_PLOTS
-    )
-
     css_definitions = get_css(
         filename=STYLES_TEMPLATE_FILENAME,
         directory=config_directory,
         page_width=cast(int, parameters["page_width"]),
     )
 
-    html_begin = get_html_begin(
+    html_begin, html_end = get_html_begin_and_end(
         template_path=Path(
-            pkg_resources.resource_filename("pyreball", "cfg/html_begin.template")
+            pkg_resources.resource_filename("pyreball", f"cfg/{HTML_TEMPLATE_FILENAME}")
         ),
         title=filename_stem,
-        script_definitions=script_definitions,
         css_definitions=css_definitions,
-    )
-    html_end = get_html_end(
-        template_path=Path(
-            pkg_resources.resource_filename("pyreball", "cfg/html_end.template")
-        )
     )
 
     with open(html_path, "w") as f:
@@ -656,9 +649,10 @@ def main() -> None:
         with open(html_path, "a") as f:
             f.write(html_end)
 
-    _replace_ids(html_path)
-    insert_heading_title_and_toc(
-        filename=html_path, include_toc=parameters["toc"] == "yes"
+    _finish_html_file(
+        html_path=html_path,
+        include_toc=parameters["toc"] == "yes",
+        external_links=external_links,
     )
 
 

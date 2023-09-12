@@ -15,6 +15,7 @@ from pyreball.utils.utils import (
     check_integer_within_range,
     check_paging_sizes_string_parameter,
     ChoiceParameter,
+    get_external_links_from_config,
     get_file_config,
     get_parameter_value,
     IntegerParameter,
@@ -348,9 +349,9 @@ def test_get_file_config__correct_specification(simple_parameter_specifications)
     }
     with mock.patch("pyreball.utils.utils.read_file_config", return_value=config):
         config_parameters = get_file_config(
-            filename="arbitrary",
+            filename="does_not_matter",
             parameter_specifications=simple_parameter_specifications,
-            directory=Path("/arbitrary"),
+            directory=Path("/does_not_matter"),
         )
         assert config_parameters == expected_config_parameters
 
@@ -364,11 +365,79 @@ def test_get_file_config__incorrect_specification(
     with mock.patch("pyreball.utils.utils.read_file_config", return_value=config):
         with pytest.raises(SystemExit):
             get_file_config(
-                filename="arbitrary",
+                filename="does_not_matter",
                 parameter_specifications=simple_parameter_specifications,
-                directory=Path("/arbitrary"),
+                directory=Path("/does_not_matter"),
             )
         assert "Parameters section not found in" in caplog.text
+
+
+def test_get_external_links_from_config__correct_specification():
+    config = configparser.ConfigParser()
+    config["Links"] = {
+        "altair": "\na\nb",
+        "bokeh": "\nc\nd\n",
+        "datatables": "\ne\n",
+        "highlight_js": "\nf\ng",
+        "jquery": "\nh",
+        "plotly": "\ni",
+    }
+    expected_result = {
+        "altair": ["a", "b"],
+        "bokeh": ["c", "d"],
+        "datatables": ["e"],
+        "highlight_js": ["f", "g"],
+        "jquery": ["h"],
+        "plotly": ["i"],
+    }
+    with mock.patch("pyreball.utils.utils.read_file_config", return_value=config):
+        result = get_external_links_from_config(
+            filename="does_not_matter",
+            directory=Path("/does_not_matter"),
+        )
+        assert result == expected_result
+
+
+def test_get_external_links_from_config__incorrect_section(
+    caplog, simple_parameter_specifications
+):
+    caplog.set_level(logging.ERROR)
+    config = configparser.ConfigParser()
+    # Wrong section name
+    config["Unsupported"] = {
+        "altair": "\na\nb",
+        "bokeh": "\nc\nd\n",
+        "datatables": "\ne\n",
+        "highlight_js": "\nf\ng",
+        "jquery": "\nh",
+        "plotly": "\ni",
+    }
+    with mock.patch("pyreball.utils.utils.read_file_config", return_value=config):
+        with pytest.raises(SystemExit):
+            get_external_links_from_config(
+                filename="does_not_matter",
+                directory=Path("/does_not_matter"),
+            )
+        assert "section not found in" in caplog.text
+
+
+def test_get_external_links_from_config__incorrect_keys(
+    caplog, simple_parameter_specifications
+):
+    caplog.set_level(logging.ERROR)
+    config = configparser.ConfigParser()
+    # contains only some items
+    config["Links"] = {
+        "altair": "\na\nb",
+        "bokeh": "\nc\nd\n",
+    }
+    with mock.patch("pyreball.utils.utils.read_file_config", return_value=config):
+        with pytest.raises(SystemExit):
+            get_external_links_from_config(
+                filename="does_not_matter",
+                directory=Path("/does_not_matter"),
+            )
+        assert "Configuration with items must contain links" in caplog.text
 
 
 @pytest.mark.parametrize(

@@ -323,12 +323,12 @@ def test_print_h1_h6__file_output__no_numbers(
 
         expected_result = (
             "<html>\n"
-            f'<h1 id="ch_{exp_id}heading_1_1">heading 1<a class="anchor-link" href="#ch_{exp_id}heading_1_1">\u00B6</a></h1>\n'
-            '<h3 id="ch_heading_3_2">heading 3<a class="anchor-link" href="#ch_heading_3_2">\u00B6</a></h3>\n'
-            '<h6 id="ch_heading_6_3">heading 6<a class="anchor-link" href="#ch_heading_6_3">\u00B6</a></h6>\n'
-            '<h4 id="ch_heading_4_4">heading 4<a class="anchor-link" href="#ch_heading_4_4">\u00B6</a></h4>\n'
-            '<h2 id="ch_heading_2_5">heading 2<a class="anchor-link" href="#ch_heading_2_5">\u00B6</a></h2>\n'
-            '<h5 id="ch_heading_5_6">heading 5<a class="anchor-link" href="#ch_heading_5_6">\u00B6</a></h5>\n'
+            f'<h1 id="ch_{exp_id}heading_1_1">heading 1<a class="pyreball-anchor-link" href="#ch_{exp_id}heading_1_1">\u00B6</a></h1>\n'
+            '<h3 id="ch_heading_3_2">heading 3<a class="pyreball-anchor-link" href="#ch_heading_3_2">\u00B6</a></h3>\n'
+            '<h6 id="ch_heading_6_3">heading 6<a class="pyreball-anchor-link" href="#ch_heading_6_3">\u00B6</a></h6>\n'
+            '<h4 id="ch_heading_4_4">heading 4<a class="pyreball-anchor-link" href="#ch_heading_4_4">\u00B6</a></h4>\n'
+            '<h2 id="ch_heading_2_5">heading 2<a class="pyreball-anchor-link" href="#ch_heading_2_5">\u00B6</a></h2>\n'
+            '<h5 id="ch_heading_5_6">heading 5<a class="pyreball-anchor-link" href="#ch_heading_5_6">\u00B6</a></h5>\n'
         )
 
         with open(simple_html_file, "r") as f:
@@ -385,15 +385,15 @@ def test_print_h1_h6__file_output__with_numbers(
 
         expected_result = (
             "<html>\n"
-            f'<h1 id="ch_{exp_id}1_he_1_1">1\u00A0\u00A0he 1<a class="anchor-link" href="#ch_{exp_id}1_he_1_1">\u00B6</a></h1>\n'
-            '<h2 id="ch_1_1_he_2_2">1.1\u00A0\u00A0he 2<a class="anchor-link" href="#ch_1_1_he_2_2">\u00B6</a></h2>\n'
-            '<h3 id="ch_1_1_1_he_3_3">1.1.1\u00A0\u00A0he 3<a class="anchor-link" href="#ch_1_1_1_he_3_3">\u00B6</a></h3>\n'
-            '<h3 id="ch_1_1_2_he_3_4">1.1.2\u00A0\u00A0he 3<a class="anchor-link" href="#ch_1_1_2_he_3_4">\u00B6</a></h3>\n'
-            '<h2 id="ch_1_2_he_2_5">1.2\u00A0\u00A0he 2<a class="anchor-link" href="#ch_1_2_he_2_5">\u00B6</a></h2>\n'
-            '<h1 id="ch_2_he_1_6">2\u00A0\u00A0he 1<a class="anchor-link" href="#ch_2_he_1_6">\u00B6</a></h1>\n'
-            '<h2 id="ch_2_1_he_2_7">2.1\u00A0\u00A0he 2<a class="anchor-link" href="#ch_2_1_he_2_7">\u00B6</a></h2>\n'
-            '<h2 id="ch_2_2_he_2_8">2.2\u00A0\u00A0he 2<a class="anchor-link" href="#ch_2_2_he_2_8">\u00B6</a></h2>\n'
-            '<h3 id="ch_2_2_1_he_3_9">2.2.1\u00A0\u00A0he 3<a class="anchor-link" href="#ch_2_2_1_he_3_9">\u00B6</a></h3>\n'
+            f'<h1 id="ch_{exp_id}1_he_1_1">1\u00A0\u00A0he 1<a class="pyreball-anchor-link" href="#ch_{exp_id}1_he_1_1">\u00B6</a></h1>\n'
+            '<h2 id="ch_1_1_he_2_2">1.1\u00A0\u00A0he 2<a class="pyreball-anchor-link" href="#ch_1_1_he_2_2">\u00B6</a></h2>\n'
+            '<h3 id="ch_1_1_1_he_3_3">1.1.1\u00A0\u00A0he 3<a class="pyreball-anchor-link" href="#ch_1_1_1_he_3_3">\u00B6</a></h3>\n'
+            '<h3 id="ch_1_1_2_he_3_4">1.1.2\u00A0\u00A0he 3<a class="pyreball-anchor-link" href="#ch_1_1_2_he_3_4">\u00B6</a></h3>\n'
+            '<h2 id="ch_1_2_he_2_5">1.2\u00A0\u00A0he 2<a class="pyreball-anchor-link" href="#ch_1_2_he_2_5">\u00B6</a></h2>\n'
+            '<h1 id="ch_2_he_1_6">2\u00A0\u00A0he 1<a class="pyreball-anchor-link" href="#ch_2_he_1_6">\u00B6</a></h1>\n'
+            '<h2 id="ch_2_1_he_2_7">2.1\u00A0\u00A0he 2<a class="pyreball-anchor-link" href="#ch_2_1_he_2_7">\u00B6</a></h2>\n'
+            '<h2 id="ch_2_2_he_2_8">2.2\u00A0\u00A0he 2<a class="pyreball-anchor-link" href="#ch_2_2_he_2_8">\u00B6</a></h2>\n'
+            '<h3 id="ch_2_2_1_he_3_9">2.2.1\u00A0\u00A0he 3<a class="pyreball-anchor-link" href="#ch_2_2_1_he_3_9">\u00B6</a></h3>\n'
         )
 
         with open(simple_html_file, "r") as f:
@@ -503,8 +503,14 @@ def test_print_code_block__stdout(syntax_highlight, capsys):
 @pytest.mark.parametrize(
     "syntax_highlight,expected_result",
     [
-        ("python", '<pre><code class="python">[1, 2, 3]</code></pre>'),
-        (None, "<pre><code>[1, 2, 3]</code></pre>"),
+        (
+            "python",
+            '<pre><code class="pyreball-code-block python">[1, 2, 3]</code></pre>',
+        ),
+        (
+            None,
+            "<pre><code>[1, 2, 3]</code></pre>",
+        ),
     ],
 )
 def test_print_code_block__file_output(
@@ -628,7 +634,7 @@ def test_print__file_output(
             False,
             3,
             "myanchor",
-            '\n<div class="text-centered"><a name="myanchor"><b>\n\n</b></a></div>\n',
+            '\n<div class="pyreball-text-centered"><a name="myanchor"><b>\n\n</b></a></div>\n',
         ),
         (
             "tab",
@@ -636,7 +642,7 @@ def test_print__file_output(
             False,
             3,
             "myanchor",
-            '\n<div class="text-centered"><a name="myanchor"><b>\nmy caption\n</b></a></div>\n',
+            '\n<div class="pyreball-text-centered"><a name="myanchor"><b>\nmy caption\n</b></a></div>\n',
         ),
         (
             "tab",
@@ -644,7 +650,7 @@ def test_print__file_output(
             True,
             3,
             "myanchor2",
-            '\n<div class="text-centered"><a name="myanchor2"><b>\ntab 3: my caption\n</b></a></div>\n',
+            '\n<div class="pyreball-text-centered"><a name="myanchor2"><b>\ntab 3: my caption\n</b></a></div>\n',
         ),
         (
             "img",
@@ -652,7 +658,7 @@ def test_print__file_output(
             True,
             5,
             "myanchor2",
-            '\n<div class="text-centered"><a name="myanchor2"><b>\nimg 5.\n</b></a></div>\n',
+            '\n<div class="pyreball-text-centered"><a name="myanchor2"><b>\nimg 5.\n</b></a></div>\n',
         ),
     ],
 )
@@ -1000,11 +1006,11 @@ def test__prepare_table_html(
     )
 
     align_class = {
-        "center": "centered",
-        "left": "left-aligned",
-        "right": "right-aligned",
+        "center": "pyreball-centered",
+        "left": "pyreball-left-aligned",
+        "right": "pyreball-right-aligned",
     }[align]
-    assert html_root.findall(f"./div[@class='table-fit-content {align_class}']")
+    assert html_root.findall(f"./div[@class='pyreball-table-fit-content {align_class}']")
 
     anchor = "table-123-5" if use_reference else "table-5"
     assert html_root.findall(f"./div/div/a[@name='{anchor}']")
@@ -1200,34 +1206,48 @@ def test__construct_image_anchor_link(
 
 
 @pytest.mark.parametrize(
-    "img_element,align,hidden,expected_result",
+    "img_element,align,hidden,img_type,expected_result",
     [
         (
             "el1",
             "center",
             True,
-            '<div class="image-wrapper" style="display: none;"><div align="center">'
-            '<div style="display: inline-block;">el1</div></div></div>',
+            "xyz",
+            (
+                '<div class="pyreball-image-wrapper pyreball-xyz-fig" style="display: none;">'
+                '<div align="center">'
+                '<div style="display: inline-block;">el1</div></div></div>'
+            ),
         ),
         (
             "el2",
             "left",
             True,
-            '<div class="image-wrapper" style="display: none;"><div align="left">'
-            '<div style="display: inline-block;">el2</div></div></div>',
+            "abc",
+            (
+                '<div class="pyreball-image-wrapper pyreball-abc-fig" style="display: none;">'
+                '<div align="left">'
+                '<div style="display: inline-block;">el2</div></div></div>'
+            ),
         ),
         (
             "el3",
             "right",
             False,
-            '<div class="image-wrapper"><div align="right">'
-            '<div style="display: inline-block;">el3</div></div></div>',
+            "abc",
+            (
+                '<div class="pyreball-image-wrapper pyreball-abc-fig"><div align="right">'
+                '<div style="display: inline-block;">el3</div></div></div>'
+            ),
         ),
     ],
 )
-def test__wrap_image_element_by_outer_divs(img_element, align, hidden, expected_result):
+def test__wrap_image_element_by_outer_divs(
+    img_element, align, hidden, img_type, expected_result
+):
     assert (
-        _wrap_image_element_by_outer_divs(img_element, align, hidden) == expected_result
+        _wrap_image_element_by_outer_divs(img_element, align, hidden, img_type)
+        == expected_result
     )
 
 
@@ -1369,7 +1389,7 @@ def test__prepare_image_element__matplotlib(_prepare_matplotlib_image_element_mo
     _prepare_matplotlib_image_element_mock.assert_called_with(
         fig=fig, fig_index=3, image_format="svg", embedded=True
     )
-    assert result == "img_element"
+    assert result == ("img_element", "matplotlib")
 
 
 @mock.patch(
@@ -1385,7 +1405,7 @@ def test__prepare_image_element__seaborn(
     _prepare_matplotlib_image_element_mock.assert_called_with(
         fig=fig, fig_index=3, image_format="svg", embedded=True
     )
-    assert result == "img_element"
+    assert result == ("img_element", "matplotlib")
 
 
 @mock.patch("pyreball.html._prepare_altair_image_element", return_value="img_element")
@@ -1406,7 +1426,7 @@ def test__prepare_image_element__altair(_prepare_altair_image_element_mock, fig)
         fig=fig, fig_index=3, matplotlib_format="svg", embedded=True
     )
     _prepare_altair_image_element_mock.assert_called_with(fig=fig, fig_index=3)
-    assert result == "img_element"
+    assert result == ("img_element", "altair")
 
 
 @mock.patch("pyreball.html._prepare_plotly_image_element", return_value="img_element")
@@ -1418,7 +1438,7 @@ def test__prepare_image_element__plotly(
         fig=fig, fig_index=3, matplotlib_format="svg", embedded=True
     )
     _prepare_plotly_image_element_mock.assert_called_with(fig=fig)
-    assert result == "img_element"
+    assert result == ("img_element", "plotly")
 
 
 @mock.patch("pyreball.html._prepare_bokeh_image_element", return_value="img_element")
@@ -1430,7 +1450,7 @@ def test__prepare_image_element__bokeh(
         fig=fig, fig_index=3, matplotlib_format="svg", embedded=True
     )
     _prepare_bokeh_image_element_mock.assert_called_with(fig=fig)
-    assert result == "img_element"
+    assert result == ("img_element", "bokeh")
 
 
 def test__print_figure__stdout__bokeh(simple_dataframe):

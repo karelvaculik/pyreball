@@ -19,6 +19,7 @@ from typing import (
 )
 
 from pyreball._common import AttrsParameter, ClParameter
+from pyreball.constants import NON_BREAKABLE_SPACE, PILCROW_SIGN
 
 from pyreball.text import code_block, div
 from pyreball.utils.utils import get_parameter_value, make_sure_dir_exists, merge_values
@@ -230,10 +231,10 @@ def _print_heading(
         # reset all sub-levels
         _heading_memory["heading_counting"][level:] = [0] * (6 - level)
         # get the string of the numbered section and append non-breakable space
-        non_breakable_spaces = "\u00A0\u00A0"
         heading_number_str = (
             _get_heading_number(level, _heading_memory["heading_counting"])
-            + non_breakable_spaces
+            + NON_BREAKABLE_SPACE
+            + NON_BREAKABLE_SPACE
         )
     else:
         heading_number_str = ""
@@ -248,12 +249,12 @@ def _print_heading(
         tidy_string = f"ch_{_tidy_title(string)}_{heading_index}"
 
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
-        builtins.print(string.replace("\u00A0\u00A0", " "))
+        builtins.print(string.replace(NON_BREAKABLE_SPACE * 2, " "))
 
     if get_parameter_value("html_file_path"):
-        pilcrow_sign = "\u00B6"
         header_contents = (
-            string + f'<a class="anchor-link" href="#{tidy_string}">{pilcrow_sign}</a>'
+            f"{string}"
+            f'<a class="pyreball-anchor-link" href="#{tidy_string}">{PILCROW_SIGN}</a>'
         )
         # For correct functioning of references,
         # it is expected that single line contains at most one heading,
@@ -438,7 +439,7 @@ def _prepare_caption_element(
     else:
         caption_text = ""
     return (
-        f'\n<div class="text-centered">'
+        f'\n<div class="pyreball-text-centered">'
         f'<a name="{anchor_link}"><b>\n{caption_text}\n</b></a>'
         f"</div>\n"
     )
@@ -527,9 +528,9 @@ def _prepare_table_html(
     **kwargs: Any,
 ) -> str:
     align_mapping = {
-        "center": "centered",
-        "left": "left-aligned",
-        "right": "right-aligned",
+        "center": "pyreball-centered",
+        "left": "pyreball-left-aligned",
+        "right": "pyreball-right-aligned",
     }
     table_classes = []
     if isinstance(datatables_style, list):
@@ -567,9 +568,10 @@ def _prepare_table_html(
         anchor_link=anchor_link,
     )
 
-    table_wrapper_inner_id = "table-wrapper-inner-" + str(tab_index)
+    table_wrapper_inner_id = "pyreball-table-wrapper-inner-" + str(tab_index)
     table_html = (
-        f'<div id="{table_wrapper_inner_id}" class="table-fit-content centered">'
+        f'<div id="{table_wrapper_inner_id}" '
+        f'class="pyreball-table-fit-content pyreball-centered">'
         f"{df_html}\n"
         f"</div>"
     )
@@ -580,17 +582,15 @@ def _prepare_table_html(
         table_html = table_html + caption_element
 
     table_html = (
-        f'<div class="table-fit-content {align_mapping[align]}">{table_html}</div>'
+        f'<div class="pyreball-table-fit-content {align_mapping[align]}">'
+        f"{table_html}</div>"
     )
 
-    table_html = f'<div class="table-wrapper">\n{table_html}\n</div>'
+    table_html = f'<div class="pyreball-table-wrapper">\n{table_html}\n</div>'
 
     if datatables_setup is not None:
         table_init = json.dumps(datatables_setup)
-        js = (
-            f"var table = $('#{table_wrapper_inner_id} > table')"
-            f".DataTable({table_init});"
-        )
+        js = f"new DataTable('#{table_wrapper_inner_id} > table', {table_init});"
         table_html += f"\n<script>{js}</script>"
 
     return table_html
@@ -782,17 +782,22 @@ def _construct_image_anchor_link(reference: Optional[Reference], fig_index: int)
 
 
 def _wrap_image_element_by_outer_divs(
-    img_element: str, align: str, hidden: bool
+    img_element: str, align: str, hidden: bool, img_type: str
 ) -> str:
     img_element = (
         f'<div align="{align}"><div style="display: inline-block;">'
         f"{img_element}"
         f"</div></div>"
     )
+    wrapper_classes = f"pyreball-image-wrapper pyreball-{img_type}-fig"
     if hidden:
-        return f'<div class="image-wrapper" style="display: none;">{img_element}</div>'
+        return (
+            f'<div class="{wrapper_classes}" style="display: none;">'
+            f"{img_element}"
+            f"</div>"
+        )
     else:
-        return f'<div class="image-wrapper">{img_element}</div>'
+        return f'<div class="{wrapper_classes}">{img_element}</div>'
 
 
 def _prepare_matplotlib_image_element(
@@ -869,7 +874,7 @@ def _prepare_image_element(
     fig_index: int,
     matplotlib_format: Optional[str] = None,
     embedded: Optional[bool] = None,
-):
+) -> Tuple[str, str]:
     # Create the html string according to the figure type.
     # (if we checked type of fig, we would have to add the libraries to requirements)
     if (
@@ -883,6 +888,7 @@ def _prepare_image_element(
             image_format=matplotlib_format,
             embedded=embedded,
         )
+        img_type = "matplotlib"
     elif type(fig).__name__ in [
         "Chart",
         "ConcatChart",
@@ -893,20 +899,23 @@ def _prepare_image_element(
         "VConcatChart",
     ]:
         img_element = _prepare_altair_image_element(fig=fig, fig_index=fig_index)
+        img_type = "altair"
     elif (
         type(fig).__name__ == "Figure"
         and type(fig).__module__ == "plotly.graph_objs._figure"
     ):
         img_element = _prepare_plotly_image_element(fig=fig)
+        img_type = "plotly"
     elif type(fig).__name__.lower() == "figure" and type(fig).__module__ in [
         "bokeh.plotting.figure",
         "bokeh.plotting._figure",
     ]:
         img_element = _prepare_bokeh_image_element(fig=fig)
+        img_type = "bokeh"
     else:
         raise ValueError(f"Unknown figure type {type(fig)}.")
 
-    return img_element
+    return img_element, img_type
 
 
 def _print_figure(
@@ -939,40 +948,33 @@ def _print_figure(
         anchor_link = _construct_image_anchor_link(
             reference=reference, fig_index=fig_index
         )
+        img_element, img_type = _prepare_image_element(
+            fig=fig,
+            fig_index=fig_index,
+            matplotlib_format=matplotlib_format,
+            embedded=embedded,
+        )
+        caption_element = _prepare_caption_element(
+            prefix="Figure",
+            caption=caption,
+            numbered=numbered,
+            index=fig_index,
+            anchor_link=anchor_link,
+        )
+
         if caption_position == "bottom":
-            img_element = _prepare_image_element(
-                fig=fig,
-                fig_index=fig_index,
-                matplotlib_format=matplotlib_format,
-                embedded=embedded,
-            )
-            img_element += _prepare_caption_element(
-                prefix="Figure",
-                caption=caption,
-                numbered=numbered,
-                index=fig_index,
-                anchor_link=anchor_link,
-            )
+            img_with_caption = img_element + caption_element
         elif caption_position == "top":
-            img_element = _prepare_caption_element(
-                prefix="Figure",
-                caption=caption,
-                numbered=numbered,
-                index=fig_index,
-                anchor_link=anchor_link,
-            )
-            img_element += _prepare_image_element(
-                fig=fig,
-                fig_index=fig_index,
-                matplotlib_format=matplotlib_format,
-                embedded=embedded,
-            )
+            img_with_caption = caption_element + img_element
         else:
             raise ValueError(
                 f"caption_position must be 'top' or 'bottom', not {caption_position}."
             )
         img_html = _wrap_image_element_by_outer_divs(
-            img_element=img_element, align=align, hidden=hidden
+            img_element=img_with_caption,
+            align=align,
+            hidden=hidden,
+            img_type=img_type,
         )
 
         _write_to_html(img_html)
