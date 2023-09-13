@@ -1,10 +1,10 @@
 __version__ = "1.0.0-alpha.1"
 
 from pyreball.html import (
-    print_figure,
     print,
     print_code_block,
     print_div,
+    print_figure,
     print_h1,
     print_h2,
     print_h3,

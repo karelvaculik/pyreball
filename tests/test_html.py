@@ -1010,7 +1010,9 @@ def test__prepare_table_html(
         "left": "pyreball-left-aligned",
         "right": "pyreball-right-aligned",
     }[align]
-    assert html_root.findall(f"./div[@class='pyreball-table-fit-content {align_class}']")
+    assert html_root.findall(
+        f"./div[@class='pyreball-table-fit-content {align_class}']"
+    )
 
     anchor = "table-123-5" if use_reference else "table-5"
     assert html_root.findall(f"./div/div/a[@name='{anchor}']")

@@ -25,4 +25,4 @@ jobs:
         run: |
           TOXENV=${{ env.TOXENV }}
           TOXENV=${TOXENV//.}
-          tox -e $TOXENV,mypy,flake8
+          tox -e $TOXENV,mypy,flake8,ufmt
