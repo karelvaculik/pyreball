@@ -48,13 +48,15 @@ def _replace_ids(lines: List[str]) -> List[str]:
     # collect all ids in form of "table-N-M", "img-N-M"
     all_table_and_img_ids = set()
     chapter_text_replacemenets = []
-    # with open(html_path, "r") as f:
     for line in lines:
-        # note that we don't need to replace only "table" ids by also "img" etc.
+        # we need to replace "table", "img", "code-block" and chapter IDs.
         results = re.findall(r"table-id[\d]+-[\d]+", line)
         if results:
             all_table_and_img_ids.update(results)
         results = re.findall(r"img-id[\d]+-[\d]+", line)
+        if results:
+            all_table_and_img_ids.update(results)
+        results = re.findall(r"code-block-id[\d]+-[\d]+", line)
         if results:
             all_table_and_img_ids.update(results)
         # now collect heading references:
@@ -71,7 +73,7 @@ def _replace_ids(lines: List[str]) -> List[str]:
     # Prepare all replacement definitions for a substitutor below
     replacements = []
     for element_id in all_table_and_img_ids:
-        # Tables and images:
+        # Tables, images and code blocks:
         re_results = re.search(r"(.+)-(id\d+)-(\d+)", element_id)
         if re_results:
             # this must be first
@@ -231,7 +233,7 @@ def _insert_js_and_css_links(
     add_jquery = False
     if _contains_class(
         html_text=html_content, class_name="inline-highlight"
-    ) or _contains_class(html_text=html_content, class_name="pyreball-code-block"):
+    ) or _contains_class(html_text=html_content, class_name="pyreball-code-wrapper"):
         add_jquery = True
         groups_of_links_to_add.add("highlight_js")
     if _contains_class(html_text=html_content, class_name="pyreball-table-wrapper"):
@@ -283,6 +285,24 @@ def _finish_html_file(
 parameter_specifications = [
     ChoiceParameter(
         "--toc", choices=["yes", "no"], default="no", help="Include table of contents."
+    ),
+    ChoiceParameter(
+        "--align-code-blocks",
+        choices=["left", "center", "right"],
+        default="center",
+        help="Alignment of code blocks.",
+    ),
+    ChoiceParameter(
+        "--code-block-captions-position",
+        choices=["top", "bottom"],
+        default="top",
+        help="Position of the code block captions.",
+    ),
+    ChoiceParameter(
+        "--numbered-code-blocks",
+        choices=["yes", "no"],
+        default="no",
+        help="Number the code blocks.",
     ),
     ChoiceParameter(
         "--align-tables",

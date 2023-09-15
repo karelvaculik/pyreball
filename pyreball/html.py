@@ -64,9 +64,15 @@ FigType = Union[
 
 _references: Set[str] = set()
 _heading_memory: Dict[str, Any] = {}
+_code_block_memory: Dict[str, Any] = {}
 _table_memory: Dict[str, Any] = {}
 _graph_memory: Dict[str, Any] = {}
-_multi_graph_memory: Dict[str, Any] = {}
+
+ALIGN_CLASS_MAP = {
+    "center": "pyreball-centered",
+    "left": "pyreball-left-aligned",
+    "right": "pyreball-right-aligned",
+}
 
 
 class Reference:
@@ -360,8 +366,60 @@ def print_div(
     print(div_str, end=end)
 
 
+def _wrap_code_block_html(
+    source_code_str: str,
+    code_block_index: int = 0,
+    caption: Optional[str] = None,
+    reference: Optional[Reference] = None,
+    align: str = "center",
+    caption_position: str = "bottom",
+    numbered: bool = True,
+    sep: str = "",
+):
+    if reference:
+        _check_and_mark_reference(reference)
+        anchor_link = f"code-block-{reference.id}-{code_block_index}"
+    else:
+        anchor_link = f"code-block-{code_block_index}"
+
+    caption_element = _prepare_caption_element(
+        prefix="Source",
+        caption=caption,
+        numbered=numbered,
+        index=code_block_index,
+        anchor_link=anchor_link,
+    )
+
+    code_block_html = (
+        f'<div class="pyreball-block-fit-content pyreball-centered">{sep}'
+        f"{source_code_str}{sep}"
+        f"</div>"
+    )
+
+    if caption_position == "top":
+        code_block_html = caption_element + sep + code_block_html
+    else:
+        code_block_html = code_block_html + sep + caption_element
+
+    code_block_html = (
+        f'<div class="pyreball-block-fit-content {ALIGN_CLASS_MAP[align]}">{sep}'
+        f"{code_block_html}{sep}</div>"
+    )
+
+    code_block_html = (
+        f'<div class="pyreball-code-wrapper">{sep}{code_block_html}{sep}</div>'
+    )
+
+    return code_block_html
+
+
 def print_code_block(
     *values: Any,
+    caption: Optional[str] = None,
+    reference: Optional[Reference] = None,
+    align: Optional[str] = None,
+    caption_position: Optional[str] = None,
+    numbered: Optional[bool] = None,
     cl: ClParameter = None,
     attrs: AttrsParameter = None,
     sep: str = "",
@@ -380,12 +438,22 @@ def print_code_block(
     Args:
         *values: Zero or more values to be enclosed in the tag.
             All values are converted to strings.
-        cl: One or more class names to be added to the tag.
+        caption: Text caption.
+        reference: Reference object.
+        align: How to align the code block horizontally.
+            Acceptable values are 'left', 'center', and 'right'.
+            Defaults to settings from config or CLI arguments if None.
+        caption_position: Where to place the caption.
+            Acceptable values are 'top', and 'bottom'.
+            Defaults to settings from config or CLI arguments if None.
+        numbered: Whether the caption should be numbered.
+            Defaults to settings from config or CLI arguments if None.
+        cl: One or more class names to be added to the <code> tag.
             If string is provided, it is used as it is.
             If a list of strings is provided, the strings are joined with space.
             If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag.
+        attrs: Additional attributes to be added to the <code> tag.
             Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
             is converted to `key1="value1" ... keyN="valueN"`.
             To construct boolean HTML attributes, set None for given key.
@@ -397,6 +465,7 @@ def print_code_block(
             no highlight is applied. When highlight is turned on,
             class "<language>" is added to the `<code>` element.
     """
+
     source_code_str = code_block(
         *values,
         cl=cl,
@@ -404,7 +473,47 @@ def print_code_block(
         sep=sep,
         syntax_highlight=syntax_highlight,
     )
-    print(source_code_str, end=end)
+    if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
+        builtins.print(source_code_str)
+    if get_parameter_value("html_file_path"):
+        if "code_block_index" not in _code_block_memory:
+            _code_block_memory["code_block_index"] = 1
+        code_block_index = _code_block_memory["code_block_index"]
+
+        align = cast(
+            str,
+            merge_values(
+                primary_value=align,
+                secondary_value=get_parameter_value("align_code_blocks"),
+            ),
+        )
+        caption_position = cast(
+            str,
+            merge_values(
+                primary_value=caption_position,
+                secondary_value=get_parameter_value("code_block_captions_position"),
+            ),
+        )
+        numbered = bool(
+            merge_values(
+                primary_value=numbered,
+                secondary_value=get_parameter_value("numbered_code_blocks"),
+            )
+        )
+
+        code_block_html = _wrap_code_block_html(
+            source_code_str=source_code_str,
+            code_block_index=code_block_index,
+            caption=caption,
+            reference=reference,
+            align=align,
+            caption_position=caption_position,
+            numbered=numbered,
+            sep=sep,
+        )
+        _write_to_html(code_block_html, end=end)
+
+        _code_block_memory["code_block_index"] += 1
 
 
 def print(*values: Any, sep: str = "", end: str = "\n") -> None:
@@ -527,11 +636,6 @@ def _prepare_table_html(
     datatables_definition: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
 ) -> str:
-    align_mapping = {
-        "center": "pyreball-centered",
-        "left": "pyreball-left-aligned",
-        "right": "pyreball-right-aligned",
-    }
     table_classes = []
     if isinstance(datatables_style, list):
         table_classes += datatables_style
@@ -571,7 +675,7 @@ def _prepare_table_html(
     table_wrapper_inner_id = "pyreball-table-wrapper-inner-" + str(tab_index)
     table_html = (
         f'<div id="{table_wrapper_inner_id}" '
-        f'class="pyreball-table-fit-content pyreball-centered">'
+        f'class="pyreball-block-fit-content pyreball-centered">'
         f"{df_html}\n"
         f"</div>"
     )
@@ -582,7 +686,7 @@ def _prepare_table_html(
         table_html = table_html + caption_element
 
     table_html = (
-        f'<div class="pyreball-table-fit-content {align_mapping[align]}">'
+        f'<div class="pyreball-block-fit-content {ALIGN_CLASS_MAP[align]}">'
         f"{table_html}</div>"
     )
 

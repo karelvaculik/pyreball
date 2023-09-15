@@ -125,9 +125,7 @@ def test_code_block__without_syntax_highlight():
 
 
 def test_code_block__with_syntax_highlight():
-    expected_result = (
-        '<pre><code class="pyreball-code-block python">\na\nb\n</code></pre>'
-    )
+    expected_result = '<pre><code class="python">\na\nb\n</code></pre>'
     assert code_block("a", "b", sep="\n", syntax_highlight="python") == expected_result
 
 

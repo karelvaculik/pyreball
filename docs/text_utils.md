@@ -53,10 +53,23 @@ When including a source code string into a text, [`code()`](../api/pyreball_text
 and [`code_block()`](../api/pyreball_text/#pyreball.text.code_block) can be used to format it.
 The former wraps values into `<code>` element and can be used inline, whereas the latter wraps values into `<pre><code>`
 and is displayed as a block element.
+Pyreball uses [highlight.js](https://highlightjs.org/) library to highlight the syntax in both cases.
 
 {{ inline_source("docs/examples/text_utils_code.py") }}
 
-<iframe style="border:2px solid;" src="../examples/text_utils_code.html" height="200" width="100%" title="Iframe Example"></iframe>
+<iframe style="border:2px solid;" src="../examples/text_utils_code.html" height="160" width="100%" title="Iframe Example"></iframe>
+
+Pyreball currently supports only Python language with default theme.
+To turn off the syntax highlighting, set `syntax_highlight` parameter to `None`.
+
+{{ inline_source("docs/examples/text_utils_code_no_highlight.py") }}
+
+<iframe style="border:2px solid;" src="../examples/text_utils_code_no_highlight.html" height="100" width="100%" title="Iframe Example"></iframe>
+
+There is also [`print_code_block()`](../api/pyreball_html/#pyreball.html.print_code_block) function that constructs the
+element and prints it directly int the HTML document. Moreover, it can add a caption and align the block horizontally.
+[`print_code_block()`](../api/pyreball_html/#pyreball.html.print_code_block) is demonstrated
+in [`Code Blocks`](../code_blocks/) chapter.
 
 ## Creating Hyperlinks
 

@@ -18,10 +18,12 @@ pb.print_table(df, caption="A data table.", index=False)
 
 img_reference = pb.Reference()
 table_ref = pb.Reference()
+code_block_ref = pb.Reference()
 pb.print_div(
-    f"It is also possible to create references to tables and figures. "
-    f"For example Table {table_ref} shows sortable columns and "
-    f"Fig. {img_reference} displays a scatterplot. "
+    f"It is also possible to create references to tables, figures and code blocks. "
+    f"For example, Table {table_ref} shows sortable columns, "
+    f"Fig. {img_reference} displays a scatterplot, "
+    f"and Source Code {code_block_ref} shows a trivial function. "
     f"Each reference has a default text to be displayed, "
     f"but this text can be overriden by using {pb.code('__call__()')} "
     f"method on the reference when pasting it into the text. "
@@ -55,4 +57,12 @@ pb.print_div(
     f"Of course, we cannot assign a single reference to multiple tables or figures. "
     f"Last, but not least, one can use reference to Chapter {ref_ch_1}. "
     f"Again, we can override the text and create a link to {ref_ch_1('First Chapter')}."
+)
+
+pb.print_h1("Code Blocks")
+
+pb.print_code_block(
+    'def greet():\n    print("hi")',
+    caption="An example of code block.",
+    reference=code_block_ref,
 )

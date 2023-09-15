@@ -155,12 +155,12 @@ def code_block(
     Args:
         *values: Zero or more values to be enclosed in the tag.
             All values are converted to strings.
-        cl: One or more class names to be added to the tag.
+        cl: One or more class names to be added to the <code> tag.
             If string is provided, it is used as it is.
             If a list of strings is provided, the strings are joined with space.
             If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag.
+        attrs: Additional attributes to be added to the <code> tag.
             Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
             is converted to `key1="value1" ... keyN="valueN"`.
             To construct boolean HTML attributes,
@@ -174,9 +174,7 @@ def code_block(
     Returns:
         HTML string representing the tag with given values.
     """
-    cl = _collect_classes_for_code_strings(
-        ["pyreball-code-block"], cl, syntax_highlight
-    )
+    cl = _collect_classes_for_code_strings([], cl, syntax_highlight)
     code_text = tag(*values, name="code", cl=cl, attrs=attrs, sep=sep)
     return tag(code_text, name="pre")
 

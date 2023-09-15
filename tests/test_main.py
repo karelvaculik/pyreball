@@ -64,6 +64,20 @@ MODULE_PATH = "pyreball.__main__"
         (
             [
                 "<html>",
+                'Reference to code block <a href="#ref-id99">id99</a>',
+                '<a name="code-block-id99-1">Code caption</a>',
+                "</html>",
+            ],
+            [
+                "<html>",
+                'Reference to code block <a href="#code-block-1">1</a>',
+                '<a name="code-block-1">Code caption</a>',
+                "</html>",
+            ],
+        ),
+        (
+            [
+                "<html>",
                 'Reference to chapter <a href="#ref-id123">id123</a>',
                 '<h1 id="ch_id123_heading_1_1">My Chapter'
                 '<a class="pyreball-anchor-link" href="#ch_id123_heading_1_1">\u00B6</a></h1>',
@@ -302,7 +316,7 @@ def test__contains_class(html_text, class_name, expected_result):
                 "</div>"
                 '<div class="pyreball-plotly-fig">'
                 "</div>"
-                '<div class="pyreball-code-block">'
+                '<div class="pyreball-code-wrapper">'
                 "</div>"
                 "</html>"
             ),
@@ -321,7 +335,7 @@ def test__contains_class(html_text, class_name, expected_result):
                 "</div>"
                 '<div class="pyreball-plotly-fig">'
                 "</div>"
-                '<div class="pyreball-code-block">'
+                '<div class="pyreball-code-wrapper">'
                 "</div>"
                 "</html>"
             ),
@@ -544,6 +558,9 @@ def test_parse_arguments__invalid_arguments(args):
 def test_parse_arguments__valid_arguments(args, expected_non_empty_result):
     expected_result = {
         "toc": None,
+        "align_code_blocks": None,
+        "code_block_captions_position": None,
+        "numbered_code_blocks": None,
         "align_tables": None,
         "table_captions_position": None,
         "numbered_tables": None,

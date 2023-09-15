@@ -33,16 +33,6 @@ function [`print_div()`](../api/pyreball_html/#pyreball.html.print_div):
 [`div()`](../api/pyreball_text/#pyreball.text.div) is one of the text util functions which are demonstrated in
 [`Text Utils`](../text_utils/) chapter.
 
-Another shortcut function is [`print_code_block()`](../api/pyreball_html/#pyreball.html.print_code_block).
-
-{{ inline_source("docs/examples/basic_print_code.py") }}
-
-<iframe style="border:2px solid;" src="../examples/basic_print_code.html" height="150" width="100%" title="Iframe Example"></iframe>
-
-[`print_code_block()`](../api/pyreball_html/#pyreball.html.print_code_block) wraps the values into `<pre>`
-and `<code>` elements and uses [highlight.js](https://highlightjs.org/) library to highlight the syntax.
-Pyreball currently supports only Python language with default theme.
-
 ## Adding a Title
 
 To add a title to the page, use [`set_title()`](../api/pyreball_html/#pyreball.html.set_title) function.
