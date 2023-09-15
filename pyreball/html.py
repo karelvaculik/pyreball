@@ -549,7 +549,7 @@ def _prepare_caption_element(
         caption_text = ""
     return (
         f'\n<div class="pyreball-text-centered">'
-        f'<a name="{anchor_link}"><b>\n{caption_text}\n</b></a>'
+        f'<a id="{anchor_link}"><b>\n{caption_text}\n</b></a>'
         f"</div>\n"
     )
 

@@ -788,7 +788,7 @@ def test_print__file_output(
             False,
             3,
             "myanchor",
-            '\n<div class="pyreball-text-centered"><a name="myanchor"><b>\n\n</b></a></div>\n',
+            '\n<div class="pyreball-text-centered"><a id="myanchor"><b>\n\n</b></a></div>\n',
         ),
         (
             "tab",
@@ -796,7 +796,7 @@ def test_print__file_output(
             False,
             3,
             "myanchor",
-            '\n<div class="pyreball-text-centered"><a name="myanchor"><b>\nmy caption\n</b></a></div>\n',
+            '\n<div class="pyreball-text-centered"><a id="myanchor"><b>\nmy caption\n</b></a></div>\n',
         ),
         (
             "tab",
@@ -804,7 +804,7 @@ def test_print__file_output(
             True,
             3,
             "myanchor2",
-            '\n<div class="pyreball-text-centered"><a name="myanchor2"><b>\ntab 3: my caption\n</b></a></div>\n',
+            '\n<div class="pyreball-text-centered"><a id="myanchor2"><b>\ntab 3: my caption\n</b></a></div>\n',
         ),
         (
             "img",
@@ -812,7 +812,7 @@ def test_print__file_output(
             True,
             5,
             "myanchor2",
-            '\n<div class="pyreball-text-centered"><a name="myanchor2"><b>\nimg 5.\n</b></a></div>\n',
+            '\n<div class="pyreball-text-centered"><a id="myanchor2"><b>\nimg 5.\n</b></a></div>\n',
         ),
     ],
 )
@@ -1169,7 +1169,7 @@ def test__prepare_table_html(
     )
 
     anchor = "table-123-5" if use_reference else "table-5"
-    assert html_root.findall(f"./div/div/a[@name='{anchor}']")
+    assert html_root.findall(f"./div/div/a[@id='{anchor}']")
 
 
 @pytest.mark.parametrize(
