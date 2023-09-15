@@ -85,21 +85,6 @@ pyreball report.py
 
 ![Pyreball Screenshot](pyreball_result_screenshot.png)
 
-## Other Examples
-
-Script `report.py` and a few other examples can be found in `examples` folder. For example, `longer_report.py`
-illustrates most of the Pyreball's features, while `sample_plots.py` shows different plotting libraries.
-To install all dependencies needed for these examples, run:
-
-```shell
-pip install -r requirements_examples.txt
-```
-
-The command above is assumed to work with Python 3.9 - 3.11.
-If you are using Python 3.8, older dependencies are needed, so `requirements_examples_py38.txt`
-can be used.
-Although the versions are fixed in these requirements files, Pyreball works with many other versions, too.
-
 ## Documentation
 
 See [documentation](https://pyreball.readthedocs.io/) for more examples and information about Pyreball.
