@@ -1,13 +1,14 @@
 # References
 
-Sometimes it might be useful to create a link to a table, an image or a chapter in the HTML document.
+Sometimes it might be useful to create a link to a table, an image, a code block or a chapter in the HTML document.
 Pyreball enables creation of such links with ease through [`Reference`](../api/pyreball_html/#pyreball.html.Reference)
 class.
 
 Specifically, one can create a reference object by calling `pb.Reference()`.
 This object can be then passed to a function that creates a
 table ([`print_table()`](../api/pyreball_html/#pyreball.html.print_table)),
-a figure ([`print_figure()`](../api/pyreball_html/#pyreball.html.print_figure)), or
+a figure ([`print_figure()`](../api/pyreball_html/#pyreball.html.print_figure)), 
+a code block ([`print_code_block()`](../api/pyreball_html/#pyreball.html.print_code_block)), or
 a heading ([`print_h1()`](../api/pyreball_html/#pyreball.html.print_h1), ...,
 [`print_h6()`](../api/pyreball_html/#pyreball.html.print_h6)).
 Each such function then creates a target for the link.

@@ -38,6 +38,7 @@ nav:
       - Basic Printing: basic_printing.md
       - Text Utils: text_utils.md
       - Tables: tables.md
+      - Code Blocks: code_blocks.md
       - Plotting: plotting.md
       - References: references.md
       - Configuration and CLI Arguments: configuration.md

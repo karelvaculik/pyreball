@@ -2,6 +2,7 @@ import os
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any, Dict
 from unittest import mock
 
 import altair as alt
@@ -14,13 +15,13 @@ from matplotlib import pyplot as plt
 
 from pyreball.html import (
     _check_and_mark_reference,
+    _code_block_memory,
     _compute_length_menu_for_datatables,
     _construct_image_anchor_link,
     _gather_datatables_setup,
     _get_heading_number,
     _graph_memory,
     _heading_memory,
-    _multi_graph_memory,
     _parse_tables_paging_sizes,
     _prepare_altair_image_element,
     _prepare_bokeh_image_element,
@@ -35,6 +36,7 @@ from pyreball.html import (
     _references,
     _table_memory,
     _tidy_title,
+    _wrap_code_block_html,
     _wrap_image_element_by_outer_divs,
     _write_to_html,
     print as print_html,
@@ -91,6 +93,15 @@ def pre_test_check_and_mark_reference_cleanup():
 
 
 @pytest.fixture
+def pre_test_print_code_block_cleanup():
+    # print_code_block is meant to be used only in a single session,
+    # but test functions don't respect this so we do manual cleanup
+    global _code_block_memory
+    _code_block_memory.clear()
+    yield
+
+
+@pytest.fixture
 def pre_test_print_table_cleanup():
     # print_table is meant to be used only in a single session,
     # but test functions don't respect this so we do manual cleanup
@@ -105,15 +116,6 @@ def pre_test_print_figure_cleanup():
     # but test functions don't respect this so we do manual cleanup
     global _graph_memory
     _graph_memory.clear()
-    yield
-
-
-@pytest.fixture
-def pre_test_plot_multi_graph_cleanup():
-    # plot_multi_graph is meant to be used only in a single session,
-    # but test functions don't respect this so we do manual cleanup
-    global _multi_graph_memory
-    _multi_graph_memory.clear()
     yield
 
 
@@ -465,6 +467,87 @@ def test_print_div__file_output(keep_stdout, capsys, simple_html_file):
 
 
 @pytest.mark.parametrize(
+    "use_reference,align,caption_position,numbered,sep,expected_anchor_link,expected_result",
+    [
+        (
+            True,
+            "left",
+            "bottom",
+            True,
+            "",
+            "code-block-123-3",
+            (
+                '<div class="pyreball-code-wrapper">'
+                '<div class="pyreball-block-fit-content pyreball-left-aligned">'
+                '<div class="pyreball-block-fit-content pyreball-centered">'
+                "<code>x = 1</code>"
+                "</div>"
+                "<span>caption</span>"
+                "</div>"
+                "</div>"
+            ),
+        ),
+        (
+            False,
+            "center",
+            "top",
+            False,
+            "\n",
+            "code-block-3",
+            (
+                '<div class="pyreball-code-wrapper">\n'
+                '<div class="pyreball-block-fit-content pyreball-centered">\n'
+                "<span>caption</span>\n"
+                '<div class="pyreball-block-fit-content pyreball-centered">\n'
+                "<code>x = 1</code>\n"
+                "</div>\n"
+                "</div>\n"
+                "</div>"
+            ),
+        ),
+    ],
+)
+def test__wrap_code_block_html(
+    pre_test_check_and_mark_reference_cleanup,
+    use_reference,
+    align,
+    caption_position,
+    numbered,
+    sep,
+    expected_anchor_link,
+    expected_result,
+):
+    with mock.patch(
+        "pyreball.html._prepare_caption_element", return_value="<span>caption</span>"
+    ) as prepare_caption_element_mock:
+        if use_reference:
+            reference = Reference()
+            reference.id = "123"
+        else:
+            reference = None
+        source_code_str = "<code>x = 1</code>"
+        code_block_index = 3
+        result = _wrap_code_block_html(
+            source_code_str,
+            code_block_index=code_block_index,
+            caption="my caption",
+            reference=reference,
+            align=align,
+            caption_position=caption_position,
+            numbered=numbered,
+            sep=sep,
+        )
+        assert result == expected_result
+        prepare_caption_element_mock.assert_called_with(
+            prefix="Source",
+            caption="my caption",
+            numbered=numbered,
+            index=code_block_index,
+            anchor_link=expected_anchor_link,
+        )
+
+
+@pytest.mark.parametrize(
     "syntax_highlight",
     [
         "python",
@@ -487,7 +570,10 @@ def test_print_code_block__stdout(syntax_highlight, capsys):
     ):
         print_code_block("[1, 2, 3]", syntax_highlight=syntax_highlight)
         captured = capsys.readouterr()
-        assert "[1, 2, 3]" in captured.out
+        if syntax_highlight:
+            assert '<pre><code class="python">[1, 2, 3]</code></pre>' in captured.out
+        else:
+            assert "<pre><code>[1, 2, 3]</code></pre>" in captured.out
 
     # when keep_stdout is set off, but we don't have html file either
     with mock.patch(
@@ -496,45 +582,113 @@ def test_print_code_block__stdout(syntax_highlight, capsys):
     ):
         print_code_block("{'a': 4}", syntax_highlight=syntax_highlight)
         captured = capsys.readouterr()
-        assert "{'a': 4}" in captured.out
+        if syntax_highlight:
+            assert "<pre><code class=\"python\">{'a': 4}</code></pre>" in captured.out
+        else:
+            assert "<pre><code>{'a': 4}</code></pre>" in captured.out
 
 
 @pytest.mark.parametrize("keep_stdout", [False, True])
 @pytest.mark.parametrize(
-    "syntax_highlight,expected_result",
+    "align,param_align,expected_used_align",
     [
-        (
-            "python",
-            '<pre><code class="pyreball-code-block python">[1, 2, 3]</code></pre>',
-        ),
-        (
-            None,
-            "<pre><code>[1, 2, 3]</code></pre>",
-        ),
+        ("left", "center", "left"),
+        (None, "right", "right"),
     ],
 )
-def test_print_code_block__file_output(
-    keep_stdout, syntax_highlight, expected_result, capsys, simple_html_file
+@pytest.mark.parametrize(
+    "caption_position,param_caption_position,expected_caption_position",
+    [
+        ("top", "bottom", "top"),
+        (None, "bottom", "bottom"),
+    ],
+)
+@pytest.mark.parametrize(
+    "numbered,param_numbered,expected_used_numbered",
+    [
+        (True, False, True),
+        (None, True, True),
+        (None, False, False),
+    ],
+)
+def test_print_code_block(
+    keep_stdout,
+    align,
+    param_align,
+    expected_used_align,
+    caption_position,
+    param_caption_position,
+    expected_caption_position,
+    numbered,
+    param_numbered,
+    expected_used_numbered,
+    capsys,
+    simple_html_file,
+    pre_test_print_code_block_cleanup,
+    pre_test_check_and_mark_reference_cleanup,
 ):
     def fake_get_parameter_value(key):
         if key == "html_file_path":
             return simple_html_file
         elif key == "keep_stdout":
             return keep_stdout
+        elif key == "align_code_blocks":
+            return param_align
+        elif key == "code_block_captions_position":
+            return param_caption_position
+        elif key == "numbered_code_blocks":
+            return param_numbered
         else:
             return None
+
+    syntax_highlight = None
+    sep = ""
 
     with mock.patch(
         "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        print_code_block("[1, 2, 3]", syntax_highlight=syntax_highlight)
-        with open(simple_html_file, "r") as f:
-            result = f.read()
-            assert result == f"<html>\n{expected_result}\n"
+        with mock.patch(
+            "pyreball.html.code_block",
+            side_effect=lambda x, **kwargs: f"<code>{x}</code>",
+        ):
+            with mock.patch(
+                "pyreball.html._wrap_code_block_html",
+                side_effect=lambda source_code_str, **kwargs: f"<div>{source_code_str}</div>",
+            ) as _wrap_code_block_html_mock:
+                ref = Reference()
+                print_code_block(
+                    "[1, 2, 3]",
+                    caption="cap",
+                    reference=ref,
+                    align=align,
+                    caption_position=caption_position,
+                    numbered=numbered,
+                    syntax_highlight=syntax_highlight,
+                    sep=sep,
+                )
 
-        captured = capsys.readouterr()
-        expected_stdout = expected_result if keep_stdout else ""
-        assert captured.out.strip() == expected_stdout
+                _wrap_code_block_html_mock.assert_called_with(
+                    source_code_str="<code>[1, 2, 3]</code>",
+                    code_block_index=1,
+                    caption="cap",
+                    reference=ref,
+                    align=expected_used_align,
+                    caption_position=expected_caption_position,
+                    numbered=expected_used_numbered,
+                    sep=sep,
+                )
+                # after writing the first block, the index is already incremented
+                assert _code_block_memory["code_block_index"] == 2
+
+                captured = capsys.readouterr()
+                if keep_stdout:
+                    assert "<code>[1, 2, 3]</code>" in captured.out.strip()
+                else:
+                    assert captured.out.strip() == ""
+
+                # check table index if another table is written to html
+                print_code_block("[1, 2, 3]")
+                assert _code_block_memory["code_block_index"] == 3
 
 
 def test_print__stdout(capsys):
@@ -1011,7 +1165,7 @@ def test__prepare_table_html(
         "right": "pyreball-right-aligned",
     }[align]
     assert html_root.findall(
-        f"./div[@class='pyreball-table-fit-content {align_class}']"
+        f"./div[@class='pyreball-block-fit-content {align_class}']"
     )
 
     anchor = "table-123-5" if use_reference else "table-5"
@@ -1138,7 +1292,7 @@ def test_print_table__file_output(
         ) as _prepare_table_html_mock:
             ref = Reference()
 
-            default_function_params = dict(
+            default_function_params: Dict[str, Any] = dict(
                 caption="cap",
                 reference=ref,
                 align="center",

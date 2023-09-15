@@ -25,14 +25,14 @@ img, svg, canvas.marks, div.vega-embed {
     text-align: center;
 }
 
-.pyreball-table-wrapper
+.pyreball-table-wrapper, .pyreball-code-wrapper
 {
     width: 100%;
     margin-top: 30px;
     margin-bottom: 30px;
 }
 
-.pyreball-table-fit-content {
+.pyreball-block-fit-content {
     width: fit-content;
     max-width: 100%;
     margin-top: 10px;
