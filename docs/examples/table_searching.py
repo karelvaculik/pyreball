@@ -10,5 +10,5 @@ df = pd.DataFrame(
 pb.print_table(
     df,
     caption="Table with a search box.",
-    show_search_box=True,
+    search_box=True,
 )

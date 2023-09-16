@@ -1,3 +1,4 @@
+import datetime
 import os
 import re
 import xml.etree.ElementTree as ET
@@ -26,6 +27,7 @@ from pyreball.html import (
     _prepare_altair_image_element,
     _prepare_bokeh_image_element,
     _prepare_caption_element,
+    _prepare_col_alignment_definition,
     _prepare_image_element,
     _prepare_matplotlib_image_element,
     _prepare_plotly_image_element,
@@ -859,7 +861,8 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
     "sortable,"
     "sorting_definition,"
     "paging_sizes,"
-    "show_search_box,"
+    "search_box,"
+    "col_align_def,"
     "datatables_definition,"
     "expected_result",
     [
@@ -872,6 +875,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
             None,
             None,
             False,
+            None,
             None,
             {
                 "paging": False,
@@ -893,6 +897,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
             None,
             False,
             None,
+            None,
             {
                 "paging": False,
                 "scrollCollapse": True,
@@ -913,6 +918,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
             None,
             False,
             None,
+            None,
             {
                 "paging": True,
                 "lengthMenu": ([10, 25, 100, -1], [10, 25, 100, "All"]),
@@ -931,6 +937,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
             None,
             [20, "All"],
             False,
+            None,
             None,
             {
                 "paging": True,
@@ -951,6 +958,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
             None,
             False,
             None,
+            None,
             {
                 "paging": False,
                 "scrollX": True,
@@ -959,7 +967,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
                 "info": False,
             },
         ),
-        # display_option = full; scroll_x = False, show_search_box = True
+        # display_option = full; scroll_x = False, search_box = True
         (
             "full",
             "300px",
@@ -968,6 +976,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
             None,
             None,
             True,
+            None,
             None,
             {
                 "paging": False,
@@ -985,6 +994,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
             None,
             None,
             False,
+            None,
             None,
             {
                 "paging": False,
@@ -1004,12 +1014,39 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
             None,
             False,
             None,
+            None,
             {
                 "paging": False,
                 "scrollX": True,
                 "order": [[1, "asc"]],
                 "searching": False,
                 "info": False,
+            },
+        ),
+        # display_option = full; col_align_def
+        (
+            "full",
+            "300px",
+            True,
+            False,
+            None,
+            None,
+            False,
+            [
+                {"targets": [0, 2], "className": "dt-left"},
+                {"targets": [1, 3], "className": "dt-right"},
+            ],
+            None,
+            {
+                "paging": False,
+                "scrollX": True,
+                "ordering": False,
+                "searching": False,
+                "info": False,
+                "columnDefs": [
+                    {"targets": [0, 2], "className": "dt-left"},
+                    {"targets": [1, 3], "className": "dt-right"},
+                ],
             },
         ),
         # display_option = full; datatables_definition => overrides everything
@@ -1021,6 +1058,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
             None,
             None,
             False,
+            None,
             {"a": "b"},
             {"a": "b"},
         ),
@@ -1034,6 +1072,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
             None,
             None,
             False,
+            None,
             {},
             {},
         ),
@@ -1046,7 +1085,8 @@ def test__gather_datatables_setup(
     sortable,
     sorting_definition,
     paging_sizes,
-    show_search_box,
+    search_box,
+    col_align_def,
     datatables_definition,
     expected_result,
 ):
@@ -1057,10 +1097,135 @@ def test__gather_datatables_setup(
         sortable,
         sorting_definition,
         paging_sizes,
-        show_search_box,
+        search_box,
+        col_align_def,
         datatables_definition,
     )
     assert result == expected_result
+
+
+@pytest.mark.parametrize(
+    "df,index,expected_result",
+    [
+        (
+            pd.DataFrame([(10,)], columns=["a"]),
+            True,
+            [
+                {"targets": [0, 1], "className": "dt-right"},
+            ],
+        ),
+        (
+            pd.DataFrame([(10, "a", 1.3)], columns=["a", "b", "c"]),
+            True,
+            [
+                {"targets": [0, 1, 3], "className": "dt-right"},
+                {"targets": [2], "className": "dt-left"},
+            ],
+        ),
+        (
+            pd.DataFrame([(10, "a", 1.3)], columns=["a", "b", "c"]),
+            False,
+            [
+                {"targets": [0, 2], "className": "dt-right"},
+                {"targets": [1], "className": "dt-left"},
+            ],
+        ),
+        (
+            pd.DataFrame(
+                [("a", bool, datetime.datetime(2000, 1, 1))], columns=["a", "b", "c"]
+            ),
+            True,
+            [
+                {"targets": [0], "className": "dt-right"},
+                {"targets": [1, 2, 3], "className": "dt-left"},
+            ],
+        ),
+    ],
+)
+def test__prepare_col_alignment_definition__col_align_none(df, index, expected_result):
+    assert _prepare_col_alignment_definition(df, None, index) == expected_result
+
+
+@pytest.mark.parametrize(
+    "col_align,index,expected_result",
+    [
+        ("left", False, [{"targets": [0, 1, 2, 3], "className": "dt-left"}]),
+        ("center", False, [{"targets": [0, 1, 2, 3], "className": "dt-center"}]),
+        ("right", False, [{"targets": [0, 1, 2, 3], "className": "dt-right"}]),
+        ("right", True, [{"targets": [0, 1, 2, 3, 4], "className": "dt-right"}]),
+    ],
+)
+def test__prepare_col_alignment_definition__col_align_str(
+    col_align, index, expected_result
+):
+    df = pd.DataFrame([(10, "a", 1.3, "x")], columns=["a", "b", "c", "d"])
+    assert _prepare_col_alignment_definition(df, col_align, index) == expected_result
+
+
+def test__prepare_col_alignment_definition__col_align_str__wrong_value():
+    df = pd.DataFrame([(10, "a", 1.3, "x")], columns=["a", "b", "c", "d"])
+    with pytest.raises(ValueError) as excinfo:
+        _prepare_col_alignment_definition(df, "unsupported")
+    assert "must use only the following values" in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    "col_align,index,expected_result",
+    [
+        (
+            ["left"] * 4,
+            False,
+            [{"targets": [0, 1, 2, 3], "className": "dt-left"}],
+        ),
+        (
+            ["left", "right"] * 2,
+            False,
+            [
+                {"targets": [0, 2], "className": "dt-left"},
+                {"targets": [1, 3], "className": "dt-right"},
+            ],
+        ),
+        (
+            ["left", "right", "center", "center"],
+            False,
+            [
+                {"targets": [0], "className": "dt-left"},
+                {"targets": [1], "className": "dt-right"},
+                {"targets": [2, 3], "className": "dt-center"},
+            ],
+        ),
+        (
+            ["center", "left", "right", "center", "center"],
+            True,
+            [
+                {"targets": [0, 3, 4], "className": "dt-center"},
+                {"targets": [1], "className": "dt-left"},
+                {"targets": [2], "className": "dt-right"},
+            ],
+        ),
+    ],
+)
+def test__prepare_col_alignment_definition__col_align_list(
+    col_align, index, expected_result
+):
+    df = pd.DataFrame([(10, "a", 1.3, "x")], columns=["a", "b", "c", "d"])
+    assert _prepare_col_alignment_definition(df, col_align, index) == expected_result
+
+
+def test__prepare_col_alignment_definition__col_align_list__wrong_size():
+    df = pd.DataFrame([(10, "a", 1.3, "x")], columns=["a", "b", "c", "d"])
+    col_align = ["left", "right", "left"]
+    with pytest.raises(ValueError) as excinfo:
+        _prepare_col_alignment_definition(df, col_align)
+    assert "must have the same length" in str(excinfo.value)
+
+
+def test__prepare_col_alignment_definition__col_align_list__wrong_values():
+    df = pd.DataFrame([(10, "a", 1.3, "x")], columns=["a", "b", "c", "d"])
+    col_align = ["left", "right", "left", "unsupported"]
+    with pytest.raises(ValueError) as excinfo:
+        _prepare_col_alignment_definition(df, col_align, False)
+    assert "must use only the following values" in str(excinfo.value)
 
 
 def test__prepare_table_html__reused_reference_error(
@@ -1173,6 +1338,56 @@ def test__prepare_table_html(
 
 
 @pytest.mark.parametrize(
+    "col_align,set_index,index,expected_col_align_def",
+    [
+        ("center", False, False, [{"targets": [0, 1, 2], "className": "dt-center"}]),
+        ("center", True, False, [{"targets": [0, 1], "className": "dt-center"}]),
+        ("center", True, True, [{"targets": [0, 1, 2], "className": "dt-center"}]),
+        ("left", True, True, [{"targets": [0, 1, 2], "className": "dt-left"}]),
+    ],
+)
+def test__prepare_table_html__col_align(
+    col_align, set_index, index, expected_col_align_def
+):
+    # Just check that col_align_def is obtained correctly for various settings
+    # of col_align and index
+    with mock.patch(
+        "pyreball.html._gather_datatables_setup", return_value=None
+    ) as gather_datatables_setup_mock:
+        params = dict(
+            display_option="full",
+            scroll_y_height="300px",
+            scroll_x=True,
+            sortable=True,
+            sorting_definition=None,
+            paging_sizes=None,
+            search_box=False,
+            datatables_definition=None,
+        )
+        if set_index:
+            params["index"] = index
+
+        _ = _prepare_table_html(
+            df=pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]}),
+            col_align=col_align,
+            caption="mycap",
+            tab_index=5,
+            **params,
+        )
+        gather_datatables_setup_mock.assert_called_with(
+            display_option="full",
+            scroll_y_height="300px",
+            scroll_x=True,
+            sortable=True,
+            sorting_definition=None,
+            paging_sizes=None,
+            search_box=False,
+            col_align_def=expected_col_align_def,
+            datatables_definition=None,
+        )
+
+
+@pytest.mark.parametrize(
     "sizes,expected_result",
     [
         ("20", [20]),
@@ -1238,9 +1453,9 @@ def test_print_table__stdout(capsys, simple_dataframe):
         ("sortable", None, "sortable_tables", False, False),
         ("paging_sizes", [100, 200], "tables_paging_sizes", "20,All", [100, 200]),
         ("paging_sizes", None, "tables_paging_sizes", "20,All", [20, "All"]),
-        ("show_search_box", True, "tables_search_box", False, True),
-        ("show_search_box", None, "tables_search_box", True, True),
-        ("show_search_box", None, "tables_search_box", False, False),
+        ("search_box", True, "tables_search_box", False, True),
+        ("search_box", None, "tables_search_box", True, True),
+        ("search_box", None, "tables_search_box", False, False),
         (
             "datatables_style",
             "display",
@@ -1298,13 +1513,14 @@ def test_print_table__file_output(
                 align="center",
                 caption_position="top",
                 numbered=True,
+                col_align="center",
                 display_option="full",
                 scroll_y_height="300px",
                 scroll_x=True,
                 sortable=False,
                 sorting_definition=sorting_definition,
                 paging_sizes=None,
-                show_search_box=False,
+                search_box=False,
                 datatables_style="display",
                 datatables_definition=None,
                 additional_kwarg=42,

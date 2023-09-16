@@ -4,7 +4,7 @@ import pyreball as pb
 df = pd.DataFrame(
     {
         "name": ["Bob", "Carol", "Alice", "Dave", "Alice"],
-        "age": [23, 5, 22, 54, 18],
+        "age": [23, 5, 2, 54, 18],
     }
 )
 pb.print_table(df, caption="Sortable table", sortable=True)

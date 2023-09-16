@@ -36,13 +36,27 @@ The position can be controlled by `caption_position`  parameter, which can be se
 
 <iframe style="border:2px solid;" src="../examples/table_caption_position.html" height="600" width="100%" title="Iframe Example"></iframe>
 
-## Aligning
+## Aligning Tables
 
 Tables can be horizontally aligned by `align` parameter, as shown in the following code example.
 
 {{ inline_source("docs/examples/table_align.py") }}
 
 <iframe style="border:2px solid;" src="../examples/table_align.html" height="800" width="100%" title="Iframe Example"></iframe>
+
+## Aligning Columns
+
+Numeric columns are aligned to right and columns of other types to left, by default.
+This behaviour can be changed through `col_align` parameter.
+The parameter takes either a string (to set the same alignment for all columns), or a list of strings 
+(to set the alignment of each column individually). 
+When a list is provided and index is displayed, the list must contain also values for the index columns.
+
+
+{{ inline_source("docs/examples/table_align_columns.py") }}
+
+<iframe style="border:2px solid;" src="../examples/table_align_columns.html" height="800" width="100%" title="Iframe Example"></iframe>
+
 
 ## Sorting
 
@@ -60,7 +74,8 @@ The following snippet shows the usage of both parameters.
     Although the columns in `sorting_definition` are indexed from 0, it is necessary to take into account
     also the table index when it is displayed. To hide the index, set `index` parameter 
     of [`print_table()`](../api/pyreball_html/#pyreball.html.print_table) method to `False`. 
-    `index` parameter is one of the `kwargs` parameters that are passed to pandas `to_html()` method.
+    `index` parameter is one of the `kwargs` parameters that are passed to [Pandas](https://pandas.pydata.org/)
+    `to_html()` method.
 
 {{ inline_source("docs/examples/table_sorting.py") }}
 
@@ -95,11 +110,32 @@ showing all entries on a single page.
 
 ## Searching
 
-To allow searching within a table, just set `show_search_box` to `True`.
+To allow searching within a table, just set `search_box` to `True`.
 
 {{ inline_source("docs/examples/table_searching.py") }}
 
 <iframe style="border:2px solid;" src="../examples/table_searching.html" height="360" width="100%" title="Iframe Example"></iframe>
+
+## Complex Headers and Indices
+
+[Pandas](https://pandas.pydata.org/) allows its users to create complex (multi-level) headers and indices.
+Such tables can be also printed into HTML, which creates additional columns and header rows, as can be seen in the
+following example. The code snippet also shows how to display index columns as regular columns.
+
+{{ inline_source("docs/examples/table_multiindex.py") }}
+
+<iframe style="border:2px solid;" src="../examples/table_multiindex.html" height="800" width="100%" title="Iframe Example"></iframe>
+
+The example also shows that when defining sorting on columns via `sorting_definition` parameter,
+one must count all index columns too.
+Index columns must be also taken into account when setting `col_align` parameter.
+
+!!! note
+
+    Pyreball sets `sparsify` parameter of [Pandas](https://pandas.pydata.org/) `to_html()` method to `False`, 
+    because [DataTables](https://datatables.net/) would not be able to display tables with a multi-index correctly,
+    especially not with sortable columns. This is also the reason why the identical `team` values
+    are not merged in the first table above.
 
 ## Styling
 

@@ -54,6 +54,14 @@ img, svg, canvas.marks, div.vega-embed {
     margin-right:0px;
 }
 
+/* Fix DataTables alignment for narrow tables with search box  */
+.dataTables_scroll {
+    width: fit-content;
+    max-width: 100%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
 a.pyreball-anchor-link:link {
     text-decoration: none;
     padding: 0px 20px;

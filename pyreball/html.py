@@ -578,7 +578,8 @@ def _gather_datatables_setup(
     sortable: bool = False,
     sorting_definition: Optional[List[Tuple[int, str]]] = None,
     paging_sizes: Optional[List[Union[int, str]]] = None,
-    show_search_box: bool = False,
+    search_box: bool = False,
+    col_align_def: Optional[List[Dict[str, Any]]] = None,
     datatables_definition: Optional[Dict[str, Any]] = None,
 ) -> Optional[Dict[str, Any]]:
     if datatables_definition is not None:
@@ -603,8 +604,7 @@ def _gather_datatables_setup(
 
     datatables_setup["info"] = False
 
-    # if show_search_box:
-    datatables_setup["searching"] = show_search_box
+    datatables_setup["searching"] = search_box
 
     if sortable or sorting_definition is not None:
         if sorting_definition is None:
@@ -614,7 +614,59 @@ def _gather_datatables_setup(
     else:
         datatables_setup["ordering"] = False
 
+    if col_align_def is not None:
+        datatables_setup["columnDefs"] = col_align_def
+
     return datatables_setup
+
+
+def _check_col_alignment_value(value: str):
+    allowed_values = ["left", "center", "right"]
+    if value not in allowed_values:
+        raise ValueError(
+            "col_align must use only the following values: "
+            f"{', '.join(allowed_values)}."
+        )
+
+
+def _prepare_col_alignment_definition(
+    df: "pandas.DataFrame",
+    col_align: Optional[Union[str, List[str]]] = None,
+    index: bool = True,
+) -> List[Dict[str, Any]]:
+    if index:
+        # when index is shown, we must also work with index columns
+        df = df.reset_index()
+
+    if col_align is None:
+        # Pyreball's default alignment
+        col_align = ["left"] * df.shape[1]
+        for col in df.select_dtypes(include="number").columns:
+            col_align[df.columns.get_loc(col)] = "right"
+    elif isinstance(col_align, str):
+        # All columns have the same alignment
+        _check_col_alignment_value(col_align)
+        return [{"targets": list(range(df.shape[1])), "className": f"dt-{col_align}"}]
+    elif len(col_align) != df.shape[1]:
+        # Alignment definition is a list and the length does not match
+        raise ValueError(
+            "col_align list must have the same length as the column list, "
+            "including any index columns if they are shown too."
+        )
+    else:
+        # it's a list with correct length, just check its values
+        list(map(_check_col_alignment_value, col_align))
+
+    # create alignment mapping in form <align_value> -> <col_indices>
+    mapping: Dict[str, List[int]] = {}
+    for i, al in enumerate(col_align):
+        mapping.setdefault(al, []).append(i)
+
+    # build final col definition for DataTables
+    col_defs = []
+    for key, value in mapping.items():
+        col_defs.append({"targets": value, "className": f"dt-{key}"})
+    return col_defs
 
 
 def _prepare_table_html(
@@ -625,13 +677,14 @@ def _prepare_table_html(
     align: str = "center",
     caption_position: str = "top",
     numbered: bool = True,
+    col_align: Optional[Union[str, List[str]]] = None,
     display_option: str = "full",
     scroll_y_height: str = "300px",
     scroll_x: bool = True,
     sortable: bool = False,
     sorting_definition: Optional[List[Tuple[int, str]]] = None,
     paging_sizes: Optional[List[Union[int, str]]] = None,
-    show_search_box: bool = False,
+    search_box: bool = False,
     datatables_style: Union[str, List[str]] = "display",
     datatables_definition: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
@@ -642,6 +695,10 @@ def _prepare_table_html(
     else:
         table_classes.append(datatables_style)
 
+    col_align_def = _prepare_col_alignment_definition(
+        df=df, col_align=col_align, index=kwargs.get("index", True)
+    )
+
     datatables_setup = _gather_datatables_setup(
         display_option=display_option,
         scroll_y_height=scroll_y_height,
@@ -649,7 +706,8 @@ def _prepare_table_html(
         sortable=sortable,
         sorting_definition=sorting_definition,
         paging_sizes=paging_sizes,
-        show_search_box=show_search_box,
+        search_box=search_box,
+        col_align_def=col_align_def,
         datatables_definition=datatables_definition,
     )
 
@@ -657,6 +715,8 @@ def _prepare_table_html(
         # If border is not set explicitly,
         # turn it off because it would clash with datatables styling
         kwargs["border"] = 0
+
+    kwargs["sparsify"] = False
     df_html = df.to_html(classes=table_classes, **kwargs)
     if reference:
         _check_and_mark_reference(reference)
@@ -713,13 +773,14 @@ def print_table(
     align: Optional[str] = None,
     caption_position: Optional[str] = None,
     numbered: Optional[bool] = None,
+    col_align: Optional[Union[str, List[str]]] = None,
     display_option: Optional[str] = None,
     paging_sizes: Optional[List[Union[int, str]]] = None,
     scroll_y_height: Optional[str] = None,
     scroll_x: Optional[bool] = None,
     sortable: Optional[bool] = None,
     sorting_definition: Optional[List[Tuple[int, str]]] = None,
-    show_search_box: Optional[bool] = None,
+    search_box: Optional[bool] = None,
     datatables_style: Optional[Union[str, List[str]]] = None,
     datatables_definition: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
@@ -741,6 +802,12 @@ def print_table(
             Defaults to settings from config or CLI arguments if None.
         numbered: Whether the caption should be numbered.
             Defaults to settings from config or CLI arguments if None.
+        col_align: Alignment of individual columns. Can be provided as a list
+            of values 'left', 'center', and 'right'. The list must match the
+            number of columns, including the index when displayed.
+            When provided as a simple string, this value is used for all columns.
+            When None, default Pyreball alignment is used, i.e. numeric columns
+            are right-aligned and all other columns left-aligned.
         display_option: How to display table. This option is useful for long tables,
             which should not be displayed fully. Acceptable values are:
             'full' (show the full table), 'scrolling' (show the table in scrolling mode
@@ -767,7 +834,7 @@ def print_table(
             in the form of a list of tuples (<column_index>, <sorting>),
             where <sorting> is either 'asc' or 'desc'.
             When None, the columns are not pre-sorted.
-        show_search_box: Whether to show the search box for the table.
+        search_box: Whether to show the search box for the table.
             Defaults to settings from config or CLI arguments if None.
         datatables_style: One or more class names for styling tables using
             Datatables styling. See https://datatables.net/manual/styling/classes
@@ -776,10 +843,12 @@ def print_table(
         datatables_definition: Custom setup for datatables in the form of a dictionary.
             This dictionary is serialized to json and passed to `DataTable` JavaScript
             object as it is. If set (i.e. not None), values of parameters
-            `display_option`, `scroll_y_height`, `scroll_x`, `sortable`,
-            `sorting_definition`, `paging_sizes`, and `show_search_box` are ignored.
+            `col_align`, `display_option`, `paging_sizes`, `scroll_y_height`,
+            `scroll_x`, `sortable`, `sorting_definition`, and `search_box` are ignored.
             Note that `datatables_style` is independent of this parameter.
-        **kwargs: Other parameters to pandas `to_html()` method.
+        **kwargs: Other parameters to pandas `to_html()` method. Note that parameter
+            `sparsify` is explicitly set to `False` by Pyreball, because tables
+            with multi-index would not be displayed correctly using DataTables library.
     """
     if not get_parameter_value("html_file_path") or get_parameter_value("keep_stdout"):
         builtins.print(df)
@@ -837,9 +906,9 @@ def print_table(
                 get_parameter_value("tables_paging_sizes")
             ),
         )
-        show_search_box = bool(
+        search_box = bool(
             merge_values(
-                primary_value=show_search_box,
+                primary_value=search_box,
                 secondary_value=get_parameter_value("tables_search_box"),
             )
         )
@@ -862,13 +931,14 @@ def print_table(
             align=align,
             caption_position=caption_position,
             numbered=numbered,
+            col_align=col_align,
             display_option=display_option,
             scroll_y_height=scroll_y_height,
             scroll_x=scroll_x,
             sortable=sortable,
             sorting_definition=sorting_definition,
             paging_sizes=paging_sizes,
-            show_search_box=show_search_box,
+            search_box=search_box,
             datatables_style=datatables_style,
             datatables_definition=datatables_definition,
             **kwargs,
