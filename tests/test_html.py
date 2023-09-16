@@ -861,7 +861,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
     "sortable,"
     "sorting_definition,"
     "paging_sizes,"
-    "show_search_box,"
+    "search_box,"
     "col_align_def,"
     "datatables_definition,"
     "expected_result",
@@ -967,7 +967,7 @@ def test__compute_length_menu_for_datatables__invalid_values(paging_sizes):
                 "info": False,
             },
         ),
-        # display_option = full; scroll_x = False, show_search_box = True
+        # display_option = full; scroll_x = False, search_box = True
         (
             "full",
             "300px",
@@ -1085,7 +1085,7 @@ def test__gather_datatables_setup(
     sortable,
     sorting_definition,
     paging_sizes,
-    show_search_box,
+    search_box,
     col_align_def,
     datatables_definition,
     expected_result,
@@ -1097,7 +1097,7 @@ def test__gather_datatables_setup(
         sortable,
         sorting_definition,
         paging_sizes,
-        show_search_box,
+        search_box,
         col_align_def,
         datatables_definition,
     )
@@ -1361,7 +1361,7 @@ def test__prepare_table_html__col_align(
             sortable=True,
             sorting_definition=None,
             paging_sizes=None,
-            show_search_box=False,
+            search_box=False,
             datatables_definition=None,
         )
         if set_index:
@@ -1381,7 +1381,7 @@ def test__prepare_table_html__col_align(
             sortable=True,
             sorting_definition=None,
             paging_sizes=None,
-            show_search_box=False,
+            search_box=False,
             col_align_def=expected_col_align_def,
             datatables_definition=None,
         )
@@ -1453,9 +1453,9 @@ def test_print_table__stdout(capsys, simple_dataframe):
         ("sortable", None, "sortable_tables", False, False),
         ("paging_sizes", [100, 200], "tables_paging_sizes", "20,All", [100, 200]),
         ("paging_sizes", None, "tables_paging_sizes", "20,All", [20, "All"]),
-        ("show_search_box", True, "tables_search_box", False, True),
-        ("show_search_box", None, "tables_search_box", True, True),
-        ("show_search_box", None, "tables_search_box", False, False),
+        ("search_box", True, "tables_search_box", False, True),
+        ("search_box", None, "tables_search_box", True, True),
+        ("search_box", None, "tables_search_box", False, False),
         (
             "datatables_style",
             "display",
@@ -1520,7 +1520,7 @@ def test_print_table__file_output(
                 sortable=False,
                 sorting_definition=sorting_definition,
                 paging_sizes=None,
-                show_search_box=False,
+                search_box=False,
                 datatables_style="display",
                 datatables_definition=None,
                 additional_kwarg=42,

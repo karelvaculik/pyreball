@@ -578,7 +578,7 @@ def _gather_datatables_setup(
     sortable: bool = False,
     sorting_definition: Optional[List[Tuple[int, str]]] = None,
     paging_sizes: Optional[List[Union[int, str]]] = None,
-    show_search_box: bool = False,
+    search_box: bool = False,
     col_align_def: Optional[List[Dict[str, Any]]] = None,
     datatables_definition: Optional[Dict[str, Any]] = None,
 ) -> Optional[Dict[str, Any]]:
@@ -604,8 +604,7 @@ def _gather_datatables_setup(
 
     datatables_setup["info"] = False
 
-    # if show_search_box:
-    datatables_setup["searching"] = show_search_box
+    datatables_setup["searching"] = search_box
 
     if sortable or sorting_definition is not None:
         if sorting_definition is None:
@@ -685,7 +684,7 @@ def _prepare_table_html(
     sortable: bool = False,
     sorting_definition: Optional[List[Tuple[int, str]]] = None,
     paging_sizes: Optional[List[Union[int, str]]] = None,
-    show_search_box: bool = False,
+    search_box: bool = False,
     datatables_style: Union[str, List[str]] = "display",
     datatables_definition: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
@@ -707,7 +706,7 @@ def _prepare_table_html(
         sortable=sortable,
         sorting_definition=sorting_definition,
         paging_sizes=paging_sizes,
-        show_search_box=show_search_box,
+        search_box=search_box,
         col_align_def=col_align_def,
         datatables_definition=datatables_definition,
     )
@@ -781,7 +780,7 @@ def print_table(
     scroll_x: Optional[bool] = None,
     sortable: Optional[bool] = None,
     sorting_definition: Optional[List[Tuple[int, str]]] = None,
-    show_search_box: Optional[bool] = None,
+    search_box: Optional[bool] = None,
     datatables_style: Optional[Union[str, List[str]]] = None,
     datatables_definition: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
@@ -835,7 +834,7 @@ def print_table(
             in the form of a list of tuples (<column_index>, <sorting>),
             where <sorting> is either 'asc' or 'desc'.
             When None, the columns are not pre-sorted.
-        show_search_box: Whether to show the search box for the table.
+        search_box: Whether to show the search box for the table.
             Defaults to settings from config or CLI arguments if None.
         datatables_style: One or more class names for styling tables using
             Datatables styling. See https://datatables.net/manual/styling/classes
@@ -844,8 +843,8 @@ def print_table(
         datatables_definition: Custom setup for datatables in the form of a dictionary.
             This dictionary is serialized to json and passed to `DataTable` JavaScript
             object as it is. If set (i.e. not None), values of parameters
-            `display_option`, `scroll_y_height`, `scroll_x`, `sortable`,
-            `sorting_definition`, `paging_sizes`, and `show_search_box` are ignored.
+            `col_align`, `display_option`, `paging_sizes`, `scroll_y_height`,
+            `scroll_x`, `sortable`, `sorting_definition`, and `search_box` are ignored.
             Note that `datatables_style` is independent of this parameter.
         **kwargs: Other parameters to pandas `to_html()` method. Note that parameter
             `sparsify` is explicitly set to `False` by Pyreball, because tables
@@ -907,9 +906,9 @@ def print_table(
                 get_parameter_value("tables_paging_sizes")
             ),
         )
-        show_search_box = bool(
+        search_box = bool(
             merge_values(
-                primary_value=show_search_box,
+                primary_value=search_box,
                 secondary_value=get_parameter_value("tables_search_box"),
             )
         )
@@ -939,7 +938,7 @@ def print_table(
             sortable=sortable,
             sorting_definition=sorting_definition,
             paging_sizes=paging_sizes,
-            show_search_box=show_search_box,
+            search_box=search_box,
             datatables_style=datatables_style,
             datatables_definition=datatables_definition,
             **kwargs,

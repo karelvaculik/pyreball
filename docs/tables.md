@@ -110,7 +110,7 @@ showing all entries on a single page.
 
 ## Searching
 
-To allow searching within a table, just set `show_search_box` to `True`.
+To allow searching within a table, just set `search_box` to `True`.
 
 {{ inline_source("docs/examples/table_searching.py") }}
 
