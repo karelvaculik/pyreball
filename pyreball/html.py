@@ -349,12 +349,12 @@ def print_div(
 
     Args:
         *values: Zero or more values to be printed into the div.
-        cl: One or more class names to be added to the tag.
+        cl: One or more class names to be added to the <div> tag.
             If string is provided, it is used as it is.
             If a list of strings is provided, the strings are joined with space.
             If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the tag.
+        attrs: Additional attributes to be added to the <div> tag.
             Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
             is converted to `key1="value1" ... keyN="valueN"`.
             To construct boolean HTML attributes, set None for given key.
@@ -422,6 +422,8 @@ def print_code_block(
     numbered: Optional[bool] = None,
     cl: ClParameter = None,
     attrs: AttrsParameter = None,
+    pre_cl: ClParameter = None,
+    pre_attrs: AttrsParameter = None,
     sep: str = "",
     end: str = "\n",
     syntax_highlight: Optional[Literal["python"]] = "python",
@@ -458,6 +460,8 @@ def print_code_block(
             is converted to `key1="value1" ... keyN="valueN"`.
             To construct boolean HTML attributes, set None for given key.
             Any quotes in values are not escaped.
+        pre_cl: The same as `cl` parameter, but for the `<pre>` tag.
+        pre_attrs: The same as `attrs` parameter, but for the `<pre>` tag.
         sep: String separator of the values inside the tag. Defaults to an empty string.
         end: String appended after the tag. Defaults to a newline.
         syntax_highlight: Syntax highlighting language.
@@ -470,6 +474,8 @@ def print_code_block(
         *values,
         cl=cl,
         attrs=attrs,
+        pre_cl=pre_cl,
+        pre_attrs=pre_attrs,
         sep=sep,
         syntax_highlight=syntax_highlight,
     )
