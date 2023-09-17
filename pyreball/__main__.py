@@ -3,6 +3,7 @@ import json
 import os
 import re
 import sys
+import textwrap
 import xml
 from pathlib import Path
 from typing import cast, Dict, List, Optional, Tuple, Union
@@ -259,6 +260,29 @@ def _insert_js_and_css_links(
     return html_content
 
 
+def _insert_inline_highlight_script(html_content: str) -> str:
+    if _contains_class(html_text=html_content, class_name="inline-highlight"):
+        script_text = textwrap.dedent(
+            """
+        <script>
+            $(document).ready(function () {
+                $('code.inline-highlight').each(function (i, block) {
+                    hljs.highlightBlock(block);
+                });
+            });
+        </script>"""
+        )
+        html_content = re.sub(
+            "<!--PYREBALL_INLINE_HIGHLIGHT_SCRIPT-->", script_text, html_content
+        )
+    else:
+        html_content = re.sub(
+            "<!--PYREBALL_INLINE_HIGHLIGHT_SCRIPT-->", "", html_content
+        )
+
+    return html_content
+
+
 def _finish_html_file(
     html_path: Path, include_toc: bool, external_links: Dict[str, List[str]]
 ) -> None:
@@ -277,6 +301,7 @@ def _finish_html_file(
 
     html_content = "".join(lines)
     html_content = _insert_js_and_css_links(html_content, external_links)
+    html_content = _insert_inline_highlight_script(html_content)
 
     with open(html_path, "w") as f:
         f.write(html_content)

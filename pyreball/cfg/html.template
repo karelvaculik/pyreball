@@ -11,13 +11,5 @@
 <body>
 <div class="pyreball-main-container">
 <!--PYREBALL_REPORT_CONTENTS--></div>
-</body>
-<script>
-    // Inline source sode is just in <code> element, so force the formatting on it too:
-    $(document).ready(function () {
-        $('code.inline-highlight').each(function (i, block) {
-            hljs.highlightBlock(block);
-        });
-    });
-</script>
+</body><!--PYREBALL_INLINE_HIGHLIGHT_SCRIPT-->
 </html>
