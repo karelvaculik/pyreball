@@ -962,7 +962,7 @@ def _construct_image_anchor_link(reference: Optional[Reference], fig_index: int)
 
 
 def _wrap_image_element_by_outer_divs(
-    img_element: str, align: str, hidden: bool, img_type: str
+    img_element: str, align: str, img_type: str
 ) -> str:
     img_element = (
         f'<div align="{align}"><div style="display: inline-block;">'
@@ -970,14 +970,7 @@ def _wrap_image_element_by_outer_divs(
         f"</div></div>"
     )
     wrapper_classes = f"pyreball-image-wrapper pyreball-{img_type}-fig"
-    if hidden:
-        return (
-            f'<div class="{wrapper_classes}" style="display: none;">'
-            f"{img_element}"
-            f"</div>"
-        )
-    else:
-        return f'<div class="{wrapper_classes}">{img_element}</div>'
+    return f'<div class="{wrapper_classes}">{img_element}</div>'
 
 
 def _prepare_matplotlib_image_element(
@@ -1107,7 +1100,6 @@ def _print_figure(
     numbered: bool = True,
     matplotlib_format: Optional[str] = None,
     embedded: Optional[bool] = None,
-    hidden: bool = False,
 ) -> None:
     if not get_parameter_value("html_file_path"):
         # only when we don't print to HTML
@@ -1153,7 +1145,6 @@ def _print_figure(
         img_html = _wrap_image_element_by_outer_divs(
             img_element=img_with_caption,
             align=align,
-            hidden=hidden,
             img_type=img_type,
         )
 
@@ -1223,5 +1214,4 @@ def print_figure(
         numbered=numbered,
         matplotlib_format=matplotlib_format,
         embedded=embedded,
-        hidden=False,
     )

@@ -1578,26 +1578,14 @@ def test__construct_image_anchor_link(
 
 
 @pytest.mark.parametrize(
-    "img_element,align,hidden,img_type,expected_result",
+    "img_element,align,img_type,expected_result",
     [
-        (
-            "el1",
-            "center",
-            True,
-            "xyz",
-            (
-                '<div class="pyreball-image-wrapper pyreball-xyz-fig" style="display: none;">'
-                '<div align="center">'
-                '<div style="display: inline-block;">el1</div></div></div>'
-            ),
-        ),
         (
             "el2",
             "left",
-            True,
             "abc",
             (
-                '<div class="pyreball-image-wrapper pyreball-abc-fig" style="display: none;">'
+                '<div class="pyreball-image-wrapper pyreball-abc-fig">'
                 '<div align="left">'
                 '<div style="display: inline-block;">el2</div></div></div>'
             ),
@@ -1605,22 +1593,20 @@ def test__construct_image_anchor_link(
         (
             "el3",
             "right",
-            False,
             "abc",
             (
-                '<div class="pyreball-image-wrapper pyreball-abc-fig"><div align="right">'
+                '<div class="pyreball-image-wrapper pyreball-abc-fig">'
+                '<div align="right">'
                 '<div style="display: inline-block;">el3</div></div></div>'
             ),
         ),
     ],
 )
 def test__wrap_image_element_by_outer_divs(
-    img_element, align, hidden, img_type, expected_result
+    img_element, align, img_type, expected_result
 ):
-    assert (
-        _wrap_image_element_by_outer_divs(img_element, align, hidden, img_type)
-        == expected_result
-    )
+    result = _wrap_image_element_by_outer_divs(img_element, align, img_type)
+    assert result == expected_result
 
 
 def test__prepare_matplotlib_image_element__wrong_format():
@@ -1913,7 +1899,6 @@ def test__print_figure__file_output(
                 numbered=True,
                 matplotlib_format="does_not_matter",
                 embedded=True,
-                hidden=True,
             )
 
             _write_to_html_mock.assert_called_once()
@@ -1928,7 +1913,6 @@ def test__print_figure__file_output(
                 numbered=True,
                 matplotlib_format="does_not_matter",
                 embedded=True,
-                hidden=True,
             )
             assert _graph_memory["fig_index"] == 3
 
@@ -1943,7 +1927,6 @@ def test__print_figure__file_output(
                     numbered=True,
                     matplotlib_format="does_not_matter",
                     embedded=True,
-                    hidden=True,
                 )
             assert "Reference is used for the second time" in str(excinfo.value)
 
@@ -2020,5 +2003,4 @@ def test_print_figure(
                 numbered=expected_used_numbered,
                 matplotlib_format="does_not_matter",
                 embedded=True,
-                hidden=False,
             )

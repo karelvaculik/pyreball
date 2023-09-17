@@ -41,6 +41,7 @@ nav:
       - Code Blocks: code_blocks.md
       - Plotting: plotting.md
       - References: references.md
+      - Custom Building Blocks: custom_functions.md
       - Configuration and CLI Arguments: configuration.md
   - API Documentation:
       - pyreball.html: api/pyreball_html.md
