@@ -129,6 +129,25 @@ def test_code_block__with_syntax_highlight():
     assert code_block("a", "b", sep="\n", syntax_highlight="python") == expected_result
 
 
+def test_code_block__with_syntax_highlight_and_attributes():
+    expected_result = (
+        '<pre class="pre1" pa="pv">'
+        '<code class="code1 python" ca="cv">\na\nb\n</code>'
+        "</pre>"
+    )
+    result = code_block(
+        "a",
+        "b",
+        cl="code1",
+        attrs={"ca": "cv"},
+        pre_cl="pre1",
+        pre_attrs={"pa": "pv"},
+        sep="\n",
+        syntax_highlight="python",
+    )
+    assert result == expected_result
+
+
 def test_code_block__unsupported_syntax_highlight():
     with pytest.raises(ValueError):
         code_block("a", "b", sep="\n", syntax_highlight="my_new_lang")

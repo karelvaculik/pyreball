@@ -142,6 +142,8 @@ def code_block(
     *values: Any,
     cl: ClParameter = None,
     attrs: AttrsParameter = None,
+    pre_cl: ClParameter = None,
+    pre_attrs: AttrsParameter = None,
     sep: str = "",
     syntax_highlight: Optional[Literal["python"]] = "python",
 ) -> str:
@@ -160,11 +162,14 @@ def code_block(
             If a list of strings is provided, the strings are joined with space.
             If None, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
+            A class is also added when `syntax_highlight` is set.
         attrs: Additional attributes to be added to the <code> tag.
             Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
             is converted to `key1="value1" ... keyN="valueN"`.
             To construct boolean HTML attributes,
             set None for given key. Any quotes in values are not escaped.
+        pre_cl: The same as `cl` parameter, but for the `<pre>` tag.
+        pre_attrs: The same as `attrs` parameter, but for the `<pre>` tag.
         sep: String separator of the values. Defaults to an empty string.
         syntax_highlight: Syntax highlighting language.
             Currently only "python" is supported. If None, no highlight is applied.
@@ -176,7 +181,7 @@ def code_block(
     """
     cl = _collect_classes_for_code_strings([], cl, syntax_highlight)
     code_text = tag(*values, name="code", cl=cl, attrs=attrs, sep=sep)
-    return tag(code_text, name="pre")
+    return tag(code_text, name="pre", cl=pre_cl, attrs=pre_attrs)
 
 
 def div(
