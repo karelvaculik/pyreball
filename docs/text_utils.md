@@ -1,6 +1,6 @@
 # Text Utils
 
-To create strings with various HTML elements simply, Pyreball provides various text utility functions.
+To create strings with various HTML elements, Pyreball provides various text utility functions.
 These functions return a string that can be directly printed into the HTML file.
 
 Each function takes zero or more values which are all automatically converted to strings and concatenated with a
@@ -26,8 +26,8 @@ provide parameters `cl`, `attrs` and `sep`. Let's see them in action.
 
 <iframe style="border:2px solid;" src="../examples/text_utils_parameters.html" height="200" width="100%" title="Iframe Example"></iframe>
 
-In particular, we set the class of the first `<div>` to value `text-centered`, for which there is actually an entry in
-included CSS for aligning text to center.
+In particular, we set the class of the first `<div>` to value `pyreball-text-centered`,
+for which there is actually an entry in included CSS for aligning text to center.
 
 In the case of the second `<div>`, we set `style` attribute through `attrs` parameter. Moreover, we set `sep` to `"\n"`,
 which adds newlines to the output HTML file between the elements instead of putting all elements on a single line.
@@ -67,9 +67,8 @@ To turn off the syntax highlighting, set `syntax_highlight` parameter to `None`.
 <iframe style="border:2px solid;" src="../examples/text_utils_code_no_highlight.html" height="100" width="100%" title="Iframe Example"></iframe>
 
 There is also [`print_code_block()`](../api/pyreball_html/#pyreball.html.print_code_block) function that constructs the
-element and prints it directly int the HTML document. Moreover, it can add a caption and align the block horizontally.
-[`print_code_block()`](../api/pyreball_html/#pyreball.html.print_code_block) is demonstrated
-in [`Code Blocks`](../code_blocks/) chapter.
+element and prints it directly into the HTML document. Moreover, it can add a caption and align the block horizontally.
+The function is demonstrated in [`Code Blocks`](../code_blocks/) chapter.
 
 ## Creating Hyperlinks
 
@@ -96,7 +95,7 @@ and [`olist()`](../api/pyreball_text/#pyreball.text.olist) functions, respective
 
 <iframe style="border:2px solid;" src="../examples/text_utils_lists.html" height="250" width="100%" title="Iframe Example"></iframe>
 
-Each value is automatically wrapped into `<li>` element and then the whole groupt is wrapped either to `<ul>` or `<ol>`
+Each value is automatically wrapped into `<li>` element and then the whole group is wrapped either to `<ul>` or `<ol>`
 element, depending on whether [`ulist()`](../api/pyreball_text/#pyreball.text.ulist)
 or [`olist()`](../api/pyreball_text/#pyreball.text.olist) is used.
 Because there are two types of elements used, `cl` and `attrs` parameters are use for the outer `<ul>` or `<ol>`
@@ -112,13 +111,12 @@ below.
 
 Adding a list item without a sublist can be achieved by providing a single value (as in the case of item `A` in the
 example above), or packing it into a tuple with an empty string (as in the case of `D` item). The latter approach might
-be more appropriate when the data are generated automatically and the types of all items needs to be the same.
+be more appropriate when the data are generated automatically and the types of all items need to be the same.
 
 ## Custom HTML Tags
 
 It is possible to use [`tag()`](../api/pyreball_text/#pyreball.text.tag) function to create tags that are not
-implemented
-directly by `pyreball`.
+implemented directly by Pyreball.
 
 For example, paired tag `<pre>` and unpaired tag `<hr>` can be created and used as follows:
 

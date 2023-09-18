@@ -8,9 +8,7 @@ from pyreball.utils.logger import get_logger
 logger = get_logger()
 
 
-def get_html_begin_and_end(
-    template_path: Path, title: str, css_definitions: str
-) -> Tuple[str, str]:
+def get_html(template_path: Path, title: str, css_definitions: str) -> Tuple[str, str]:
     with open(template_path, "r") as f:
         html_text = f.read()
         html_start, html_end = html_text.split("<!--PYREBALL_REPORT_CONTENTS-->")

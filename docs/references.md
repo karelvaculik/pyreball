@@ -26,13 +26,13 @@ The code above creates a reference object with default link text `My Table` and 
 table.
 The code also creates three instances of the same link pointing to the
 table. [`__str__()`](../api/pyreball_html/#pyreball.html.Reference.__str__) method uses the default string
-that we passed to the constructor.
+that we passed to the [`Reference`](../api/pyreball_html/#pyreball.html.Reference) constructor.
 The last link was created by [`__call__()`](../api/pyreball_html/#pyreball.html.Reference.__call__) method, which takes
 a parameter that is used to override the default link
 text.
 
 When default link text is not provided through the constructor, Pyreball uses table numbers as texts for links pointing
-to tables. The same is applied for links pointing to figures. 
+to tables. The same is applied for links pointing to figures or code blocks. 
 In case of headings, the default link text would be the text of the heading itself.
 
 The artificial example below demonstrates some of these features.

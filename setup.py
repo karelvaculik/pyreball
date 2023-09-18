@@ -35,7 +35,14 @@ setup(
     author="Karel Vaculik",
     author_email="vaculik.dev@gmail.com",
     packages=find_packages(exclude=("examples", "tests")),
-    package_data={"pyreball": ["cfg/html_begin.template", "cfg/html_end.template"]},
+    package_data={
+        "pyreball": [
+            "cfg/config.ini",
+            "cfg/css.template",
+            "cfg/external_links.ini",
+            "cfg/html.template",
+        ]
+    },
     include_package_data=True,
     tests_require=test_required + examples_required,
     entry_points={

@@ -56,6 +56,8 @@ from pyreball.html import (
     set_title,
 )
 
+MODULE_PATH = "pyreball.html"
+
 
 @pytest.fixture
 def simple_html_file(tmpdir):
@@ -163,7 +165,7 @@ def test__check_and_mark_reference(pre_test_check_and_mark_reference_cleanup):
 
 
 def test_set_title__stdout(capsys):
-    with mock.patch("pyreball.html.get_parameter_value", return_value=False):
+    with mock.patch(f"{MODULE_PATH}.get_parameter_value", return_value=False):
         set_title("my title")
         captured = capsys.readouterr()
         assert captured.out.strip() == "my title"
@@ -183,7 +185,7 @@ def test_set_title__file_output(keep_stdout, capsys, simple_html_file):
         f.write("<title>old title</title>\n</html>")
 
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         set_title("new title with more words")
         with open(simple_html_file, "r") as f:
@@ -202,7 +204,7 @@ def test__write_to_html(simple_html_file):
             return simple_html_file
 
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         _write_to_html("<div>")
         with open(simple_html_file, "r") as f:
@@ -273,7 +275,7 @@ def test__print_heading__stdout(capsys, pre_test_print_heading_cleanup):
 
     # when keep_stdout is set on
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         _print_heading("simple heading", level=3)
         captured = capsys.readouterr()
@@ -281,7 +283,7 @@ def test__print_heading__stdout(capsys, pre_test_print_heading_cleanup):
 
     # when keep_stdout is set off, but we don't have html file either
     with mock.patch(
-        "pyreball.html.get_parameter_value",
+        f"{MODULE_PATH}.get_parameter_value",
         side_effect=fake_get_parameter_value_different,
     ):
         _print_heading("another heading", level=5)
@@ -308,7 +310,7 @@ def test_print_h1_h6__file_output__no_numbers(
             return None
 
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         if use_reference:
             ref = Reference()
@@ -367,7 +369,7 @@ def test_print_h1_h6__file_output__with_numbers(
             return key == "numbered_headings"
 
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         if use_reference:
             ref = Reference()
@@ -428,7 +430,7 @@ def test_print_div__stdout(capsys):
 
     # when keep_stdout is set on
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         print_div("arbitrary paragraph\nsecond line")
         captured = capsys.readouterr()
@@ -436,7 +438,7 @@ def test_print_div__stdout(capsys):
 
     # when keep_stdout is set off, but we don't have html file either
     with mock.patch(
-        "pyreball.html.get_parameter_value",
+        f"{MODULE_PATH}.get_parameter_value",
         side_effect=fake_get_parameter_value_different,
     ):
         print_div("another paragraph\nsecond line")
@@ -455,7 +457,7 @@ def test_print_div__file_output(keep_stdout, capsys, simple_html_file):
             return None
 
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         print_div("new\nparagraph")
         expected_div_element = "<div>new\nparagraph</div>"
@@ -520,7 +522,7 @@ def test__wrap_code_block_html(
     expected_result,
 ):
     with mock.patch(
-        "pyreball.html._prepare_caption_element", return_value="<span>caption</span>"
+        f"{MODULE_PATH}._prepare_caption_element", return_value="<span>caption</span>"
     ) as prepare_caption_element_mock:
         if use_reference:
             reference = Reference()
@@ -568,7 +570,7 @@ def test_print_code_block__stdout(syntax_highlight, capsys):
 
     # when keep_stdout is set on
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         print_code_block("[1, 2, 3]", syntax_highlight=syntax_highlight)
         captured = capsys.readouterr()
@@ -579,7 +581,7 @@ def test_print_code_block__stdout(syntax_highlight, capsys):
 
     # when keep_stdout is set off, but we don't have html file either
     with mock.patch(
-        "pyreball.html.get_parameter_value",
+        f"{MODULE_PATH}.get_parameter_value",
         side_effect=fake_get_parameter_value_different,
     ):
         print_code_block("{'a': 4}", syntax_highlight=syntax_highlight)
@@ -647,14 +649,14 @@ def test_print_code_block(
     sep = ""
 
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         with mock.patch(
-            "pyreball.html.code_block",
+            f"{MODULE_PATH}.code_block",
             side_effect=lambda x, **kwargs: f"<code>{x}</code>",
         ):
             with mock.patch(
-                "pyreball.html._wrap_code_block_html",
+                f"{MODULE_PATH}._wrap_code_block_html",
                 side_effect=lambda source_code_str, **kwargs: f"<div>{source_code_str}</div>",
             ) as _wrap_code_block_html_mock:
                 ref = Reference()
@@ -705,7 +707,7 @@ def test_print__stdout(capsys):
 
     # when keep_stdout is set on
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         print_html("<p><b>whatever</b></p>")
         captured = capsys.readouterr()
@@ -713,7 +715,7 @@ def test_print__stdout(capsys):
 
     # when keep_stdout is set off, but we don't have html file either
     with mock.patch(
-        "pyreball.html.get_parameter_value",
+        f"{MODULE_PATH}.get_parameter_value",
         side_effect=fake_get_parameter_value_different,
     ):
         print_html("<h1>another string</h1>")
@@ -769,7 +771,7 @@ def test_print__file_output(
             return None
 
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         print_html(*values, sep=sep, end=end)
         with open(simple_html_file, "r") as f:
@@ -1352,7 +1354,7 @@ def test__prepare_table_html__col_align(
     # Just check that col_align_def is obtained correctly for various settings
     # of col_align and index
     with mock.patch(
-        "pyreball.html._gather_datatables_setup", return_value=None
+        f"{MODULE_PATH}._gather_datatables_setup", return_value=None
     ) as gather_datatables_setup_mock:
         params = dict(
             display_option="full",
@@ -1414,7 +1416,7 @@ def test_print_table__stdout(capsys, simple_dataframe):
 
     # when keep_stdout is set on
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         print_table(simple_dataframe)
         captured = capsys.readouterr()
@@ -1422,7 +1424,7 @@ def test_print_table__stdout(capsys, simple_dataframe):
 
     # when keep_stdout is set off, but we don't have html file either
     with mock.patch(
-        "pyreball.html.get_parameter_value",
+        f"{MODULE_PATH}.get_parameter_value",
         side_effect=fake_get_parameter_value_different,
     ):
         print_table(simple_dataframe)
@@ -1500,10 +1502,10 @@ def test_print_table__file_output(
             return None
 
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         with mock.patch(
-            "pyreball.html._prepare_table_html", return_value="<table>x</table>"
+            f"{MODULE_PATH}._prepare_table_html", return_value="<table>x</table>"
         ) as _prepare_table_html_mock:
             ref = Reference()
 
@@ -1616,7 +1618,7 @@ def test__prepare_matplotlib_image_element__wrong_format():
 
 
 def test__prepare_matplotlib_image_element__unsupported_param_values():
-    with mock.patch("pyreball.html.get_parameter_value", return_value=False):
+    with mock.patch(f"{MODULE_PATH}.get_parameter_value", return_value=False):
         with pytest.raises(RuntimeError) as excinfo:
             _prepare_matplotlib_image_element(mock.Mock(), 0, "png", False)
         assert "Failed to create a matplotlib image." in str(excinfo.value)
@@ -1672,7 +1674,7 @@ def test__prepare_matplotlib_image_element(
     fig.savefig.side_effect = fake_savefig
 
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         if expected_used_embedded and expected_used_image_format != "svg":
             with pytest.raises(ValueError) as excinfo:
@@ -1737,7 +1739,7 @@ def test__prepare_image_element__unknown_figure_type():
 
 
 @mock.patch(
-    "pyreball.html._prepare_matplotlib_image_element", return_value="img_element"
+    f"{MODULE_PATH}._prepare_matplotlib_image_element", return_value="img_element"
 )
 def test__prepare_image_element__matplotlib(_prepare_matplotlib_image_element_mock):
     fig, _ = plt.subplots()
@@ -1751,7 +1753,7 @@ def test__prepare_image_element__matplotlib(_prepare_matplotlib_image_element_mo
 
 
 @mock.patch(
-    "pyreball.html._prepare_matplotlib_image_element", return_value="img_element"
+    f"{MODULE_PATH}._prepare_matplotlib_image_element", return_value="img_element"
 )
 def test__prepare_image_element__seaborn(
     _prepare_matplotlib_image_element_mock, simple_dataframe
@@ -1766,7 +1768,7 @@ def test__prepare_image_element__seaborn(
     assert result == ("img_element", "matplotlib")
 
 
-@mock.patch("pyreball.html._prepare_altair_image_element", return_value="img_element")
+@mock.patch(f"{MODULE_PATH}._prepare_altair_image_element", return_value="img_element")
 @pytest.mark.parametrize(
     "fig",
     [
@@ -1787,7 +1789,7 @@ def test__prepare_image_element__altair(_prepare_altair_image_element_mock, fig)
     assert result == ("img_element", "altair")
 
 
-@mock.patch("pyreball.html._prepare_plotly_image_element", return_value="img_element")
+@mock.patch(f"{MODULE_PATH}._prepare_plotly_image_element", return_value="img_element")
 def test__prepare_image_element__plotly(
     _prepare_plotly_image_element_mock, simple_dataframe
 ):
@@ -1799,7 +1801,7 @@ def test__prepare_image_element__plotly(
     assert result == ("img_element", "plotly")
 
 
-@mock.patch("pyreball.html._prepare_bokeh_image_element", return_value="img_element")
+@mock.patch(f"{MODULE_PATH}._prepare_bokeh_image_element", return_value="img_element")
 def test__prepare_image_element__bokeh(
     _prepare_bokeh_image_element_mock, simple_dataframe
 ):
@@ -1826,14 +1828,14 @@ def test__print_figure__stdout__bokeh(simple_dataframe):
     with mock.patch("bokeh.plotting.show") as show_mock:
         # when keep_stdout is set on
         with mock.patch(
-            "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+            f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
         ):
             _print_figure(fig)
             show_mock.assert_called_once_with(fig)
 
         # when keep_stdout is set off, but we don't have html file either
         with mock.patch(
-            "pyreball.html.get_parameter_value",
+            f"{MODULE_PATH}.get_parameter_value",
             side_effect=fake_get_parameter_value_different,
         ):
             _print_figure(fig)
@@ -1854,14 +1856,14 @@ def test__print_figure__stdout__not_bokeh(simple_dataframe):
         fig = alt.Chart(simple_dataframe)
         # when keep_stdout is set on
         with mock.patch(
-            "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+            f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
         ):
             _print_figure(fig)
             show_mock.assert_called_once()
 
         # when keep_stdout is set off, but we don't have html file either
         with mock.patch(
-            "pyreball.html.get_parameter_value",
+            f"{MODULE_PATH}.get_parameter_value",
             side_effect=fake_get_parameter_value_different,
         ):
             _print_figure(fig)
@@ -1884,9 +1886,9 @@ def test__print_figure__file_output(
             return None
 
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        with mock.patch("pyreball.html._write_to_html") as _write_to_html_mock:
+        with mock.patch(f"{MODULE_PATH}._write_to_html") as _write_to_html_mock:
             fig = alt.Chart(simple_dataframe).mark_bar().encode(x="x2", y="x1")
             ref = Reference()
             ref.id = "id123"
@@ -1978,9 +1980,9 @@ def test_print_figure(
             return None
 
     with mock.patch(
-        "pyreball.html.get_parameter_value", side_effect=fake_get_parameter_value
+        f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
-        with mock.patch("pyreball.html._print_figure") as _print_figure_mock:
+        with mock.patch(f"{MODULE_PATH}._print_figure") as _print_figure_mock:
             ref = Reference()
             fig = alt.Chart(simple_dataframe).mark_bar().encode(x="x2", y="x1")
             print_figure(

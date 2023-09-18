@@ -22,7 +22,7 @@ from pyreball._common import AttrsParameter, ClParameter
 from pyreball.constants import NON_BREAKABLE_SPACE, PILCROW_SIGN
 
 from pyreball.text import code_block, div
-from pyreball.utils.utils import get_parameter_value, make_sure_dir_exists, merge_values
+from pyreball.utils.param import get_parameter_value, make_sure_dir_exists, merge_values
 
 if TYPE_CHECKING:
     # needed for mypy

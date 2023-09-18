@@ -6,7 +6,7 @@ from unittest import mock
 
 import pytest
 
-from pyreball.utils.utils import (
+from pyreball.utils.param import (
     _map_env_value,
     _matches_paging_sizes_string,
     carefully_remove_directory_if_exists,
@@ -26,6 +26,8 @@ from pyreball.utils.utils import (
     StringParameter,
     Substitutor,
 )
+
+MODULE_PATH = "pyreball.utils.param"
 
 
 @pytest.fixture
@@ -347,7 +349,7 @@ def test_get_file_config__correct_specification(simple_parameter_specifications)
         "page_width": 20,
         "paging_sizes": "10,25,100,All",
     }
-    with mock.patch("pyreball.utils.utils.read_file_config", return_value=config):
+    with mock.patch(f"{MODULE_PATH}.read_file_config", return_value=config):
         config_parameters = get_file_config(
             filename="does_not_matter",
             parameter_specifications=simple_parameter_specifications,
@@ -362,7 +364,7 @@ def test_get_file_config__incorrect_specification(
     caplog.set_level(logging.ERROR)
     config = configparser.ConfigParser()
     config["unknown"] = {"organize": "yes"}
-    with mock.patch("pyreball.utils.utils.read_file_config", return_value=config):
+    with mock.patch(f"{MODULE_PATH}.read_file_config", return_value=config):
         with pytest.raises(SystemExit):
             get_file_config(
                 filename="does_not_matter",
@@ -390,7 +392,7 @@ def test_get_external_links_from_config__correct_specification():
         "jquery": ["h"],
         "plotly": ["i"],
     }
-    with mock.patch("pyreball.utils.utils.read_file_config", return_value=config):
+    with mock.patch(f"{MODULE_PATH}.read_file_config", return_value=config):
         result = get_external_links_from_config(
             filename="does_not_matter",
             directory=Path("/does_not_matter"),
@@ -412,7 +414,7 @@ def test_get_external_links_from_config__incorrect_section(
         "jquery": "\nh",
         "plotly": "\ni",
     }
-    with mock.patch("pyreball.utils.utils.read_file_config", return_value=config):
+    with mock.patch(f"{MODULE_PATH}.read_file_config", return_value=config):
         with pytest.raises(SystemExit):
             get_external_links_from_config(
                 filename="does_not_matter",
@@ -431,7 +433,7 @@ def test_get_external_links_from_config__incorrect_keys(
         "altair": "\na\nb",
         "bokeh": "\nc\nd\n",
     }
-    with mock.patch("pyreball.utils.utils.read_file_config", return_value=config):
+    with mock.patch(f"{MODULE_PATH}.read_file_config", return_value=config):
         with pytest.raises(SystemExit):
             get_external_links_from_config(
                 filename="does_not_matter",
@@ -533,7 +535,7 @@ def test_make_sure_dir_exists(tmpdir):
     assert os.path.exists(directory)
 
 
-@mock.patch("pyreball.utils.utils.shutil")
+@mock.patch(f"{MODULE_PATH}.shutil")
 def test_carefully_remove_directory_if_exists__doesnt_exist(shutil_mock, tmpdir):
     directory = Path(tmpdir / "whatever")
     assert not directory.exists()
@@ -541,7 +543,7 @@ def test_carefully_remove_directory_if_exists__doesnt_exist(shutil_mock, tmpdir)
     shutil_mock.rmtree.assert_not_called()
 
 
-@mock.patch("pyreball.utils.utils.shutil")
+@mock.patch(f"{MODULE_PATH}.shutil")
 def test_carefully_remove_directory_if_exists__error_when_deleting(shutil_mock, tmpdir):
     shutil_mock.rmtree.side_effect = OSError
     directory = Path(tmpdir / "whatever")

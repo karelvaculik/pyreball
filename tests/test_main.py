@@ -21,9 +21,6 @@ from pyreball.constants import (
 )
 
 
-MODULE_PATH = "pyreball.__main__"
-
-
 @pytest.mark.parametrize(
     "lines,expected_result",
     [

@@ -30,7 +30,7 @@ function [`print_div()`](../api/pyreball_html/#pyreball.html.print_div):
 
 [`print_div()`](../api/pyreball_html/#pyreball.html.print_div) function combines
 [`print()`](../api/pyreball_html/#pyreball.html.print) and [`div()`](../api/pyreball_text/#pyreball.text.div) function.
-[`div()`](../api/pyreball_text/#pyreball.text.div) is one of the text util functions which are demonstrated in
+[`div()`](../api/pyreball_text/#pyreball.text.div) is one of the text util functions, which are demonstrated in
 [`Text Utils`](../text_utils/) chapter.
 
 ## Adding a Title
@@ -61,7 +61,7 @@ Pyreball also creates a table of contents with links to individual headings.
 Moreover, it adds a [pilcrow sign](https://en.wikipedia.org/wiki/Pilcrow) to each heading to create an anchor.
 
 The table of contents, as well as heading numbers can be turned off by using either
-Pyreball's [CLI parameters](../cli_parameters/) or [config file](../config_file/).
+[Pyreball's CLI arguments or config file](../configuration/).
 
 ## Title vs. Headings
 
@@ -70,12 +70,13 @@ and [`print_h1()`](../api/pyreball_html/#pyreball.html.print_h1), ...,
 [`print_h6()`](../api/pyreball_html/#pyreball.html.print_h6) functions is
 that [`set_title()`](../api/pyreball_html/#pyreball.html.set_title) can be applied anywhere and it always changes the
 title at the very beginning of the document, whereas [`print_h1()`](../api/pyreball_html/#pyreball.html.print_h1), ...,
-[`print_h6()`](../api/pyreball_html/#pyreball.html.print_h6) functions create headings sequentially as they are called.
+[`print_h6()`](../api/pyreball_html/#pyreball.html.print_h6) functions create headings in order they are called.
 
 Moreover, title created by [`set_title()`](../api/pyreball_html/#pyreball.html.set_title) is not included in the table
 of contents and it also sets the value of `<title>` element.
 
-Last, but not least, when title is set, it is also used instead of the `Table of Contents` heading, see example below.
+Last but not least, when title is set, it is also used instead of the `Table of Contents` heading, 
+see the example below.
 
 {{ inline_source("docs/examples/basic_print_title_with_headings.py") }}
 

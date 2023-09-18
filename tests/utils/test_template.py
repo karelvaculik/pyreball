@@ -3,10 +3,10 @@ from pathlib import Path
 
 import pytest
 
-from pyreball.utils.template_utils import get_css, get_html_begin_and_end
+from pyreball.utils.template import get_css, get_html
 
 
-def test_get_html_begin_and_end(tmpdir):
+def test_get_html(tmpdir):
     filename = "styles"
     template_path = Path(tmpdir) / filename
     with open(template_path, "w") as f:
@@ -16,7 +16,7 @@ def test_get_html_begin_and_end(tmpdir):
             "<!--PYREBALL_REPORT_CONTENTS-->"
             "</html>"
         )
-    result_begin, result_end = get_html_begin_and_end(
+    result_begin, result_end = get_html(
         template_path=template_path,
         title="t1",
         css_definitions="c1",

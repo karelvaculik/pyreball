@@ -59,3 +59,7 @@ pyreball report_chart.py
 `report_chart.html` should look like this:
 
 <iframe style="border:2px solid;" src="examples/example_init_deps.html" height="800" width="100%" title="Iframe Example"></iframe>
+
+## Next Steps
+
+Continue with [Basic Printing](./basic_printing/) chapter to explore more features and examples.

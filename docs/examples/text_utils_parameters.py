@@ -1,7 +1,7 @@
 import pyreball as pb
 
 pb.print(
-    pb.div("Centered block of text", cl="text-centered"),
+    pb.div("Centered block of text", cl="pyreball-text-centered"),
     pb.div(
         "Highlighted block of text",
         "<br>",

@@ -19,8 +19,7 @@ from pyreball.constants import (
     STYLES_TEMPLATE_FILENAME,
 )
 from pyreball.utils.logger import get_logger
-from pyreball.utils.template_utils import get_css, get_html_begin_and_end
-from pyreball.utils.utils import (
+from pyreball.utils.param import (
     carefully_remove_directory_if_exists,
     check_and_fix_parameters,
     check_paging_sizes_string_parameter,
@@ -32,6 +31,7 @@ from pyreball.utils.utils import (
     StringParameter,
     Substitutor,
 )
+from pyreball.utils.template import get_css, get_html
 
 logger = get_logger()
 
@@ -676,7 +676,7 @@ def main() -> None:
         page_width=cast(int, parameters["page_width"]),
     )
 
-    html_begin, html_end = get_html_begin_and_end(
+    html_begin, html_end = get_html(
         template_path=Path(
             pkg_resources.resource_filename("pyreball", f"cfg/{HTML_TEMPLATE_FILENAME}")
         ),
