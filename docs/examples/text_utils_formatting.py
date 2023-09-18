@@ -1,5 +1,3 @@
 import pyreball as pb
 
-pb.print(
-    f"This line contains both {pb.bold('bold')} and {pb.em('emphasized')} text."
-)
+pb.print(f"A line with {pb.bold('bold')} and {pb.em('emphasized')} text.")
