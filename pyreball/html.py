@@ -88,7 +88,7 @@ class Reference:
             default_text: Default text of the link.
                 This text can be overriden by parameter of `__call__` method.
                 If not provided, Pyreball automatically inserts a text.
-                For tables and images, their number is used.
+                For tables, images and code blocks, their number is used.
                 For headings, their text is used.
         """
         self.id = f"id{random.getrandbits(64)}"
@@ -96,7 +96,7 @@ class Reference:
 
     def __str__(self) -> str:
         """
-        Create a link string.
+        Create a link string with default text.
 
         Returns:
             Link string.
@@ -349,15 +349,15 @@ def print_div(
 
     Args:
         *values: Zero or more values to be printed into the div.
-        cl: One or more class names to be added to the <div> tag.
-            If string is provided, it is used as it is.
+        cl: One or more class names to be added to the `<div>` tag.
+            If a string is provided, it is used as it is.
             If a list of strings is provided, the strings are joined with space.
-            If None, no class is added.
+            If `None`, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the <div> tag.
+        attrs: Additional attributes to be added to the `<div>` tag.
             Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
             is converted to `key1="value1" ... keyN="valueN"`.
-            To construct boolean HTML attributes, set None for given key.
+            To construct boolean HTML attributes, set `None` for given key.
             Any quotes in values are not escaped.
         sep: String separator of the values inside the tag. Defaults to an empty string.
         end: String appended after the tag. Defaults to a newline.
@@ -435,39 +435,37 @@ def print_code_block(
     It is possible to highlight the code syntax by setting `syntax_highlight`
     parameter to an appropriate string.
 
-    This function is a shortcut for `code_block()` and `print()`.
-
     Args:
         *values: Zero or more values to be enclosed in the tag.
             All values are converted to strings.
         caption: Text caption.
         reference: Reference object.
         align: How to align the code block horizontally.
-            Acceptable values are 'left', 'center', and 'right'.
-            Defaults to settings from config or CLI arguments if None.
+            Acceptable values are `'left'`, `'center'`, and `'right'`.
+            Defaults to settings from config or CLI arguments if `None`.
         caption_position: Where to place the caption.
-            Acceptable values are 'top', and 'bottom'.
-            Defaults to settings from config or CLI arguments if None.
+            Acceptable values are `'top'`, and `'bottom'`.
+            Defaults to settings from config or CLI arguments if `None`.
         numbered: Whether the caption should be numbered.
-            Defaults to settings from config or CLI arguments if None.
-        cl: One or more class names to be added to the <code> tag.
-            If string is provided, it is used as it is.
+            Defaults to settings from config or CLI arguments if `None`.
+        cl: One or more class names to be added to the `<code>` tag.
+            If a string is provided, it is used as it is.
             If a list of strings is provided, the strings are joined with space.
-            If None, no class is added.
+            If `None`, no class is added.
             If an empty list is provided, class attribute is added with an empty string.
-        attrs: Additional attributes to be added to the <code> tag.
+        attrs: Additional attributes to be added to the `<code>` tag.
             Dictionary `{"key1": "value1", ..., "keyN": "valueN"}`
             is converted to `key1="value1" ... keyN="valueN"`.
-            To construct boolean HTML attributes, set None for given key.
+            To construct boolean HTML attributes, set `None` for given key.
             Any quotes in values are not escaped.
         pre_cl: The same as `cl` parameter, but for the `<pre>` tag.
         pre_attrs: The same as `attrs` parameter, but for the `<pre>` tag.
         sep: String separator of the values inside the tag. Defaults to an empty string.
         end: String appended after the tag. Defaults to a newline.
         syntax_highlight: Syntax highlighting language.
-            Currently only "python" is supported. If None,
+            Currently only `'python'` is supported. If `None`,
             no highlight is applied. When highlight is turned on,
-            class "<language>" is added to the `<code>` element.
+            language name is added to the `<code>` element as a class.
     """
 
     source_code_str = code_block(
@@ -793,55 +791,54 @@ def print_table(
 ) -> None:
     """Print pandas DataFrame into HTML.
 
-    The sortable tables are based on
-    https://datatables.net/examples/basic_init/zero_configuration.html.
+    It uses DataTables JavaScript library to display the table.
 
     Args:
         df: Data frame to be printed.
         caption: Text caption.
         reference: Reference object.
         align: How to align the table horizontally.
-            Acceptable values are 'left', 'center', and 'right'.
-            Defaults to settings from config or CLI arguments if None.
+            Acceptable values are `'left'`, `'center'`, and `'right'`.
+            Defaults to settings from config or CLI arguments if `None`.
         caption_position: Where to place the caption.
-            Acceptable values are 'top', and 'bottom'.
-            Defaults to settings from config or CLI arguments if None.
+            Acceptable values are `'top'`, and `'bottom'`.
+            Defaults to settings from config or CLI arguments if `None`.
         numbered: Whether the caption should be numbered.
-            Defaults to settings from config or CLI arguments if None.
+            Defaults to settings from config or CLI arguments if `None`.
         col_align: Alignment of individual columns. Can be provided as a list
-            of values 'left', 'center', and 'right'. The list must match the
+            of values `'left'`, `'center'`, and `'right'`. The list must match the
             number of columns, including the index when displayed.
             When provided as a simple string, this value is used for all columns.
-            When None, default Pyreball alignment is used, i.e. numeric columns
+            When `None`, default Pyreball alignment is used, i.e. numeric columns
             are right-aligned and all other columns left-aligned.
-        display_option: How to display table. This option is useful for long tables,
+        display_option: How to display the table. This option is useful for long tables,
             which should not be displayed fully. Acceptable values are:
-            'full' (show the full table), 'scrolling' (show the table in scrolling mode
-            on y-axis), 'paging' (show the table in paging mode).
-            Defaults to settings from config or CLI arguments if None.
+            `'full'` (show the full table), `'scrolling'` (show the table
+            in scrolling mode on y-axis), `'paging'` (show the table in paging mode).
+            Defaults to settings from config or CLI arguments if `None`.
         paging_sizes: A list of page sizes to display in paging mode.
             Allowed values in the list are integer values and string
-            "All" (the case is not important).
-            When `display_option` is not `"paging"`, the value is ignored.
-            Defaults to settings from config or CLI arguments if None.
-            If it still remains None, values `[10, 25, 100, "All"]` are used.
+            `'All'` (the case is not important).
+            When `display_option` is not `'paging'`, the value is ignored.
+            Defaults to settings from config or CLI arguments if `None`.
+            If it still remains `None`, values `[10, 25, 100, "All"]` are used.
         scroll_y_height: Height of the tables when `display_option` is set to
-            `"scrolling"`. Any string compatible with CSS sizing can be used,
-            e.g. "300px", "20em", etc. Ignored with other display options.
-            Defaults to settings from config or CLI arguments if None.
-        scroll_x: Whether to allow scrolling on the x-axis. If set to False,
+            `'scrolling'`. Any string compatible with CSS sizing can be used,
+            e.g. `'300px'`, `'20em'`, etc. Ignored with other display options.
+            Defaults to settings from config or CLI arguments if `None`.
+        scroll_x: Whether to allow scrolling on the x-axis. If set to `False`,
             a wide table is allowed to overflow the main container.
-            It is recommended to set this to True, especially with
-            display_option="scrolling", because otherwise the table header
+            It is recommended to set this to `True`, especially with
+            `display_option='scrolling'`, because otherwise the table header
             won't interact properly when scrolling horizontally.
         sortable: Whether to allow sortable columns.
-            Defaults to settings from config or CLI arguments if None.
+            Defaults to settings from config or CLI arguments if `None`.
         sorting_definition: How to sort the table columns initially,
-            in the form of a list of tuples (<column_index>, <sorting>),
-            where <sorting> is either 'asc' or 'desc'.
-            When None, the columns are not pre-sorted.
+            in the form of a list of tuples `(<column_index>, <sorting>)`,
+            where `<sorting>` is either `'asc'` or `'desc'`.
+            When `None`, the columns are not pre-sorted.
         search_box: Whether to show the search box for the table.
-            Defaults to settings from config or CLI arguments if None.
+            Defaults to settings from config or CLI arguments if `None`.
         datatables_style: One or more class names for styling tables using
             Datatables styling. See https://datatables.net/manual/styling/classes
             for possible values. Can be either a string with the class name,
@@ -1170,19 +1167,19 @@ def print_figure(
         caption: Caption of the figure.
         reference: Reference object for link creation.
         align: How to align the graph horizontally.
-            Acceptable values are 'left', 'center', and 'right'.
-            Defaults to settings from config or CLI arguments if None.
+            Acceptable values are `'left'`, `'center'`, and `'right'`.
+            Defaults to settings from config or CLI arguments if `None`.
         caption_position: Where to place the caption.
-            Acceptable values are 'top', and 'bottom'.
-            Defaults to settings from config or CLI arguments if None.
+            Acceptable values are `'top'`, and `'bottom'`.
+            Defaults to settings from config or CLI arguments if `None`.
         numbered: Whether the caption should be numbered.
-            Defaults to settings from config or CLI arguments if None.
+            Defaults to settings from config or CLI arguments if `None`.
         matplotlib_format: Format for matplotlib figures.
-            Acceptable values are "svg", and "png".
-            Defaults to settings from config or CLI arguments if None.
+            Acceptable values are `'svg'`, and `'png'`.
+            Defaults to settings from config or CLI arguments if `None`.
         embedded: Whether to embed the figure directly into HTML;
-            Only applicable for matplotlib "svg" images.
-            Defaults to settings from config or CLI arguments if None.
+            Only applicable for matplotlib svg images.
+            Defaults to settings from config or CLI arguments if `None`.
     """
 
     align = cast(
