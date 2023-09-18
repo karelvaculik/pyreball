@@ -308,8 +308,30 @@ def _finish_html_file(
 
 
 parameter_specifications = [
+    IntegerParameter(
+        "--page-width",
+        boundaries=(40, 100),
+        default=80,
+        help=(
+            "Width of the page container in percentage. "
+            "An integer in the range 40..100. "
+            "If set outside the range, the value will be shifted towards the range."
+        ),
+    ),
+    ChoiceParameter(
+        "--keep-stdout",
+        choices=["yes", "no"],
+        default="no",
+        help="Print the output to stdout too.",
+    ),
     ChoiceParameter(
         "--toc", choices=["yes", "no"], default="no", help="Include table of contents."
+    ),
+    ChoiceParameter(
+        "--numbered-headings",
+        choices=["yes", "no"],
+        default="no",
+        help="Number the headings.",
     ),
     ChoiceParameter(
         "--align-code-blocks",
@@ -434,28 +456,6 @@ parameter_specifications = [
             "Whether to embedded matplotlib figures directly into HTML. "
             "Only for svg format."
         ),
-    ),
-    ChoiceParameter(
-        "--numbered-headings",
-        choices=["yes", "no"],
-        default="no",
-        help="Number the headings.",
-    ),
-    IntegerParameter(
-        "--page-width",
-        boundaries=(40, 100),
-        default=80,
-        help=(
-            "Width of the page container in percentage. "
-            "An integer in the range 40..100. "
-            "If set outside the range, the value will be shifted towards the range."
-        ),
-    ),
-    ChoiceParameter(
-        "--keep-stdout",
-        choices=["yes", "no"],
-        default="no",
-        help="Print the output to stdout too.",
     ),
 ]
 
