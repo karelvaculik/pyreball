@@ -48,15 +48,13 @@ Tables can be horizontally aligned by `align` parameter, as shown in the followi
 
 Numeric columns are aligned to right and columns of other types to left, by default.
 This behaviour can be changed through `col_align` parameter.
-The parameter takes either a string (to set the same alignment for all columns), or a list of strings 
-(to set the alignment of each column individually). 
+The parameter takes either a string (to set the same alignment for all columns), or a list of strings
+(to set the alignment of each column individually).
 When a list is provided and index is displayed, the list must contain also values for the index columns.
-
 
 {{ inline_source("docs/examples/table_align_columns.py") }}
 
 <iframe style="border:2px solid;" src="../examples/table_align_columns.html" height="800" width="100%" title="Iframe Example"></iframe>
-
 
 ## Sorting
 
@@ -74,8 +72,9 @@ The following snippet shows the usage of both parameters.
     Although the columns in `sorting_definition` are indexed from 0, it is necessary to take into account
     also the table index when it is displayed. To hide the index, set `index` parameter 
     of [`print_table()`](../api/pyreball_html/#pyreball.html.print_table) method to `False`. 
-    `index` parameter is one of the `kwargs` parameters that are passed to [Pandas](https://pandas.pydata.org/)
-    `to_html()` method, which is used internally by Pyreball.
+    `index` parameter is one of the `kwargs` parameters that are passed to 
+    [Pandas to_html()](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_html.html) method, 
+    which is used internally by Pyreball.
 
 {{ inline_source("docs/examples/table_sorting.py") }}
 
@@ -83,7 +82,7 @@ The following snippet shows the usage of both parameters.
 
 ## Dealing with Large Tables
 
-Each table is fully displayed by default. This is caused by keeping the `display_option` parameter 
+Each table is fully displayed by default. This is caused by keeping the `display_option` parameter
 to its default value `full`.
 However, this might not be practical for large tables.
 
@@ -133,7 +132,8 @@ Index columns must be also taken into account when setting `col_align` parameter
 
 !!! note
 
-    Pyreball sets `sparsify` parameter of [Pandas](https://pandas.pydata.org/) `to_html()` method to `False`, 
+    Pyreball sets `sparsify` parameter of 
+    [Pandas to_html()](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_html.html) method to `False`, 
     because [DataTables](https://datatables.net/) would not be able to display tables with a multi-index correctly,
     especially not with sortable columns. This is also the reason why the identical `team` values
     are not merged in the first table above.
