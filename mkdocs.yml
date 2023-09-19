@@ -20,9 +20,6 @@ extra:
     provider: mike
 
 plugins:
-  - mike:
-      alias_type: symlink
-      canonical_version: latest
   - search
   - macros:
       module_name: docs/plugins/main
