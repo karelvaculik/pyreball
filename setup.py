@@ -45,7 +45,7 @@ setup(
     },
     include_package_data=True,
     tests_require=test_required + examples_required,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     entry_points={
         "console_scripts": [
             "pyreball = pyreball.__main__:main",
