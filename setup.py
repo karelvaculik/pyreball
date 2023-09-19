@@ -1,9 +1,9 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
-with open('requirements_test.txt') as f:
+with open("requirements_test.txt") as f:
     test_required = f.read().splitlines()
 
-with open('requirements_examples.txt') as f:
+with open("requirements_examples.txt") as f:
     examples_required = f.read().splitlines()
 
 import codecs
@@ -12,14 +12,14 @@ import os.path
 
 def read(rel_path):
     here = os.path.abspath(os.path.dirname(__file__))
-    with codecs.open(os.path.join(here, rel_path), 'r') as fp:
+    with codecs.open(os.path.join(here, rel_path), "r") as fp:
         return fp.read()
 
 
 def get_version(rel_path):
     # based on https://packaging.python.org/guides/single-sourcing-package-version/
     for line in read(rel_path).splitlines():
-        if line.startswith('__version__'):
+        if line.startswith("__version__"):
             delim = '"' if '"' in line else "'"
             return line.split(delim)[1]
     else:
@@ -27,21 +27,28 @@ def get_version(rel_path):
 
 
 setup(
-    name='pyreball',
+    name="pyreball",
     version=get_version("pyreball/__init__.py"),
-    description='Python reporting tool.',
+    description="Python reporting tool.",
     url="https://github.com/karelvaculik/pyreball",
     license="Apache License 2.0",
-    author='Karel Vaculik',
-    author_email='vaculik.dev@gmail.com',
-    packages=find_packages(exclude=('examples', 'tests')),
-    package_data={'pyreball': ['cfg/html_begin.template', 'cfg/html_end.template']},
+    author="Karel Vaculik",
+    author_email="vaculik.dev@gmail.com",
+    packages=find_packages(exclude=("examples", "tests")),
+    package_data={
+        "pyreball": [
+            "cfg/config.ini",
+            "cfg/css.template",
+            "cfg/external_links.ini",
+            "cfg/html.template",
+        ]
+    },
     include_package_data=True,
     tests_require=test_required + examples_required,
     entry_points={
-        'console_scripts': [
-            'pyreball = pyreball.__main__:main',
-            'pyreball-generate-config = pyreball.config_generator:main',
+        "console_scripts": [
+            "pyreball = pyreball.__main__:main",
+            "pyreball-generate-config = pyreball.config_generator:main",
         ]
     },
 )

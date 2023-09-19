@@ -1,5 +1,5 @@
-import sys
 import logging
+import sys
 
 _logger = None
 
@@ -11,7 +11,7 @@ def get_logger():
         return _logger
     else:
         handler = logging.StreamHandler(sys.stdout)
-        formatter = logging.Formatter('%(levelname)s: %(message)s')
+        formatter = logging.Formatter("%(levelname)s: %(message)s")
         handler.setFormatter(formatter)
         _logger = logging.getLogger()
         _logger.setLevel(logging.INFO)

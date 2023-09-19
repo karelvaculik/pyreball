@@ -1,0 +1,85 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.pyreball-main-container {
+    width: {{page_width}}%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pyreball-image-wrapper {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+img, svg, canvas.marks, div.vega-embed {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.pyreball-text-centered {
+    text-align: center;
+}
+
+.pyreball-table-wrapper, .pyreball-code-wrapper
+{
+    width: 100%;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.pyreball-block-fit-content {
+    width: fit-content;
+    max-width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.pyreball-centered {
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.pyreball-left-aligned {
+    margin-left:0px;
+    margin-right:auto;
+}
+
+.pyreball-right-aligned {
+    margin-left:auto;
+    margin-right:0px;
+}
+
+/* Fix DataTables alignment for narrow tables with search box  */
+.dataTables_scroll {
+    width: fit-content;
+    max-width: 100%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+a.pyreball-anchor-link:link {
+    text-decoration: none;
+    padding: 0px 20px;
+    opacity: 0;
+}
+
+a[href]:link, a[href]:visited {
+    color: #296eaa;
+}
+a[href]:hover {
+    color: #001f3f
+}
+
+h1:hover .pyreball-anchor-link,
+h2:hover .pyreball-anchor-link,
+h3:hover .pyreball-anchor-link,
+h4:hover .pyreball-anchor-link,
+h5:hover .pyreball-anchor-link,
+h6:hover .pyreball-anchor-link {
+    opacity: 1;
+}
