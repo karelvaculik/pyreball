@@ -138,7 +138,7 @@ def _parse_heading_info(line: str) -> Optional[Tuple[int, str, str]]:
 
 
 def _insert_heading_title_and_toc(
-        lines: List[str], include_toc: bool = True
+    lines: List[str], include_toc: bool = True
 ) -> List[str]:
     # try to extract the title from <title> element:
     report_title = None
@@ -220,20 +220,20 @@ def _contains_class(html_text: str, class_name: str) -> bool:
         True if the HTML text contains the given class name.
     """
     pattern = (
-            r'class\s*=\s*["\']\s*(?:\S+\s+)*'
-            + re.escape(class_name)
-            + r'(?:\s+\S+)*\s*["\']'
+        r'class\s*=\s*["\']\s*(?:\S+\s+)*'
+        + re.escape(class_name)
+        + r'(?:\s+\S+)*\s*["\']'
     )
     return re.search(pattern, html_text) is not None
 
 
 def _insert_js_and_css_links(
-        html_content: str, external_links: Dict[str, List[str]]
+    html_content: str, external_links: Dict[str, List[str]]
 ) -> str:
     groups_of_links_to_add = set()
     add_jquery = False
     if _contains_class(
-            html_text=html_content, class_name="inline-highlight"
+        html_text=html_content, class_name="inline-highlight"
     ) or _contains_class(html_text=html_content, class_name="pyreball-code-wrapper"):
         add_jquery = True
         groups_of_links_to_add.add("highlight_js")
@@ -284,7 +284,7 @@ def _insert_inline_highlight_script(html_content: str) -> str:
 
 
 def _finish_html_file(
-        html_path: Path, include_toc: bool, external_links: Dict[str, List[str]]
+    html_path: Path, include_toc: bool, external_links: Dict[str, List[str]]
 ) -> None:
     """
     Load the printed HTML and finish substitutions to make it complete.
@@ -461,7 +461,7 @@ parameter_specifications = [
 
 
 def _check_existence_of_config_files(
-        config_dir_path: Path, recommendation_msg: str
+    config_dir_path: Path, recommendation_msg: str
 ) -> None:
     required_filename = [
         CONFIG_INI_FILENAME,
@@ -527,7 +527,7 @@ def _get_config_directory(config_dir_path: Optional[Path] = None) -> Path:
 
 
 def _get_output_dir_and_file_stem(
-        input_path: Path, output_path_str: Optional[Path]
+    input_path: Path, output_path_str: Optional[Path]
 ) -> Tuple[Path, str]:
     """
     Obtain the output directory for the HTML file and output filename stem.
@@ -625,9 +625,9 @@ def parse_arguments(args) -> Dict[str, Optional[Union[str, int]]]:
         action=PathAction,
         nargs="?",
     )
-    if '--' in args:
+    if "--" in args:
         index_of_double_dash = args.index("--")
-        script_args = args[(index_of_double_dash + 1):]
+        script_args = args[(index_of_double_dash + 1) :]
         args = args[:index_of_double_dash]
     else:
         script_args = []
