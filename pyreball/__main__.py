@@ -627,7 +627,8 @@ def parse_arguments(args) -> Dict[str, Optional[Union[str, int]]]:
     )
     if "--" in args:
         index_of_double_dash = args.index("--")
-        script_args = args[(index_of_double_dash + 1) :]
+        index_of_double_dash_plus = index_of_double_dash + 1
+        script_args = args[index_of_double_dash_plus:]
         args = args[:index_of_double_dash]
     else:
         script_args = []
