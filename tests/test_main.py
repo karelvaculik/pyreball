@@ -1,5 +1,7 @@
 import os
+import textwrap
 from pathlib import Path
+from unittest.mock import patch
 
 import pkg_resources
 import pytest
@@ -11,6 +13,7 @@ from pyreball.__main__ import (
     _insert_js_and_css_links,
     _parse_heading_info,
     _replace_ids,
+    main,
     parse_arguments,
 )
 from pyreball.constants import (
@@ -465,6 +468,8 @@ def test__get_output_dir_and_file_stem__valid_inputs(
         ["--output-path", "\n    \n", "scripts/report.py"],
         # The same for --config-path
         ["--config-path", "\n    \n", "scripts/report.py"],
+        # both input_path and -m are used
+        ["-m", "my_module", "my_module.py"],
     ],
 )
 def test_parse_arguments__invalid_arguments(args):
@@ -475,10 +480,15 @@ def test_parse_arguments__invalid_arguments(args):
 @pytest.mark.parametrize(
     "args,expected_non_empty_result",
     [
-        # only the required argument
+        # only the input-path
         (
             ["scripts/report.py"],
             {"input_path": Path("scripts/report.py")},
+        ),
+        # only module path via -m
+        (
+            ["-m", "scripts.report"],
+            {"mod": "scripts.report"},
         ),
         # with some table parameters
         (
@@ -487,9 +497,9 @@ def test_parse_arguments__invalid_arguments(args):
                 "paging",
                 "--tables-scroll-y-height",
                 "500px",
+                "scripts/report.py",
                 "--tables-paging-sizes",
                 "20,all",
-                "scripts/report.py",
             ],
             {
                 "tables_display_option": "paging",
@@ -529,19 +539,51 @@ def test_parse_arguments__invalid_arguments(args):
             ["--align-tables", "left", "scripts/report.py"],
             {"align_tables": "left", "input_path": Path("scripts/report.py")},
         ),
-        # now --align-tables is considered scripts-args
+        # --align-tables can be even after the path
         (
             ["scripts/report.py", "--align-tables", "left"],
+            {"align_tables": "left", "input_path": Path("scripts/report.py")},
+        ),
+        # with empty script_args
+        (
+            ["--align-tables", "left", "scripts/report.py", "--"],
             {
+                "align_tables": "left",
                 "input_path": Path("scripts/report.py"),
-                "script_args": ["--align-tables", "left"],
             },
         ),
         # with script_args
         (
-            ["scripts/report.py", "-p", "20", "img.png"],
+            [
+                "--align-tables",
+                "left",
+                "scripts/report.py",
+                "--",
+                "-p",
+                "20",
+                "img.png",
+            ],
             {
+                "align_tables": "left",
                 "input_path": Path("scripts/report.py"),
+                "script_args": ["-p", "20", "img.png"],
+            },
+        ),
+        # with -m and script_args
+        (
+            [
+                "--align-tables",
+                "left",
+                "-m",
+                "scripts.report",
+                "--",
+                "-p",
+                "20",
+                "img.png",
+            ],
+            {
+                "align_tables": "left",
+                "mod": "scripts.report",
                 "script_args": ["-p", "20", "img.png"],
             },
         ),
@@ -554,6 +596,7 @@ def test_parse_arguments__invalid_arguments(args):
 )
 def test_parse_arguments__valid_arguments(args, expected_non_empty_result):
     expected_result = {
+        "mod": None,
         "toc": None,
         "align_code_blocks": None,
         "code_block_captions_position": None,
@@ -583,3 +626,75 @@ def test_parse_arguments__valid_arguments(args, expected_non_empty_result):
     }
     expected_result.update(**expected_non_empty_result)
     assert parse_arguments(args) == expected_result
+
+
+def test_main__script_input(tmpdir):
+    dummy_script = tmpdir / "my_script.py"
+    script_contents = textwrap.dedent(
+        """\
+        import pyreball as pb
+            
+        pb.set_title("Pyreball Illustration")
+        
+        pb.print_div(
+            "Pyreball has many features, among others:",
+            pb.ulist(
+                "Creating charts.",
+                "Sortable and scrollable tables.",
+                f'Basic text formatting such as {pb.em("emphasis")}.',
+                f'Also {pb.link("hyperlinks", "https://www.python.org/")}.',
+            ),
+        )
+    """
+    )
+    dummy_script.write_text(script_contents, encoding="utf-8")
+
+    with patch("sys.argv", ["pyreball", str(dummy_script)]):
+        main()
+
+    expected_output_path = tmpdir / "my_script.html"
+    with open(expected_output_path) as f:
+        result_html_content = f.read()
+
+    assert "<html>" in result_html_content
+    assert "Sortable and scrollable tables" in result_html_content
+    assert "</html>" in result_html_content
+
+
+def test_main__module_input(tmpdir):
+    os.chdir(tmpdir)
+
+    package_dir = Path("my_package")
+    dummy_script = package_dir / "my_script.py"
+    dummy_lib = package_dir / "my_lib.py"
+    lib_contents = textwrap.dedent(
+        """\
+        def square(x: int) -> int:
+            return x * x
+    """
+    )
+    script_contents = textwrap.dedent(
+        """\
+        import pyreball as pb
+        from my_package.my_lib import square
+        
+        pb.set_title("Pyreball Illustration")
+        
+        pb.print_div(f"Square of 4 is {square(4)}")
+    """
+    )
+    package_dir.mkdir()
+    (package_dir / "__init__.py").touch()
+    dummy_lib.write_text(lib_contents, encoding="utf-8")
+    dummy_script.write_text(script_contents, encoding="utf-8")
+
+    with patch("sys.argv", ["pyreball", "-m", "my_package.my_script"]):
+        main()
+
+    expected_output_path = package_dir / "my_script.html"
+    with open(expected_output_path) as f:
+        result_html_content = f.read()
+
+    assert "<html>" in result_html_content
+    assert "Square of 4 is 16" in result_html_content
+    assert "</html>" in result_html_content

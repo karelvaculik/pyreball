@@ -39,6 +39,12 @@ pyreball report.py
 
 <iframe style="border:2px solid;" src="examples/example_init.html" height="300" width="100%" title="Iframe Example"></iframe>
 
+It is also possible to pass a module path:
+
+```shell
+pyreball -m report
+```
+
 ## Adding Tables and Figures
 
 The core functionality of `pyreball` does not require any 3rd party dependencies.

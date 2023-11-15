@@ -566,21 +566,33 @@ def _get_output_dir_and_file_stem(
 
 class PathAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        if values.strip() == "":
-            raise argparse.ArgumentError(
-                self, "Path argument cannot contain only whitespaces."
-            )
-        setattr(namespace, self.dest, Path(values))
+        if values is None:
+            setattr(namespace, self.dest, values)
+        else:
+            if values.strip() == "":
+                raise argparse.ArgumentError(
+                    self, "Path argument cannot contain only whitespaces."
+                )
+            setattr(namespace, self.dest, Path(values))
 
 
 def parse_arguments(args) -> Dict[str, Optional[Union[str, int]]]:
     parser = argparse.ArgumentParser(
         description=(
             "Generate Python report. "
-            "All pyreball options must be specified before input-path argument. "
-            "Any options or arguments after input-path are passed "
-            "to the processed Python script. "
+            "Any options or arguments after '--' are passed "
+            "to the processed Python script / module. "
         )
+    )
+    parser.add_argument(
+        "-m",
+        dest="mod",
+        help=(
+            "Run library module as a script. "
+            "It calls Python command with -m option. "
+            "It must represent an existing Python module, not package. "
+            "Can be used only when input-path argument is not used."
+        ),
     )
     for input_param in parameter_specifications:
         input_param.add_argument_to_parser(parser)
@@ -606,28 +618,56 @@ def parse_arguments(args) -> Dict[str, Optional[Union[str, int]]]:
     )
     parser.add_argument(
         "input-path",
-        help="Input file path. Must represent an existing Python script.",
+        help=(
+            "Input file path. Must represent an existing Python script. "
+            "Can be used only when -m option is not used."
+        ),
         action=PathAction,
+        nargs="?",
     )
-    parser.add_argument(
-        "script-args",
-        nargs=argparse.REMAINDER,
-        help="Remaining arguments that are passed to the Python script.",
-    )
+    if "--" in args:
+        index_of_double_dash = args.index("--")
+        index_of_double_dash_plus = index_of_double_dash + 1
+        script_args = args[index_of_double_dash_plus:]
+        args = args[:index_of_double_dash]
+    else:
+        script_args = []
     variables = vars(parser.parse_args(args))
     # positional arguments must be renamed manually
     variables["input_path"] = variables["input-path"]
-    variables["script_args"] = variables["script-args"]
+    variables["script_args"] = script_args
+    if variables["input_path"] == "--":
+        variables["input_path"] = None
+    if variables["input_path"] is None and variables["mod"] is None:
+        parser.error(
+            "Input must be set either through input-path argument or -m option."
+        )
+    elif variables["input_path"] is not None and variables["mod"] is not None:
+        parser.error(
+            "It is not possible to set both input-path argument and -m option."
+        )
     del variables["input-path"]
-    del variables["script-args"]
     return variables
+
+
+def _convert_module_to_path(mod: str) -> Path:
+    return Path(mod.replace(".", os.sep) + ".py")
 
 
 def main() -> None:
     args_dict = parse_arguments(sys.argv[1:])
     script_args_string = " ".join(cast(List[str], args_dict.pop("script_args")))
-    input_path = cast(Path, args_dict.pop("input_path"))
-    input_path = input_path.expanduser().resolve()
+    if args_dict["input_path"]:
+        input_path = cast(Path, args_dict.pop("input_path"))
+        input_path = input_path.expanduser().resolve()
+        path_arg = str(input_path)
+    elif args_dict["mod"]:
+        input_module = cast(str, args_dict.pop("mod"))
+        input_path = _convert_module_to_path(input_module)
+        input_path = input_path.expanduser().resolve()
+        path_arg = f"-m {input_module}"
+    else:
+        raise RuntimeError("input-path nor module is specified.")
     output_path = cast(Optional[Path], args_dict.pop("output_path"))
     config_path = cast(Optional[Path], args_dict.pop("config_path"))
 
@@ -689,7 +729,7 @@ def main() -> None:
     try:
         # Use {sys.executable} instead of just "python" command as it may not work
         # correctly as a PyCharm external tool
-        os.system(f"{sys.executable} {input_path} {script_args_string}")
+        os.system(f"{sys.executable} {path_arg} {script_args_string}")
     finally:
         with open(html_path, "a") as f:
             f.write(html_end)

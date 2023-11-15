@@ -18,22 +18,37 @@ Typical `pyreball` call could be summarized as:
 pyreball <pyreball options> <Python script path> <Python script args>
 ```
 
-The Python script path is the only required argument.
-This argument can be preceded by pyreball options described below.
-There can be also arguments for the script itself, in which case they should be just passed after the script path.
-Internally, Pyreball uses current executable `python` and executes the script with it, passing the script
-arguments to the script itself.
-For better readability, the script arguments can be delimited from script path by `--`.
-An example of a call:
-
+The simplest call is only with the Python script path.
+This positional argument can be, however, replaced with `-m` option, which specifies 
+a module.
+The following two example commands show alternative ways of specifying the path:
 ```shell
-pyreball --page-width=90 my_script.py -- --sum 23 25 24
+pyreball my_package/my_script.py
+pyreball -m my_package.my_script
 ```
 
-In this example, script `my_script.py` uses option `--sum` followed by one or more numbers.
+Pyreball behaviour can be controlled via various pyreball options that are further described below.
+There can be also arguments for the script (module) itself, in which case they need to be separated from other arguments and options by `--`.
+Internally, Pyreball uses current executable `python` and executes the script with it, passing the script arguments to the script (module).
+
+An example of a script with custom arguments:
+
+{{ inline_source("docs/examples/script_with_args.py") }}
+
+Then we can pass arguments as follows:
+
+```shell
+pyreball --page-width=90 script_with_args.py -- --sum 23 25 24
+```
+
+<iframe style="border:2px solid;" src="../examples/script_with_args.html" height="200" width="100%" title="Iframe Example"></iframe>
+
+In this example, script `script_with_args.py` uses option `--sum` followed by one or more numbers.
 
 By default, Pyreball re-uses the input script path to construct the output HTML file path, only changing the `.py`
-suffix to `.html`. The output path can be modified by option `--output-path`.
+suffix to `.html`.
+If `-m` option is used to specify a module, the module path is converted to regular path and the process is the same.
+The output path can be modified by option `--output-path`.
 If the output path ends with `.html`, it is interpreted as HTML file path. If not, it is interpreted as a directory,
 where the HTML file should be created. In such a case, the HTML file will have the same filename stem as the input
 script (e.g., `my_report.py` will produce `my_report.html`).

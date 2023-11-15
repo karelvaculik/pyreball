@@ -6,7 +6,8 @@ build:
     python: "3.10"
   jobs:
     pre_build:
-      - find docs/examples -name "*.py" -exec pyreball {} \;
+      - find docs/examples -name "*.py" ! -name "script_with_args.py" -exec pyreball {} \;
+      - pyreball --page-width=90 docs/examples/script_with_args.py -- --sum 23 25 24
 
 python:
   install:
