@@ -7,7 +7,7 @@ import shutil
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, cast, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 from pyreball.utils.logger import get_logger
 
@@ -27,17 +27,14 @@ class Parameter(ABC):
 
     @property
     @abstractmethod
-    def param_key(self):
-        ...
+    def param_key(self) -> str: ...
 
     @property
     @abstractmethod
-    def config_param_key(self):
-        ...
+    def config_param_key(self) -> str: ...
 
     @abstractmethod
-    def add_argument_to_parser(self, parser: argparse.ArgumentParser) -> None:
-        ...
+    def add_argument_to_parser(self, parser: argparse.ArgumentParser) -> None: ...
 
     @abstractmethod
     def check_and_fix_value(
@@ -46,8 +43,7 @@ class Parameter(ABC):
         none_allowed: bool,
         warning_messages: List[str],
         error_messages: List[str],
-    ) -> Any:
-        ...
+    ) -> Any: ...
 
 
 class ChoiceParameter(Parameter):
@@ -57,11 +53,11 @@ class ChoiceParameter(Parameter):
         self.choices = choices
 
     @property
-    def param_key(self):
+    def param_key(self) -> str:
         return self._param_key
 
     @property
-    def config_param_key(self):
+    def config_param_key(self) -> str:
         return self._config_param_key
 
     def add_argument_to_parser(self, parser: argparse.ArgumentParser) -> None:
@@ -98,11 +94,11 @@ class IntegerParameter(Parameter):
         self.default = default
 
     @property
-    def param_key(self):
+    def param_key(self) -> str:
         return self._param_key
 
     @property
-    def config_param_key(self):
+    def config_param_key(self) -> str:
         return self._config_param_key
 
     def add_argument_to_parser(self, parser: argparse.ArgumentParser) -> None:
@@ -143,11 +139,11 @@ class StringParameter(Parameter):
         self.validation_function = validation_function
 
     @property
-    def param_key(self):
+    def param_key(self) -> str:
         return self._param_key
 
     @property
-    def config_param_key(self):
+    def config_param_key(self) -> str:
         return self._config_param_key
 
     def add_argument_to_parser(self, parser: argparse.ArgumentParser) -> None:
@@ -351,7 +347,7 @@ def get_external_links_from_config(
     if links.keys() != required_keys:
         logger.error(
             "Configuration with items must contain links for exactly these keys: "
-            f"{', '.join(sorted(list(required_keys)))}."
+            f"{', '.join(sorted(required_keys))}."
         )
         sys.exit(1)
     return links
@@ -375,15 +371,8 @@ def merge_parameter_dictionaries(
     }
 
 
-def _map_env_value(value):
-    if value == "None":
-        return None
-    elif value == "yes":
-        return True
-    elif value == "no":
-        return False
-    else:
-        return value
+def _map_env_value(value: str) -> Any:
+    return {"None": None, "yes": True, "no": False}.get(value, value)
 
 
 def get_parameter_value(key: str) -> Any:

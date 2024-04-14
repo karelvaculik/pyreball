@@ -1,4 +1,5 @@
 """Main functions that serve as building blocks of the final html file."""
+
 import builtins
 import io
 import json
@@ -6,60 +7,59 @@ import os
 import random
 import re
 from typing import (
+    TYPE_CHECKING,
     Any,
-    cast,
     Dict,
     List,
     Literal,
     Optional,
     Set,
     Tuple,
-    TYPE_CHECKING,
     Union,
+    cast,
 )
 
 from pyreball._common import AttrsParameter, ClParameter
 from pyreball.constants import NON_BREAKABLE_SPACE, PILCROW_SIGN
-
 from pyreball.text import code_block, div
 from pyreball.utils.param import get_parameter_value, make_sure_dir_exists, merge_values
 
 if TYPE_CHECKING:
     # needed for mypy
     # noinspection PyUnresolvedReferences,PyPackageRequirements
-    import altair  # type: ignore
+    import altair  # type: ignore[unused-ignore]
 
     # noinspection PyPackageRequirements
-    import bokeh  # type: ignore
+    import bokeh  # type: ignore[unused-ignore]
 
     # noinspection PyPackageRequirements
-    import matplotlib  # type: ignore
+    import matplotlib  # type: ignore[unused-ignore]
 
     # noinspection PyPackageRequirements
-    import pandas  # type: ignore
+    import pandas  # type: ignore[unused-ignore]
 
     # noinspection PyPackageRequirements
-    import plotly  # type: ignore
+    import plotly  # type: ignore[unused-ignore]
 
 AltairFigType = Union[
-    "altair.vegalite.v4.api.Chart",
-    "altair.vegalite.v4.api.ConcatChart",
-    "altair.vegalite.v4.api.FacetChart",
-    "altair.vegalite.v4.api.HConcatChart",
-    "altair.vegalite.v4.api.LayerChart",
-    "altair.vegalite.v4.api.RepeatChart",
-    "altair.vegalite.v4.api.VConcatChart",
+    "altair.vegalite.v5.api.Chart",
+    "altair.vegalite.v5.api.ConcatChart",
+    "altair.vegalite.v5.api.FacetChart",
+    "altair.vegalite.v5.api.HConcatChart",
+    "altair.vegalite.v5.api.LayerChart",
+    "altair.vegalite.v5.api.RepeatChart",
+    "altair.vegalite.v5.api.VConcatChart",
 ]
 FigType = Union[
     "matplotlib.figure.Figure",
     "plotly.graph_objs._figure.Figure",
-    "altair.vegalite.v4.api.Chart",
-    "altair.vegalite.v4.api.ConcatChart",
-    "altair.vegalite.v4.api.FacetChart",
-    "altair.vegalite.v4.api.HConcatChart",
-    "altair.vegalite.v4.api.LayerChart",
-    "altair.vegalite.v4.api.RepeatChart",
-    "altair.vegalite.v4.api.VConcatChart",
+    "altair.vegalite.v5.api.Chart",
+    "altair.vegalite.v5.api.ConcatChart",
+    "altair.vegalite.v5.api.FacetChart",
+    "altair.vegalite.v5.api.HConcatChart",
+    "altair.vegalite.v5.api.LayerChart",
+    "altair.vegalite.v5.api.RepeatChart",
+    "altair.vegalite.v5.api.VConcatChart",
 ]
 
 _references: Set[str] = set()
@@ -152,7 +152,7 @@ def set_title(title: str) -> None:
     if get_parameter_value("html_file_path"):
         # it is assumed that the heading is already written into the file,
         # so find the line with title element and replace its contents
-        with open(get_parameter_value("html_file_path"), "r") as f:
+        with open(get_parameter_value("html_file_path")) as f:
             lines = f.readlines()
 
         # replace the title and also add "custom_pyreball_title" class,
@@ -375,7 +375,7 @@ def _wrap_code_block_html(
     caption_position: str = "bottom",
     numbered: bool = True,
     sep: str = "",
-):
+) -> str:
     if reference:
         _check_and_mark_reference(reference)
         anchor_link = f"code-block-{reference.id}-{code_block_index}"
@@ -543,10 +543,7 @@ def _prepare_caption_element(
 ) -> str:
     if numbered:
         caption_text = f"{prefix} {index}"
-        if caption:
-            caption_text = f"{caption_text}: {caption}"
-        else:
-            caption_text = f"{caption_text}."
+        caption_text = f"{caption_text}: {caption}" if caption else f"{caption_text}."
     elif caption:
         caption_text = f"{caption}"
     else:
@@ -559,7 +556,7 @@ def _prepare_caption_element(
 
 
 def _compute_length_menu_for_datatables(
-    paging_sizes: List[Union[int, str]]
+    paging_sizes: List[Union[int, str]],
 ) -> Tuple[List[int], List[Union[int, str]]]:
     arr_1: List[int] = []
     arr_2: List[Union[int, str]] = []
@@ -624,7 +621,7 @@ def _gather_datatables_setup(
     return datatables_setup
 
 
-def _check_col_alignment_value(value: str):
+def _check_col_alignment_value(value: str) -> None:
     allowed_values = ["left", "center", "right"]
     if value not in allowed_values:
         raise ValueError(
@@ -1028,12 +1025,12 @@ def _prepare_altair_image_element(fig: AltairFigType, fig_index: int) -> str:
 
 
 def _prepare_plotly_image_element(fig: "plotly.graph_objs.Figure") -> str:
-    return fig.to_html(full_html=False, include_plotlyjs=False)
+    return cast(str, fig.to_html(full_html=False, include_plotlyjs=False))
 
 
 def _prepare_bokeh_image_element(fig: "bokeh.plotting._figure.figure") -> str:
     # noinspection PyPackageRequirements
-    from bokeh.embed import components  # type: ignore
+    from bokeh.embed import components  # type: ignore[unused-ignore]
 
     script, div = components(fig)
     return f"<div>{div}{script}</div>"

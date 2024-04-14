@@ -7,6 +7,10 @@ from unittest import mock
 import pytest
 
 from pyreball.utils.param import (
+    ChoiceParameter,
+    IntegerParameter,
+    StringParameter,
+    Substitutor,
     _map_env_value,
     _matches_paging_sizes_string,
     carefully_remove_directory_if_exists,
@@ -14,17 +18,13 @@ from pyreball.utils.param import (
     check_choice_string_parameter,
     check_integer_within_range,
     check_paging_sizes_string_parameter,
-    ChoiceParameter,
     get_external_links_from_config,
     get_file_config,
     get_parameter_value,
-    IntegerParameter,
     make_sure_dir_exists,
     merge_parameter_dictionaries,
     merge_values,
     read_file_config,
-    StringParameter,
-    Substitutor,
 )
 
 MODULE_PATH = "pyreball.utils.param"
@@ -96,7 +96,7 @@ def test_check_paging_sizes_string_parameter(
         error_messages,
     )
     assert result_value == expected_result
-    contains_error_msg = any(map(lambda msg: err_msg in msg, error_messages))
+    contains_error_msg = any(err_msg in msg for msg in error_messages)
     assert contains_error_msg if err_msg else not contains_error_msg
 
 
@@ -126,8 +126,8 @@ def test_check_choice_string_parameter(
         error_messages,
     )
     assert result_value == expected_result
-    contains_warning_msg = any(map(lambda msg: warn_msg in msg, warning_messages))
-    contains_error_msg = any(map(lambda msg: err_msg in msg, error_messages))
+    contains_warning_msg = any(warn_msg in msg for msg in warning_messages)
+    contains_error_msg = any(err_msg in msg for msg in error_messages)
     assert contains_warning_msg if warn_msg else not contains_warning_msg
     assert contains_error_msg if err_msg else not contains_error_msg
 
@@ -189,8 +189,8 @@ def test_check_integer_within_range(
         "param1", value, low, high, none_allowed, warning_messages, error_messages
     )
     assert result_value == expected_result
-    contains_warning_msg = any(map(lambda msg: warn_msg in msg, warning_messages))
-    contains_error_msg = any(map(lambda msg: err_msg in msg, error_messages))
+    contains_warning_msg = any(warn_msg in msg for msg in warning_messages)
+    contains_error_msg = any(err_msg in msg for msg in error_messages)
     assert contains_warning_msg if warn_msg else not contains_warning_msg
     assert contains_error_msg if err_msg else not contains_error_msg
 
@@ -568,8 +568,7 @@ def test_carefully_remove_directory_if_exists__with_image_files(tmpdir):
     # Creates empty files
     filenames = ["img.png", "img.jpg", "img.svg"]
     for filename in filenames:
-        with open(directory / filename, "w") as fp:
-            pass
+        (directory / filename).touch()
 
     assert directory.exists()
     assert len(list(directory.glob("*"))) == len(filenames)
@@ -584,8 +583,7 @@ def test_carefully_remove_directory_if_exists__with_non_image_files(tmpdir):
     # Creates empty files
     filenames = ["img.png", "img.jpg", "img.svg", "important_script.py"]
     for filename in filenames:
-        with open(directory / filename, "w") as fp:
-            pass
+        (directory / filename).touch()
 
     assert directory.exists()
     assert len(list(directory.glob("*"))) == len(filenames)

@@ -2,9 +2,9 @@ import argparse
 import shutil
 from pathlib import Path
 
+from pyreball._common import get_default_path_to_config
 from pyreball.constants import (
     CONFIG_INI_FILENAME,
-    DEFAULT_PATH_TO_CONFIG,
     HTML_TEMPLATE_FILENAME,
     LINKS_INI_FILENAME,
     STYLES_TEMPLATE_FILENAME,
@@ -20,10 +20,11 @@ def copy_config_files(output_directory: Path) -> None:
             f"Directory {output_directory} already exists, config will be over-written."
         )
     output_directory.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(DEFAULT_PATH_TO_CONFIG / CONFIG_INI_FILENAME, output_directory)
-    shutil.copy2(DEFAULT_PATH_TO_CONFIG / LINKS_INI_FILENAME, output_directory)
-    shutil.copy2(DEFAULT_PATH_TO_CONFIG / STYLES_TEMPLATE_FILENAME, output_directory)
-    shutil.copy2(DEFAULT_PATH_TO_CONFIG / HTML_TEMPLATE_FILENAME, output_directory)
+    default_path_to_config = get_default_path_to_config()
+    shutil.copy2(default_path_to_config / CONFIG_INI_FILENAME, output_directory)
+    shutil.copy2(default_path_to_config / LINKS_INI_FILENAME, output_directory)
+    shutil.copy2(default_path_to_config / STYLES_TEMPLATE_FILENAME, output_directory)
+    shutil.copy2(default_path_to_config / HTML_TEMPLATE_FILENAME, output_directory)
 
 
 def main() -> None:

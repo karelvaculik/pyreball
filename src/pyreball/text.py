@@ -1,4 +1,5 @@
 """Text utils for creating strings with HTML elements."""
+
 from typing import Any, List, Literal, Optional
 
 from pyreball._common import AttrsParameter, ClParameter
@@ -15,10 +16,7 @@ def _construct_attrs_str(attrs: AttrsParameter) -> Optional[str]:
 def _construct_class_attr_string(cl: ClParameter) -> Optional[str]:
     if cl is None:
         return None
-    if isinstance(cl, str):
-        cl_values = cl
-    else:
-        cl_values = " ".join(cl)
+    cl_values = cl if isinstance(cl, str) else " ".join(cl)
     return _construct_attrs_str({"class": cl_values})
 
 
@@ -92,7 +90,7 @@ def _collect_classes_for_code_strings(
         if cl is None:
             cl = classes_to_be_added
         elif isinstance(cl, str):
-            cl = [cl] + classes_to_be_added
+            cl = [cl, *classes_to_be_added]
         else:
             cl = cl + classes_to_be_added
     return cl
@@ -285,13 +283,10 @@ def _enclose_into_li_tags(
     cl: ClParameter = None,
     attrs: AttrsParameter = None,
     sep: str = "",
-):
+) -> str:
     result = ""
     for value in values:
-        if isinstance(value, tuple):
-            value_str = "".join(map(str, value))
-        else:
-            value_str = str(value)
+        value_str = "".join(map(str, value)) if isinstance(value, tuple) else str(value)
         result += tag(value_str, name="li", cl=cl, attrs=attrs, sep=sep)
     return result
 

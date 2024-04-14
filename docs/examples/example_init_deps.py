@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-import pyreball as pb
 import seaborn as sns
+
+import pyreball as pb
 
 pb.set_title("Tables and Figures")
 

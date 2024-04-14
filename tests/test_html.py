@@ -1,10 +1,10 @@
 import datetime
 import os
 import re
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Dict
 from unittest import mock
+from xml.etree import ElementTree
 
 import altair as alt
 import pandas as pd
@@ -15,6 +15,7 @@ from bokeh.plotting import figure as bokeh_figure
 from matplotlib import pyplot as plt
 
 from pyreball.html import (
+    Reference,
     _check_and_mark_reference,
     _code_block_memory,
     _compute_length_menu_for_datatables,
@@ -22,7 +23,7 @@ from pyreball.html import (
     _gather_datatables_setup,
     _get_heading_number,
     _graph_memory,
-    _heading_memory,
+    _heading_memory,  # noqa: F401
     _parse_tables_paging_sizes,
     _prepare_altair_image_element,
     _prepare_bokeh_image_element,
@@ -35,13 +36,12 @@ from pyreball.html import (
     _print_figure,
     _print_heading,
     _reduce_whitespaces,
-    _references,
+    _references,  # noqa: F401
     _table_memory,
     _tidy_title,
     _wrap_code_block_html,
     _wrap_image_element_by_outer_divs,
     _write_to_html,
-    print as print_html,
     print_code_block,
     print_div,
     print_figure,
@@ -52,8 +52,10 @@ from pyreball.html import (
     print_h5,
     print_h6,
     print_table,
-    Reference,
     set_title,
+)
+from pyreball.html import (
+    print as print_html,
 )
 
 MODULE_PATH = "pyreball.html"
@@ -188,9 +190,12 @@ def test_set_title__file_output(keep_stdout, capsys, simple_html_file):
         f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         set_title("new title with more words")
-        with open(simple_html_file, "r") as f:
+        with open(simple_html_file) as f:
             result = f.read()
-            expected_result = '<html>\n<title class="custom_pyreball_title">new title with more words</title>\n</html>'
+            expected_result = (
+                '<html>\n<title class="custom_pyreball_title">'
+                "new title with more words</title>\n</html>"
+            )
             assert result == expected_result
 
     captured = capsys.readouterr()
@@ -207,7 +212,7 @@ def test__write_to_html(simple_html_file):
         f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         _write_to_html("<div>")
-        with open(simple_html_file, "r") as f:
+        with open(simple_html_file) as f:
             result = f.read()
             assert result == "<html>\n<div>\n"
 
@@ -329,15 +334,22 @@ def test_print_h1_h6__file_output__no_numbers(
 
         expected_result = (
             "<html>\n"
-            f'<h1 id="ch_{exp_id}heading_1_1">heading 1<a class="pyreball-anchor-link" href="#ch_{exp_id}heading_1_1">\u00B6</a></h1>\n'
-            '<h3 id="ch_heading_3_2">heading 3<a class="pyreball-anchor-link" href="#ch_heading_3_2">\u00B6</a></h3>\n'
-            '<h6 id="ch_heading_6_3">heading 6<a class="pyreball-anchor-link" href="#ch_heading_6_3">\u00B6</a></h6>\n'
-            '<h4 id="ch_heading_4_4">heading 4<a class="pyreball-anchor-link" href="#ch_heading_4_4">\u00B6</a></h4>\n'
-            '<h2 id="ch_heading_2_5">heading 2<a class="pyreball-anchor-link" href="#ch_heading_2_5">\u00B6</a></h2>\n'
-            '<h5 id="ch_heading_5_6">heading 5<a class="pyreball-anchor-link" href="#ch_heading_5_6">\u00B6</a></h5>\n'
+            f'<h1 id="ch_{exp_id}heading_1_1">heading 1'
+            f'<a class="pyreball-anchor-link" href="#ch_{exp_id}heading_1_1">\u00b6'
+            f"</a></h1>\n"
+            '<h3 id="ch_heading_3_2">heading 3'
+            '<a class="pyreball-anchor-link" href="#ch_heading_3_2">\u00b6</a></h3>\n'
+            '<h6 id="ch_heading_6_3">heading 6'
+            '<a class="pyreball-anchor-link" href="#ch_heading_6_3">\u00b6</a></h6>\n'
+            '<h4 id="ch_heading_4_4">heading 4'
+            '<a class="pyreball-anchor-link" href="#ch_heading_4_4">\u00b6</a></h4>\n'
+            '<h2 id="ch_heading_2_5">heading 2'
+            '<a class="pyreball-anchor-link" href="#ch_heading_2_5">\u00b6</a></h2>\n'
+            '<h5 id="ch_heading_5_6">heading 5'
+            '<a class="pyreball-anchor-link" href="#ch_heading_5_6">\u00b6</a></h5>\n'
         )
 
-        with open(simple_html_file, "r") as f:
+        with open(simple_html_file) as f:
             result = f.read()
             assert result == expected_result
 
@@ -391,18 +403,29 @@ def test_print_h1_h6__file_output__with_numbers(
 
         expected_result = (
             "<html>\n"
-            f'<h1 id="ch_{exp_id}1_he_1_1">1\u00A0\u00A0he 1<a class="pyreball-anchor-link" href="#ch_{exp_id}1_he_1_1">\u00B6</a></h1>\n'
-            '<h2 id="ch_1_1_he_2_2">1.1\u00A0\u00A0he 2<a class="pyreball-anchor-link" href="#ch_1_1_he_2_2">\u00B6</a></h2>\n'
-            '<h3 id="ch_1_1_1_he_3_3">1.1.1\u00A0\u00A0he 3<a class="pyreball-anchor-link" href="#ch_1_1_1_he_3_3">\u00B6</a></h3>\n'
-            '<h3 id="ch_1_1_2_he_3_4">1.1.2\u00A0\u00A0he 3<a class="pyreball-anchor-link" href="#ch_1_1_2_he_3_4">\u00B6</a></h3>\n'
-            '<h2 id="ch_1_2_he_2_5">1.2\u00A0\u00A0he 2<a class="pyreball-anchor-link" href="#ch_1_2_he_2_5">\u00B6</a></h2>\n'
-            '<h1 id="ch_2_he_1_6">2\u00A0\u00A0he 1<a class="pyreball-anchor-link" href="#ch_2_he_1_6">\u00B6</a></h1>\n'
-            '<h2 id="ch_2_1_he_2_7">2.1\u00A0\u00A0he 2<a class="pyreball-anchor-link" href="#ch_2_1_he_2_7">\u00B6</a></h2>\n'
-            '<h2 id="ch_2_2_he_2_8">2.2\u00A0\u00A0he 2<a class="pyreball-anchor-link" href="#ch_2_2_he_2_8">\u00B6</a></h2>\n'
-            '<h3 id="ch_2_2_1_he_3_9">2.2.1\u00A0\u00A0he 3<a class="pyreball-anchor-link" href="#ch_2_2_1_he_3_9">\u00B6</a></h3>\n'
+            f'<h1 id="ch_{exp_id}1_he_1_1">1\u00a0\u00a0he 1'
+            f'<a class="pyreball-anchor-link" href="#ch_{exp_id}1_he_1_1">\u00b6'
+            f"</a></h1>\n"
+            '<h2 id="ch_1_1_he_2_2">1.1\u00a0\u00a0he 2'
+            '<a class="pyreball-anchor-link" href="#ch_1_1_he_2_2">\u00b6'
+            "</a></h2>\n"
+            '<h3 id="ch_1_1_1_he_3_3">1.1.1\u00a0\u00a0he 3'
+            '<a class="pyreball-anchor-link" href="#ch_1_1_1_he_3_3">\u00b6</a></h3>\n'
+            '<h3 id="ch_1_1_2_he_3_4">1.1.2\u00a0\u00a0he 3'
+            '<a class="pyreball-anchor-link" href="#ch_1_1_2_he_3_4">\u00b6</a></h3>\n'
+            '<h2 id="ch_1_2_he_2_5">1.2\u00a0\u00a0he 2'
+            '<a class="pyreball-anchor-link" href="#ch_1_2_he_2_5">\u00b6</a></h2>\n'
+            '<h1 id="ch_2_he_1_6">2\u00a0\u00a0he 1'
+            '<a class="pyreball-anchor-link" href="#ch_2_he_1_6">\u00b6</a></h1>\n'
+            '<h2 id="ch_2_1_he_2_7">2.1\u00a0\u00a0he 2'
+            '<a class="pyreball-anchor-link" href="#ch_2_1_he_2_7">\u00b6</a></h2>\n'
+            '<h2 id="ch_2_2_he_2_8">2.2\u00a0\u00a0he 2'
+            '<a class="pyreball-anchor-link" href="#ch_2_2_he_2_8">\u00b6</a></h2>\n'
+            '<h3 id="ch_2_2_1_he_3_9">2.2.1\u00a0\u00a0he 3'
+            '<a class="pyreball-anchor-link" href="#ch_2_2_1_he_3_9">\u00b6</a></h3>\n'
         )
 
-        with open(simple_html_file, "r") as f:
+        with open(simple_html_file) as f:
             result = f.read()
             assert result == expected_result
 
@@ -461,7 +484,7 @@ def test_print_div__file_output(keep_stdout, capsys, simple_html_file):
     ):
         print_div("new\nparagraph")
         expected_div_element = "<div>new\nparagraph</div>"
-        with open(simple_html_file, "r") as f:
+        with open(simple_html_file) as f:
             result = f.read()
             assert result == f"<html>\n{expected_div_element}\n"
 
@@ -471,7 +494,13 @@ def test_print_div__file_output(keep_stdout, capsys, simple_html_file):
 
 
 @pytest.mark.parametrize(
-    "use_reference,align,caption_position,numbered,sep,expected_anchor_link,expected_result",
+    "use_reference,"
+    "align,"
+    "caption_position,"
+    "numbered,"
+    "sep,"
+    "expected_anchor_link,"
+    "expected_result",
     [
         (
             True,
@@ -632,67 +661,60 @@ def test_print_code_block(
     pre_test_check_and_mark_reference_cleanup,
 ):
     def fake_get_parameter_value(key):
-        if key == "html_file_path":
-            return simple_html_file
-        elif key == "keep_stdout":
-            return keep_stdout
-        elif key == "align_code_blocks":
-            return param_align
-        elif key == "code_block_captions_position":
-            return param_caption_position
-        elif key == "numbered_code_blocks":
-            return param_numbered
-        else:
-            return None
+        return {
+            "html_file_path": simple_html_file,
+            "keep_stdout": keep_stdout,
+            "align_code_blocks": param_align,
+            "code_block_captions_position": param_caption_position,
+            "numbered_code_blocks": param_numbered,
+        }.get(key)
 
     syntax_highlight = None
     sep = ""
 
     with mock.patch(
         f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
-    ):
-        with mock.patch(
-            f"{MODULE_PATH}.code_block",
-            side_effect=lambda x, **kwargs: f"<code>{x}</code>",
-        ):
-            with mock.patch(
-                f"{MODULE_PATH}._wrap_code_block_html",
-                side_effect=lambda source_code_str, **kwargs: f"<div>{source_code_str}</div>",
-            ) as _wrap_code_block_html_mock:
-                ref = Reference()
-                print_code_block(
-                    "[1, 2, 3]",
-                    caption="cap",
-                    reference=ref,
-                    align=align,
-                    caption_position=caption_position,
-                    numbered=numbered,
-                    syntax_highlight=syntax_highlight,
-                    sep=sep,
-                )
+    ), mock.patch(
+        f"{MODULE_PATH}.code_block",
+        side_effect=lambda x, **kwargs: f"<code>{x}</code>",
+    ), mock.patch(
+        f"{MODULE_PATH}._wrap_code_block_html",
+        side_effect=lambda source_code_str, **kwargs: f"<div>{source_code_str}</div>",
+    ) as _wrap_code_block_html_mock:
+        ref = Reference()
+        print_code_block(
+            "[1, 2, 3]",
+            caption="cap",
+            reference=ref,
+            align=align,
+            caption_position=caption_position,
+            numbered=numbered,
+            syntax_highlight=syntax_highlight,
+            sep=sep,
+        )
 
-                _wrap_code_block_html_mock.assert_called_with(
-                    source_code_str="<code>[1, 2, 3]</code>",
-                    code_block_index=1,
-                    caption="cap",
-                    reference=ref,
-                    align=expected_used_align,
-                    caption_position=expected_caption_position,
-                    numbered=expected_used_numbered,
-                    sep=sep,
-                )
-                # after writing the first block, the index is already incremented
-                assert _code_block_memory["code_block_index"] == 2
+        _wrap_code_block_html_mock.assert_called_with(
+            source_code_str="<code>[1, 2, 3]</code>",
+            code_block_index=1,
+            caption="cap",
+            reference=ref,
+            align=expected_used_align,
+            caption_position=expected_caption_position,
+            numbered=expected_used_numbered,
+            sep=sep,
+        )
+        # after writing the first block, the index is already incremented
+        assert _code_block_memory["code_block_index"] == 2
 
-                captured = capsys.readouterr()
-                if keep_stdout:
-                    assert "<code>[1, 2, 3]</code>" in captured.out.strip()
-                else:
-                    assert captured.out.strip() == ""
+        captured = capsys.readouterr()
+        if keep_stdout:
+            assert "<code>[1, 2, 3]</code>" in captured.out.strip()
+        else:
+            assert captured.out.strip() == ""
 
-                # check table index if another table is written to html
-                print_code_block("[1, 2, 3]")
-                assert _code_block_memory["code_block_index"] == 3
+        # check table index if another table is written to html
+        print_code_block("[1, 2, 3]")
+        assert _code_block_memory["code_block_index"] == 3
 
 
 def test_print__stdout(capsys):
@@ -774,7 +796,7 @@ def test_print__file_output(
         f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
     ):
         print_html(*values, sep=sep, end=end)
-        with open(simple_html_file, "r") as f:
+        with open(simple_html_file) as f:
             result = f.read()
             assert result == "<html>\n" + expected_printed_result
 
@@ -792,7 +814,10 @@ def test_print__file_output(
             False,
             3,
             "myanchor",
-            '\n<div class="pyreball-text-centered"><a id="myanchor"><b>\n\n</b></a></div>\n',
+            (
+                '\n<div class="pyreball-text-centered">'
+                '<a id="myanchor"><b>\n\n</b></a></div>\n'
+            ),
         ),
         (
             "tab",
@@ -800,7 +825,10 @@ def test_print__file_output(
             False,
             3,
             "myanchor",
-            '\n<div class="pyreball-text-centered"><a id="myanchor"><b>\nmy caption\n</b></a></div>\n',
+            (
+                '\n<div class="pyreball-text-centered">'
+                '<a id="myanchor"><b>\nmy caption\n</b></a></div>\n'
+            ),
         ),
         (
             "tab",
@@ -808,7 +836,10 @@ def test_print__file_output(
             True,
             3,
             "myanchor2",
-            '\n<div class="pyreball-text-centered"><a id="myanchor2"><b>\ntab 3: my caption\n</b></a></div>\n',
+            (
+                '\n<div class="pyreball-text-centered">'
+                '<a id="myanchor2"><b>\ntab 3: my caption\n</b></a></div>\n'
+            ),
         ),
         (
             "img",
@@ -816,7 +847,10 @@ def test_print__file_output(
             True,
             5,
             "myanchor2",
-            '\n<div class="pyreball-text-centered"><a id="myanchor2"><b>\nimg 5.\n</b></a></div>\n',
+            (
+                '\n<div class="pyreball-text-centered">'
+                '<a id="myanchor2"><b>\nimg 5.\n</b></a></div>\n'
+            ),
         ),
     ],
 )
@@ -1305,12 +1339,12 @@ def test__prepare_table_html(
     )
 
     assert "<script>" in result
-    # Remove the final row with script, because it cannot be parsed by ET
+    # Remove the final row with script, because it cannot be parsed by ElementTree
     result = re.sub("<script.*", "", result)
-    html_root = ET.fromstring(result)
+    html_root = ElementTree.fromstring(result)
 
     assert (
-        len(html_root.findall(f"./div/div/table/tbody/tr")) == simple_dataframe.shape[0]
+        len(html_root.findall("./div/div/table/tbody/tr")) == simple_dataframe.shape[0]
     )
 
     if caption_position == "top":
@@ -1356,16 +1390,16 @@ def test__prepare_table_html__col_align(
     with mock.patch(
         f"{MODULE_PATH}._gather_datatables_setup", return_value=None
     ) as gather_datatables_setup_mock:
-        params = dict(
-            display_option="full",
-            scroll_y_height="300px",
-            scroll_x=True,
-            sortable=True,
-            sorting_definition=None,
-            paging_sizes=None,
-            search_box=False,
-            datatables_definition=None,
-        )
+        params = {
+            "display_option": "full",
+            "scroll_y_height": "300px",
+            "scroll_x": True,
+            "sortable": True,
+            "sorting_definition": None,
+            "paging_sizes": None,
+            "search_box": False,
+            "datatables_definition": None,
+        }
         if set_index:
             params["index"] = index
 
@@ -1434,7 +1468,11 @@ def test_print_table__stdout(capsys, simple_dataframe):
 
 @pytest.mark.parametrize("keep_stdout", [False, True])
 @pytest.mark.parametrize(
-    "function_param_name,function_param_value,param_name,param_value,expected_param_value",
+    "function_param_name,"
+    "function_param_value,"
+    "param_name,"
+    "param_value,"
+    "expected_param_value",
     [
         ("align", "left", "align_tables", "center", "left"),
         ("align", None, "align_tables", "right", "right"),
@@ -1503,62 +1541,61 @@ def test_print_table__file_output(
 
     with mock.patch(
         f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
-    ):
-        with mock.patch(
-            f"{MODULE_PATH}._prepare_table_html", return_value="<table>x</table>"
-        ) as _prepare_table_html_mock:
-            ref = Reference()
+    ), mock.patch(
+        f"{MODULE_PATH}._prepare_table_html", return_value="<table>x</table>"
+    ) as _prepare_table_html_mock:
+        ref = Reference()
 
-            default_function_params: Dict[str, Any] = dict(
-                caption="cap",
-                reference=ref,
-                align="center",
-                caption_position="top",
-                numbered=True,
-                col_align="center",
-                display_option="full",
-                scroll_y_height="300px",
-                scroll_x=True,
-                sortable=False,
-                sorting_definition=sorting_definition,
-                paging_sizes=None,
-                search_box=False,
-                datatables_style="display",
-                datatables_definition=None,
-                additional_kwarg=42,
-            )
-            default_function_params[function_param_name] = function_param_value
-            if param_name != "tables_paging_sizes":
-                default_function_params["paging_sizes"] = [10, 20]
+        default_function_params: Dict[str, Any] = {
+            "caption": "cap",
+            "reference": ref,
+            "align": "center",
+            "caption_position": "top",
+            "numbered": True,
+            "col_align": "center",
+            "display_option": "full",
+            "scroll_y_height": "300px",
+            "scroll_x": True,
+            "sortable": False,
+            "sorting_definition": sorting_definition,
+            "paging_sizes": None,
+            "search_box": False,
+            "datatables_style": "display",
+            "datatables_definition": None,
+            "additional_kwarg": 42,
+            function_param_name: function_param_value,
+        }
+        if param_name != "tables_paging_sizes":
+            default_function_params["paging_sizes"] = [10, 20]
 
-            print_table(
-                simple_dataframe,
-                **default_function_params,
-            )
-            with open(simple_html_file, "r") as f:
-                result = f.read()
-                assert result == "<html>\n<table>x</table>\n"
+        print_table(
+            simple_dataframe,
+            **default_function_params,
+        )
+        with open(simple_html_file) as f:
+            result = f.read()
+            assert result == "<html>\n<table>x</table>\n"
 
-            default_function_params[function_param_name] = expected_param_value
+        default_function_params[function_param_name] = expected_param_value
 
-            _prepare_table_html_mock.assert_called_with(
-                df=simple_dataframe,
-                tab_index=1,
-                **default_function_params,
-            )
+        _prepare_table_html_mock.assert_called_with(
+            df=simple_dataframe,
+            tab_index=1,
+            **default_function_params,
+        )
 
-            # after writing the first table, the index is already incremented
-            assert _table_memory["table_index"] == 2
+        # after writing the first table, the index is already incremented
+        assert _table_memory["table_index"] == 2
 
-            captured = capsys.readouterr()
-            if keep_stdout:
-                assert "x1 x2" in captured.out.strip()
-            else:
-                assert captured.out.strip() == ""
+        captured = capsys.readouterr()
+        if keep_stdout:
+            assert "x1 x2" in captured.out.strip()
+        else:
+            assert captured.out.strip() == ""
 
-            # check table index if another table is written to html
-            print_table(simple_dataframe)
-            assert _table_memory["table_index"] == 3
+        # check table index if another table is written to html
+        print_table(simple_dataframe)
+        assert _table_memory["table_index"] == 3
 
 
 @pytest.mark.parametrize(
@@ -1707,7 +1744,8 @@ def test__prepare_altair_image_element():
     fig = mock.Mock()
     fig.to_json.return_value = "fig_json"
     expected_result = (
-        '<div id="altairvis326"></div><script type="text/javascript">\nvar spec = fig_json;\n'
+        '<div id="altairvis326"></div>'
+        '<script type="text/javascript">\nvar spec = fig_json;\n'
         'var opt = {"renderer": "canvas", "actions": false};\n'
         'vegaEmbed("#altairvis326", spec, opt);'
         "</script>"
@@ -1730,7 +1768,7 @@ def test__prepare_bokeh_image_element():
 
 
 def test__prepare_image_element__unknown_figure_type():
-    fig = list()
+    fig = []
     with pytest.raises(ValueError) as excinfo:
         _prepare_image_element(
             fig=fig, fig_index=3, matplotlib_format="svg", embedded=True
@@ -1887,11 +1925,38 @@ def test__print_figure__file_output(
 
     with mock.patch(
         f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
-    ):
-        with mock.patch(f"{MODULE_PATH}._write_to_html") as _write_to_html_mock:
-            fig = alt.Chart(simple_dataframe).mark_bar().encode(x="x2", y="x1")
-            ref = Reference()
-            ref.id = "id123"
+    ), mock.patch(f"{MODULE_PATH}._write_to_html") as _write_to_html_mock:
+        fig = alt.Chart(simple_dataframe).mark_bar().encode(x="x2", y="x1")
+        ref = Reference()
+        ref.id = "id123"
+        _print_figure(
+            fig=fig,
+            caption="cap",
+            reference=ref,
+            align="left",
+            caption_position=caption_position,
+            numbered=True,
+            matplotlib_format="does_not_matter",
+            embedded=True,
+        )
+
+        _write_to_html_mock.assert_called_once()
+        assert _graph_memory["fig_index"] == 2
+
+        _print_figure(
+            fig=fig,
+            caption="cap",
+            reference=Reference(),
+            align="left",
+            caption_position=caption_position,
+            numbered=True,
+            matplotlib_format="does_not_matter",
+            embedded=True,
+        )
+        assert _graph_memory["fig_index"] == 3
+
+        # try with the same reference one more time
+        with pytest.raises(ValueError) as excinfo:
             _print_figure(
                 fig=fig,
                 caption="cap",
@@ -1902,35 +1967,7 @@ def test__print_figure__file_output(
                 matplotlib_format="does_not_matter",
                 embedded=True,
             )
-
-            _write_to_html_mock.assert_called_once()
-            assert _graph_memory["fig_index"] == 2
-
-            _print_figure(
-                fig=fig,
-                caption="cap",
-                reference=Reference(),
-                align="left",
-                caption_position=caption_position,
-                numbered=True,
-                matplotlib_format="does_not_matter",
-                embedded=True,
-            )
-            assert _graph_memory["fig_index"] == 3
-
-            # try with the same reference one more time
-            with pytest.raises(ValueError) as excinfo:
-                _print_figure(
-                    fig=fig,
-                    caption="cap",
-                    reference=ref,
-                    align="left",
-                    caption_position=caption_position,
-                    numbered=True,
-                    matplotlib_format="does_not_matter",
-                    embedded=True,
-                )
-            assert "Reference is used for the second time" in str(excinfo.value)
+        assert "Reference is used for the second time" in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
@@ -1968,41 +2005,36 @@ def test_print_figure(
     simple_dataframe,
 ):
     def fake_get_parameter_value(key):
-        if key == "html_file_path":
-            return simple_html_file
-        elif key == "align_figures":
-            return param_align
-        elif key == "figure_captions_position":
-            return param_caption_position
-        elif key == "numbered_figures":
-            return param_numbered
-        else:
-            return None
+        return {
+            "html_file_path": simple_html_file,
+            "align_figures": param_align,
+            "figure_captions_position": param_caption_position,
+            "numbered_figures": param_numbered,
+        }.get(key)
 
     with mock.patch(
         f"{MODULE_PATH}.get_parameter_value", side_effect=fake_get_parameter_value
-    ):
-        with mock.patch(f"{MODULE_PATH}._print_figure") as _print_figure_mock:
-            ref = Reference()
-            fig = alt.Chart(simple_dataframe).mark_bar().encode(x="x2", y="x1")
-            print_figure(
-                fig,
-                caption="cap",
-                reference=ref,
-                align=align,
-                caption_position=caption_position,
-                numbered=numbered,
-                matplotlib_format="does_not_matter",
-                embedded=True,
-            )
+    ), mock.patch(f"{MODULE_PATH}._print_figure") as _print_figure_mock:
+        ref = Reference()
+        fig = alt.Chart(simple_dataframe).mark_bar().encode(x="x2", y="x1")
+        print_figure(
+            fig,
+            caption="cap",
+            reference=ref,
+            align=align,
+            caption_position=caption_position,
+            numbered=numbered,
+            matplotlib_format="does_not_matter",
+            embedded=True,
+        )
 
-            _print_figure_mock.assert_called_with(
-                fig=fig,
-                caption="cap",
-                reference=ref,
-                align=expected_used_align,
-                caption_position=expected_caption_position,
-                numbered=expected_used_numbered,
-                matplotlib_format="does_not_matter",
-                embedded=True,
-            )
+        _print_figure_mock.assert_called_with(
+            fig=fig,
+            caption="cap",
+            reference=ref,
+            align=expected_used_align,
+            caption_position=expected_caption_position,
+            numbered=expected_used_numbered,
+            matplotlib_format="does_not_matter",
+            embedded=True,
+        )

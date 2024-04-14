@@ -1,7 +1,8 @@
 import pandas as pd
-import pyreball as pb
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
+
+import pyreball as pb
 
 df = pd.DataFrame({"x": [1, 2, 3], "y": [4, 3, 6]})
 df["x"] = df["x"].astype(str)
