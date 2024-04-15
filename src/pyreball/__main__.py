@@ -4,32 +4,31 @@ import os
 import re
 import sys
 import textwrap
+import typing
 import xml
 from pathlib import Path
-from typing import cast, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
 from xml.dom.minidom import parseString
 
-import pkg_resources
-
+from pyreball._common import get_default_path_to_config
 from pyreball.constants import (
     CONFIG_INI_FILENAME,
-    DEFAULT_PATH_TO_CONFIG,
     HTML_TEMPLATE_FILENAME,
     LINKS_INI_FILENAME,
     STYLES_TEMPLATE_FILENAME,
 )
 from pyreball.utils.logger import get_logger
 from pyreball.utils.param import (
+    ChoiceParameter,
+    IntegerParameter,
+    StringParameter,
+    Substitutor,
     carefully_remove_directory_if_exists,
     check_and_fix_parameters,
     check_paging_sizes_string_parameter,
-    ChoiceParameter,
     get_external_links_from_config,
     get_file_config,
-    IntegerParameter,
     merge_parameter_dictionaries,
-    StringParameter,
-    Substitutor,
 )
 from pyreball.utils.template import get_css, get_html
 
@@ -200,7 +199,7 @@ def _insert_heading_title_and_toc(
         lines_index += 1
 
     # at the end, get back to level 1 if necessary
-    while 1 < current_level:
+    while current_level > 1:
         lines.insert(lines_index, "</ul>\n")
         lines_index += 1
         current_level -= 1
@@ -232,9 +231,11 @@ def _insert_js_and_css_links(
 ) -> str:
     groups_of_links_to_add = set()
     add_jquery = False
-    if _contains_class(
-        html_text=html_content, class_name="inline-highlight"
-    ) or _contains_class(html_text=html_content, class_name="pyreball-code-wrapper"):
+    if (
+        _contains_class(html_text=html_content, class_name="inline-highlight")
+        or _contains_class(html_text=html_content, class_name="block-highlight")
+        or _contains_class(html_text=html_content, class_name="pyreball-code-wrapper")
+    ):
         add_jquery = True
         groups_of_links_to_add.add("highlight_js")
     if _contains_class(html_text=html_content, class_name="pyreball-table-wrapper"):
@@ -252,7 +253,7 @@ def _insert_js_and_css_links(
         (external_links["jquery"] if add_jquery else [])
         + [
             el
-            for group in sorted(list(groups_of_links_to_add))
+            for group in sorted(groups_of_links_to_add)
             for el in external_links[group]
         ]
     )
@@ -293,7 +294,7 @@ def _finish_html_file(
         html_path: Path to the HTML file.
         include_toc: Whether to include the table of contents.
     """
-    with open(html_path, "r") as f:
+    with open(html_path) as f:
         lines = f.readlines()
 
     lines = _replace_ids(lines)
@@ -518,12 +519,12 @@ def _get_config_directory(config_dir_path: Optional[Path] = None) -> Path:
         return home_config_dir_path
 
     # Fallback to the default config directory in installation directory
-    default_config_dir_path = DEFAULT_PATH_TO_CONFIG
+    default_config_dir_path = get_default_path_to_config()
     _check_existence_of_config_files(
         config_dir_path=default_config_dir_path,
         recommendation_msg="Try re-installing pyreball.",
     )
-    return default_config_dir_path
+    return default_config_dir_path  # type: ignore[no-any-return]
 
 
 def _get_output_dir_and_file_stem(
@@ -565,18 +566,26 @@ def _get_output_dir_and_file_stem(
 
 
 class PathAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values: Optional[Union[str, Sequence[Any]]],
+        option_string: Optional[str] = None,
+    ) -> None:
         if values is None:
             setattr(namespace, self.dest, values)
-        else:
+        elif isinstance(values, str):
             if values.strip() == "":
                 raise argparse.ArgumentError(
                     self, "Path argument cannot contain only whitespaces."
                 )
             setattr(namespace, self.dest, Path(values))
+        else:
+            raise ValueError("Unexpected argument type for values.")
 
 
-def parse_arguments(args) -> Dict[str, Optional[Union[str, int]]]:
+def parse_arguments(args: List[str]) -> Dict[str, Optional[Union[str, int]]]:
     parser = argparse.ArgumentParser(
         description=(
             "Generate Python report. "
@@ -654,6 +663,22 @@ def _convert_module_to_path(mod: str) -> Path:
     return Path(mod.replace(".", os.sep) + ".py")
 
 
+@typing.no_type_check
+def _get_path_to_html_template() -> Path:
+    try:
+        # Python >=3.9
+        from importlib.resources import files  # type: ignore[attr-defined]
+
+        return Path(files("pyreball") / "cfg" / HTML_TEMPLATE_FILENAME)
+    except ImportError:
+        # Python 3.8
+        import pkg_resources
+
+        return Path(
+            pkg_resources.resource_filename("pyreball", f"cfg/{HTML_TEMPLATE_FILENAME}")
+        )
+
+
 def main() -> None:
     args_dict = parse_arguments(sys.argv[1:])
     script_args_string = " ".join(cast(List[str], args_dict.pop("script_args")))
@@ -717,9 +742,7 @@ def main() -> None:
     )
 
     html_begin, html_end = get_html(
-        template_path=Path(
-            pkg_resources.resource_filename("pyreball", f"cfg/{HTML_TEMPLATE_FILENAME}")
-        ),
+        template_path=_get_path_to_html_template(),
         title=filename_stem,
         css_definitions=css_definitions,
     )

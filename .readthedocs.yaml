@@ -5,17 +5,13 @@ build:
   tools:
     python: "3.10"
   jobs:
+    post_create_environment:
+      - python -m pip install poetry
+    post_install:
+      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH poetry install --with docs --extras "examples"
     pre_build:
       - find docs/examples -name "*.py" ! -name "script_with_args.py" -exec pyreball {} \;
       - pyreball --page-width=90 docs/examples/script_with_args.py -- --sum 23 25 24
-
-python:
-  install:
-    - requirements: docs/requirements.txt
-    - requirements: requirements_examples.txt
-    # Install our python package before building the docs
-    - method: pip
-      path: .
 
 mkdocs:
   configuration: mkdocs.yml

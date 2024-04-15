@@ -2,6 +2,7 @@ import uuid
 
 import altair as alt
 import pandas as pd
+
 import pyreball as pb
 
 pb.set_title("Multi-figure Plots")

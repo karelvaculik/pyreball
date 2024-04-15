@@ -3,8 +3,8 @@ import textwrap
 from pathlib import Path
 from unittest.mock import patch
 
-import pkg_resources
 import pytest
+
 from pyreball.__main__ import (
     _contains_class,
     _get_config_directory,
@@ -16,6 +16,7 @@ from pyreball.__main__ import (
     main,
     parse_arguments,
 )
+from pyreball._common import get_default_path_to_config
 from pyreball.constants import (
     CONFIG_INI_FILENAME,
     HTML_TEMPLATE_FILENAME,
@@ -42,11 +43,20 @@ from pyreball.constants import (
                 "<html>",
                 'Reference to table <a href="#ref-id99">id99</a>',
                 'Reference to image <a href="#ref-id17">id17</a>',
-                '<a name="img-id17-5">Image caption</a><a name="table-id99-1">Table caption</a>',
-                'Reference to table <a href="#ref-id123">id123</a> and image <a href="#ref-id42">id42</a>',
+                (
+                    '<a name="img-id17-5">Image caption</a>'
+                    '<a name="table-id99-1">Table caption</a>'
+                ),
+                (
+                    'Reference to table <a href="#ref-id123">id123</a> and image '
+                    '<a href="#ref-id42">id42</a>'
+                ),
                 '<a name="table-id123-2">Another table caption</a>',
                 '<a name="img-id42-2">Another image caption</a>',
-                'Reference again to table <a href="#ref-id123">id123</a> and image <a href="#ref-id42">id42</a>',
+                (
+                    'Reference again to table <a href="#ref-id123">id123</a> and image '
+                    '<a href="#ref-id42">id42</a>'
+                ),
                 "</html>",
             ],
             [
@@ -54,10 +64,16 @@ from pyreball.constants import (
                 'Reference to table <a href="#table-1">1</a>',
                 'Reference to image <a href="#img-5">5</a>',
                 '<a name="img-5">Image caption</a><a name="table-1">Table caption</a>',
-                'Reference to table <a href="#table-2">2</a> and image <a href="#img-2">2</a>',
+                (
+                    'Reference to table <a href="#table-2">2</a> and image '
+                    '<a href="#img-2">2</a>'
+                ),
                 '<a name="table-2">Another table caption</a>',
                 '<a name="img-2">Another image caption</a>',
-                'Reference again to table <a href="#table-2">2</a> and image <a href="#img-2">2</a>',
+                (
+                    'Reference again to table <a href="#table-2">2</a> and image '
+                    '<a href="#img-2">2</a>'
+                ),
                 "</html>",
             ],
         ),
@@ -79,15 +95,22 @@ from pyreball.constants import (
             [
                 "<html>",
                 'Reference to chapter <a href="#ref-id123">id123</a>',
-                '<h1 id="ch_id123_heading_1_1">My Chapter'
-                '<a class="pyreball-anchor-link" href="#ch_id123_heading_1_1">\u00B6</a></h1>',
+                (
+                    '<h1 id="ch_id123_heading_1_1">My Chapter'
+                    '<a class="pyreball-anchor-link" href="#ch_id123_heading_1_1">'
+                    "\u00b6</a></h1>"
+                ),
                 'Reference to chapter <a href="#ref-id123">id123</a> again',
                 "</html>",
             ],
             [
                 "<html>",
                 'Reference to chapter <a href="#ch_heading_1_1">My Chapter</a>',
-                '<h1 id="ch_heading_1_1">My Chapter<a class="pyreball-anchor-link" href="#ch_heading_1_1">\u00B6</a></h1>',
+                (
+                    '<h1 id="ch_heading_1_1">My Chapter'
+                    '<a class="pyreball-anchor-link" href="#ch_heading_1_1">\u00b6'
+                    "</a></h1>"
+                ),
                 'Reference to chapter <a href="#ch_heading_1_1">My Chapter</a> again',
                 "</html>",
             ],
@@ -103,7 +126,11 @@ def test__replace_ids(lines, expected_result):
     "test_input,expected_result",
     [
         (
-            '<h2 id="result_of_addition_2">Result of addition<a class="pyreball-anchor-link" href="#result_of_addition_2">¶</a></h2>',
+            (
+                '<h2 id="result_of_addition_2">Result of addition'
+                '<a class="pyreball-anchor-link" href="#result_of_addition_2">¶'
+                "</a></h2>"
+            ),
             (2, "result_of_addition_2", "Result of addition"),
         ),
         (
@@ -117,8 +144,12 @@ def test__replace_ids(lines, expected_result):
             (3, "some_id", "Whatever text - is necessary - 999"),
         ),
         (
-            '<h3 id="some_id">Whatever text - also <code>code</code> and <b><em>bold emphasis</em></b> - 999'
-            '<a class="pyreball-anchor-link" href="#result_of_addition_2">¶</a></h3>',
+            (
+                '<h3 id="some_id">Whatever text - also <code>code</code> and '
+                "<b><em>bold emphasis</em></b> - 999"
+                '<a class="pyreball-anchor-link" href="#result_of_addition_2">¶'
+                "</a></h3>"
+            ),
             (3, "some_id", "Whatever text - also code and bold emphasis - 999"),
         ),
         ("<div>paragraph</div>", None),
@@ -151,14 +182,38 @@ def test__insert_heading_title_and_toc__with_headings(include_toc, title_set):
         "<head/>",
         "<body>",
         '<div class="pyreball-main-container">',
-        '<h1 id="1_heading_h1_1">1  heading h1<a class="pyreball-anchor-link" href="#1_heading_h1_1">¶</a></h1>',
-        '<h2 id="1_1_heading_h2_2">1.1  heading h2<a class="pyreball-anchor-link" href="#1_1_heading_h2_2">¶</a></h2>',
-        '<h2 id="1_2_heading_h2_3">1.2  heading h2<a class="pyreball-anchor-link" href="#1_2_heading_h2_3">¶</a></h2>',
-        '<h3 id="1_2_1_heading_h3_4">1.2.1  heading h3<a class="pyreball-anchor-link" href="#1_2_1_heading_h3_4">¶</a></h3>',
-        '<h3 id="1_2_2_heading_h3_5">1.2.2  heading h3<a class="pyreball-anchor-link" href="#1_2_2_heading_h3_5">¶</a></h3>',
-        '<h1 id="2_heading_h1_6">2  heading h1<a class="pyreball-anchor-link" href="#2_heading_h1_6">¶</a></h1>',
-        '<h1 id="3_heading_h1_7">3  heading h1<a class="pyreball-anchor-link" href="#3_heading_h1_7">¶</a></h1>',
-        '<h2 id="3_1_heading_h2_8">3.1  heading h2<a class="pyreball-anchor-link" href="#3_1_heading_h2_8">¶</a></h2>',
+        (
+            '<h1 id="1_heading_h1_1">1  heading h1'
+            '<a class="pyreball-anchor-link" href="#1_heading_h1_1">¶</a></h1>'
+        ),
+        (
+            '<h2 id="1_1_heading_h2_2">1.1  heading h2'
+            '<a class="pyreball-anchor-link" href="#1_1_heading_h2_2">¶</a></h2>'
+        ),
+        (
+            '<h2 id="1_2_heading_h2_3">1.2  heading h2'
+            '<a class="pyreball-anchor-link" href="#1_2_heading_h2_3">¶</a></h2>'
+        ),
+        (
+            '<h3 id="1_2_1_heading_h3_4">1.2.1  heading h3'
+            '<a class="pyreball-anchor-link" href="#1_2_1_heading_h3_4">¶</a></h3>'
+        ),
+        (
+            '<h3 id="1_2_2_heading_h3_5">1.2.2  heading h3'
+            '<a class="pyreball-anchor-link" href="#1_2_2_heading_h3_5">¶</a></h3>'
+        ),
+        (
+            '<h1 id="2_heading_h1_6">2  heading h1'
+            '<a class="pyreball-anchor-link" href="#2_heading_h1_6">¶</a></h1>'
+        ),
+        (
+            '<h1 id="3_heading_h1_7">3  heading h1'
+            '<a class="pyreball-anchor-link" href="#3_heading_h1_7">¶</a></h1>'
+        ),
+        (
+            '<h2 id="3_1_heading_h2_8">3.1  heading h2'
+            '<a class="pyreball-anchor-link" href="#3_1_heading_h2_8">¶</a></h2>'
+        ),
         "</div>",
         "</body>",
         "</html>",
@@ -169,11 +224,17 @@ def test__insert_heading_title_and_toc__with_headings(include_toc, title_set):
     expected_title_and_toc = []
     if title_set and not include_toc:
         expected_title_and_toc = [
-            f'<h1 id="toc_generated_0">{expected_toc_heading}<a class="pyreball-anchor-link" href="#toc_generated_0">¶</a></h1>\n'
+            (
+                f'<h1 id="toc_generated_0">{expected_toc_heading}'
+                f'<a class="pyreball-anchor-link" href="#toc_generated_0">¶</a></h1>\n'
+            )
         ]
     elif include_toc:
         expected_title_and_toc = [
-            f'<h1 id="toc_generated_0">{expected_toc_heading}<a class="pyreball-anchor-link" href="#toc_generated_0">¶</a></h1>\n',
+            (
+                f'<h1 id="toc_generated_0">{expected_toc_heading}'
+                f'<a class="pyreball-anchor-link" href="#toc_generated_0">¶</a></h1>\n'
+            ),
             '<a href="#1_heading_h1_1">1  heading h1</a><br/>\n',
             '<ul style="list-style-type:none; margin:0px">\n',
             '<li><a href="#1_1_heading_h2_2">1.1  heading h2</a></li>\n',
@@ -190,30 +251,50 @@ def test__insert_heading_title_and_toc__with_headings(include_toc, title_set):
             "</ul>\n",
         ]
 
-    expected_result = (
-        [
-            "<html>",
-            "<head>",
-            title,
-            "<head/>",
-            "<body>",
-            '<div class="pyreball-main-container">',
-        ]
-        + expected_title_and_toc
-        + [
-            '<h1 id="1_heading_h1_1">1  heading h1<a class="pyreball-anchor-link" href="#1_heading_h1_1">¶</a></h1>',
-            '<h2 id="1_1_heading_h2_2">1.1  heading h2<a class="pyreball-anchor-link" href="#1_1_heading_h2_2">¶</a></h2>',
-            '<h2 id="1_2_heading_h2_3">1.2  heading h2<a class="pyreball-anchor-link" href="#1_2_heading_h2_3">¶</a></h2>',
-            '<h3 id="1_2_1_heading_h3_4">1.2.1  heading h3<a class="pyreball-anchor-link" href="#1_2_1_heading_h3_4">¶</a></h3>',
-            '<h3 id="1_2_2_heading_h3_5">1.2.2  heading h3<a class="pyreball-anchor-link" href="#1_2_2_heading_h3_5">¶</a></h3>',
-            '<h1 id="2_heading_h1_6">2  heading h1<a class="pyreball-anchor-link" href="#2_heading_h1_6">¶</a></h1>',
-            '<h1 id="3_heading_h1_7">3  heading h1<a class="pyreball-anchor-link" href="#3_heading_h1_7">¶</a></h1>',
-            '<h2 id="3_1_heading_h2_8">3.1  heading h2<a class="pyreball-anchor-link" href="#3_1_heading_h2_8">¶</a></h2>',
-            "</div>",
-            "</body>",
-            "</html>",
-        ]
-    )
+    expected_result = [
+        "<html>",
+        "<head>",
+        title,
+        "<head/>",
+        "<body>",
+        '<div class="pyreball-main-container">',
+        *expected_title_and_toc,
+        (
+            '<h1 id="1_heading_h1_1">1\xa0\xa0heading h1'
+            '<a class="pyreball-anchor-link" href="#1_heading_h1_1">¶</a></h1>'
+        ),
+        (
+            '<h2 id="1_1_heading_h2_2">1.1\xa0\xa0heading h2'
+            '<a class="pyreball-anchor-link" href="#1_1_heading_h2_2">¶</a></h2>'
+        ),
+        (
+            '<h2 id="1_2_heading_h2_3">1.2\xa0\xa0heading h2'
+            '<a class="pyreball-anchor-link" href="#1_2_heading_h2_3">¶</a></h2>'
+        ),
+        (
+            '<h3 id="1_2_1_heading_h3_4">1.2.1\xa0\xa0heading h3'
+            '<a class="pyreball-anchor-link" href="#1_2_1_heading_h3_4">¶</a></h3>'
+        ),
+        (
+            '<h3 id="1_2_2_heading_h3_5">1.2.2\xa0\xa0heading h3'
+            '<a class="pyreball-anchor-link" href="#1_2_2_heading_h3_5">¶</a></h3>'
+        ),
+        (
+            '<h1 id="2_heading_h1_6">2\xa0\xa0heading h1'
+            '<a class="pyreball-anchor-link" href="#2_heading_h1_6">¶</a></h1>'
+        ),
+        (
+            '<h1 id="3_heading_h1_7">3\xa0\xa0heading h1'
+            '<a class="pyreball-anchor-link" href="#3_heading_h1_7">¶</a></h1>'
+        ),
+        (
+            '<h2 id="3_1_heading_h2_8">3.1\xa0\xa0heading h2'
+            '<a class="pyreball-anchor-link" href="#3_1_heading_h2_8">¶</a></h2>'
+        ),
+        "</div>",
+        "</body>",
+        "</html>",
+    ]
 
     assert result == expected_result
 
@@ -249,25 +330,24 @@ def test__insert_heading_title_and_toc__without_headings(include_toc, title_set)
     expected_title_and_toc = []
     if title_set:
         expected_title_and_toc = [
-            f'<h1 id="toc_generated_0">Custom Title<a class="pyreball-anchor-link" href="#toc_generated_0">¶</a></h1>\n'
+            (
+                '<h1 id="toc_generated_0">Custom Title'
+                '<a class="pyreball-anchor-link" href="#toc_generated_0">¶</a></h1>\n'
+            )
         ]
 
-    report_after = (
-        [
-            "<html>",
-            "<head>",
-            title,
-            "<head/>",
-            "<body>",
-            '<div class="pyreball-main-container">',
-        ]
-        + expected_title_and_toc
-        + [
-            "</div>",
-            "</body>",
-            "</html>",
-        ]
-    )
+    report_after = [
+        "<html>",
+        "<head>",
+        title,
+        "<head/>",
+        "<body>",
+        '<div class="pyreball-main-container">',
+        *expected_title_and_toc,
+        "</div>",
+        "</body>",
+        "</html>",
+    ]
 
     assert result == report_after
 
@@ -382,7 +462,7 @@ def test__get_config_directory__home_path_with_incomplete_files(tmpdir, mocker):
         # Path from home
         (None, True, Path("my_home/.pyreball")),
         # Path from installation directory
-        (None, False, Path(pkg_resources.resource_filename("pyreball", "cfg"))),
+        (None, False, get_default_path_to_config()),
     ],
 )
 def test__get_config_directory__valid_conditions(

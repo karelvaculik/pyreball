@@ -4,7 +4,7 @@ import sys
 _logger = None
 
 
-def get_logger():
+def get_logger() -> logging.Logger:
     global _logger
 
     if _logger is not None:

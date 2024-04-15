@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 
 import pyreball as pb
-import seaborn as sns
 
 pb.set_title("References to Figures and Tables")
 

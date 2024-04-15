@@ -1,6 +1,6 @@
 import pytest
 
-from pyreball.utils.param import _parameter_cache, get_parameter_value
+from pyreball.utils.param import _parameter_cache, get_parameter_value  # noqa: F401
 
 
 @pytest.fixture(autouse=True)

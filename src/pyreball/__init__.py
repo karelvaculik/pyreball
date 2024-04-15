@@ -1,6 +1,5 @@
-__version__ = "2.0.0"
-
 from pyreball.html import (
+    Reference,
     print,
     print_code_block,
     print_div,
@@ -12,7 +11,6 @@ from pyreball.html import (
     print_h5,
     print_h6,
     print_table,
-    Reference,
     set_title,
 )
 from pyreball.text import (

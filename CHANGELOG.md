@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.1.0 (2024-04-15)
+
+- Added support for Python 3.12.
+- Fixed erroneous highlighting behaviour for `code`, `code_block` and `print_code_block`
+  functions when `None` value was used for `syntax_highlight` parameter.
+- Arbitrary string value can be now passed to `syntax_highlight` parameter
+  of `code`, `code_block` and `print_code_block` functions. This allows to use languages
+  supported by Highlight.js library.
+- Internals:
+    - Replaced with `setup.py` with `pyproject.toml` and Poetry, moved source code
+      under `src` directory.
+    - Dependency on `pkg_resources` replaced with `importlib` for Python >= 3.9.
+    - Ruff is now used for linting and formatting.
+    - Added missing `py.typed` file.
+
 ## 2.0.0 (2023-11-15)
 
 - Added option `-m` to specify input as module.

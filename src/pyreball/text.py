@@ -1,5 +1,6 @@
 """Text utils for creating strings with HTML elements."""
-from typing import Any, List, Literal, Optional
+
+from typing import Any, List, Optional
 
 from pyreball._common import AttrsParameter, ClParameter
 
@@ -15,10 +16,7 @@ def _construct_attrs_str(attrs: AttrsParameter) -> Optional[str]:
 def _construct_class_attr_string(cl: ClParameter) -> Optional[str]:
     if cl is None:
         return None
-    if isinstance(cl, str):
-        cl_values = cl
-    else:
-        cl_values = " ".join(cl)
+    cl_values = cl if isinstance(cl, str) else " ".join(cl)
     return _construct_attrs_str({"class": cl_values})
 
 
@@ -79,20 +77,15 @@ def em(
 def _collect_classes_for_code_strings(
     initial_class_list: List[str],
     cl: ClParameter,
-    syntax_highlight: Optional[Literal["python"]],
+    syntax_highlight: Optional[str],
 ) -> ClParameter:
     classes_to_be_added = initial_class_list[:]
     if syntax_highlight is not None:
-        if syntax_highlight == "python":
-            classes_to_be_added.append("python")
-        else:
-            raise ValueError(
-                f"Unsupported syntax highlighting language: {syntax_highlight}."
-            )
+        classes_to_be_added.append(syntax_highlight)
         if cl is None:
             cl = classes_to_be_added
         elif isinstance(cl, str):
-            cl = [cl] + classes_to_be_added
+            cl = [cl, *classes_to_be_added]
         else:
             cl = cl + classes_to_be_added
     return cl
@@ -103,7 +96,7 @@ def code(
     cl: ClParameter = None,
     attrs: AttrsParameter = None,
     sep: str = "",
-    syntax_highlight: Optional[Literal["python"]] = "python",
+    syntax_highlight: Optional[str] = "python",
 ) -> str:
     """
     Create a `<code>` element string with given values.
@@ -127,7 +120,9 @@ def code(
             set `None` for given key. Any quotes in values are not escaped.
         sep: String separator of the values. Defaults to an empty string.
         syntax_highlight: Syntax highlighting language.
-            Currently only `'python'` is supported. If `None`, no highlight is applied.
+            Supported values can be obtained from highlight.js table
+            https://github.com/highlightjs/highlight.js/blob/main/SUPPORTED_LANGUAGES.md
+            - see column "Aliases". If `None`, no highlighting is applied.
             When highlight is turned on, language name and `'inline-highlight'`
             are added to the element as classes.
 
@@ -145,7 +140,7 @@ def code_block(
     pre_cl: ClParameter = None,
     pre_attrs: AttrsParameter = None,
     sep: str = "",
-    syntax_highlight: Optional[Literal["python"]] = "python",
+    syntax_highlight: Optional[str] = "python",
 ) -> str:
     """
     Create a `<pre><code>` pair element string with given values.
@@ -172,14 +167,16 @@ def code_block(
         pre_attrs: The same as `attrs` parameter, but for the `<pre>` tag.
         sep: String separator of the values. Defaults to an empty string.
         syntax_highlight: Syntax highlighting language.
-            Currently only `'python'` is supported. If `None`, no highlight is applied.
-            When highlight is turned on, language name is added to the `<code>`
-            element as a class.
+            Supported values can be obtained from highlight.js table
+            https://github.com/highlightjs/highlight.js/blob/main/SUPPORTED_LANGUAGES.md
+            - see column "Aliases". If `None`, no highlighting is applied.
+            When highlight is turned on, language name and `'block-highlight'`
+            are added to the element as classes.
 
     Returns:
         HTML string representing the tag with given values.
     """
-    cl = _collect_classes_for_code_strings([], cl, syntax_highlight)
+    cl = _collect_classes_for_code_strings(["block-highlight"], cl, syntax_highlight)
     code_text = tag(*values, name="code", cl=cl, attrs=attrs, sep=sep)
     return tag(code_text, name="pre", cl=pre_cl, attrs=pre_attrs)
 
@@ -285,13 +282,10 @@ def _enclose_into_li_tags(
     cl: ClParameter = None,
     attrs: AttrsParameter = None,
     sep: str = "",
-):
+) -> str:
     result = ""
     for value in values:
-        if isinstance(value, tuple):
-            value_str = "".join(map(str, value))
-        else:
-            value_str = str(value)
+        value_str = "".join(map(str, value)) if isinstance(value, tuple) else str(value)
         result += tag(value_str, name="li", cl=cl, attrs=attrs, sep=sep)
     return result
 

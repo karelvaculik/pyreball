@@ -1,0 +1,122 @@
+[tool.poetry]
+name = "pyreball"
+version = "2.1.0"
+description = "Python reporting tool."
+authors = ["Karel Vaculik <vaculik.dev@gmail.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+packages = [{ include = "pyreball", from = "src" }]
+keywords = ["python", "reporting", "html"]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+altair = { version = "^5.0.1", optional = true }
+altair-viewer = { version = "^0.4.0", optional = true }
+bokeh = [
+    { version = "^3.1.1", python = "<3.9", optional = true },
+    { version = "^3.2.2", python = ">=3.9,<3.12", optional = true },
+    { version = "^3.2.2", python = ">=3.12", optional = true },
+]
+numpy = [
+    { version = "^1.24.4", python = "<3.9", optional = true },
+    { version = "^1.25.2", python = ">=3.9,<3.12", optional = true },
+    { version = "^1.26.4", python = ">=3.12", optional = true },
+]
+matplotlib = { version = "^3.7.2", optional = true }
+pandas = [
+    { version = "^2.0.3", python = "<3.9", optional = true },
+    { version = "^2.0.3", python = ">=3.9,<3.12", optional = true },
+    { version = "^2.2.2", python = ">=3.12", optional = true },
+]
+plotly = { version = "^5.16.1", optional = true }
+seaborn = { version = "^0.12.2", optional = true }
+
+[tool.poetry.group.test.dependencies]
+mypy = "^1.9.0"
+pytest = "^8.1.1"
+pytest-mock = "^3.14.0"
+pytest-cov = "^5.0.0"
+ruff = "^0.3.7"
+ruff-lsp = "^0.0.53"
+tox = "^4.14.2"
+
+[tool.poetry.group.docs.dependencies]
+mkdocs-material = "^9.5.17"
+mkdocstrings = {extras = ["python"], version = "^0.24.3"}
+mkdocs-macros-plugin = "^1.0.5"
+
+[tool.poetry.extras]
+examples = [
+    "altair",
+    "altair-viewer",
+    "bokeh",
+    "numpy",
+    "matplotlib",
+    "pandas",
+    "plotly",
+    "seaborn"
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+pyreball = "pyreball.__main__:main"
+pyreball-generate-config = "pyreball.config_generator:main"
+
+[tool.ruff]
+fix = true
+lint.unfixable = [
+    "ERA", # do not autoremove commented out code
+]
+target-version = "py38"
+line-length = 88
+lint.extend-select = [
+    "B", # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "E", # pydocstyle
+    "I", # isort
+    "N", # pep8-naming
+    "PIE", # flake8-pie
+    "PGH", # pygrep
+    "RUF", # ruff checks
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+    "TID", # flake8-tidy-imports
+    "UP", # pyupgrade
+]
+lint.ignore = ["RUF001"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 88
+
+[tool.ruff.lint.isort]
+known-first-party = ["pyreball"]
+
+[tool.mypy]
+files = "src, tests"
+mypy_path = "src"
+namespace_packages = true
+explicit_package_bases = true
+show_error_codes = true
+strict = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pkg_resources.*"
+ignore_missing_imports = true

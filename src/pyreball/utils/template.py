@@ -9,7 +9,7 @@ logger = get_logger()
 
 
 def get_html(template_path: Path, title: str, css_definitions: str) -> Tuple[str, str]:
-    with open(template_path, "r") as f:
+    with open(template_path) as f:
         html_text = f.read()
         html_start, html_end = html_text.split("<!--PYREBALL_REPORT_CONTENTS-->")
         html_start = re.sub("<!--PYREBALL_PAGE_TITLE-->", title, html_start)
