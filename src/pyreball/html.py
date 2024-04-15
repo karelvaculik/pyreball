@@ -11,7 +11,6 @@ from typing import (
     Any,
     Dict,
     List,
-    Literal,
     Optional,
     Set,
     Tuple,
@@ -426,7 +425,7 @@ def print_code_block(
     pre_attrs: AttrsParameter = None,
     sep: str = "",
     end: str = "\n",
-    syntax_highlight: Optional[Literal["python"]] = "python",
+    syntax_highlight: Optional[str] = "python",
 ) -> None:
     """
     Print values as a source code into a preformatted block.
@@ -463,9 +462,12 @@ def print_code_block(
         sep: String separator of the values inside the tag. Defaults to an empty string.
         end: String appended after the tag. Defaults to a newline.
         syntax_highlight: Syntax highlighting language.
-            Currently only `'python'` is supported. If `None`,
-            no highlight is applied. When highlight is turned on,
-            language name is added to the `<code>` element as a class.
+            Supported values can be obtained from highlight.js table
+            https://github.com/highlightjs/highlight.js/blob/main/SUPPORTED_LANGUAGES.md
+            - see column "Aliases". If `None`, no highlighting is applied.
+            When highlight is turned on, language name and `'block-highlight'`
+            are added to the `<code>` element as classes.
+
     """
 
     source_code_str = code_block(

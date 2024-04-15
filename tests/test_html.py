@@ -604,7 +604,10 @@ def test_print_code_block__stdout(syntax_highlight, capsys):
         print_code_block("[1, 2, 3]", syntax_highlight=syntax_highlight)
         captured = capsys.readouterr()
         if syntax_highlight:
-            assert '<pre><code class="python">[1, 2, 3]</code></pre>' in captured.out
+            assert (
+                '<pre><code class="block-highlight python">[1, 2, 3]</code></pre>'
+                in captured.out
+            )
         else:
             assert "<pre><code>[1, 2, 3]</code></pre>" in captured.out
 
@@ -616,7 +619,10 @@ def test_print_code_block__stdout(syntax_highlight, capsys):
         print_code_block("{'a': 4}", syntax_highlight=syntax_highlight)
         captured = capsys.readouterr()
         if syntax_highlight:
-            assert "<pre><code class=\"python\">{'a': 4}</code></pre>" in captured.out
+            assert (
+                "<pre><code class=\"block-highlight python\">{'a': 4}</code></pre>"
+                in captured.out
+            )
         else:
             assert "<pre><code>{'a': 4}</code></pre>" in captured.out
 

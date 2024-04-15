@@ -114,25 +114,20 @@ def test_code__with_syntax_highlight():
     assert code("a", "b", sep="\n", syntax_highlight="python") == expected_result
 
 
-def test_code__unsupported_syntax_highlight():
-    with pytest.raises(ValueError):
-        code("a", "b", sep="\n", syntax_highlight="my_new_lang")
-
-
 def test_code_block__without_syntax_highlight():
     expected_result = "<pre><code>\na\nb\n</code></pre>"
     assert code_block("a", "b", sep="\n", syntax_highlight=None) == expected_result
 
 
 def test_code_block__with_syntax_highlight():
-    expected_result = '<pre><code class="python">\na\nb\n</code></pre>'
+    expected_result = '<pre><code class="block-highlight python">\na\nb\n</code></pre>'
     assert code_block("a", "b", sep="\n", syntax_highlight="python") == expected_result
 
 
 def test_code_block__with_syntax_highlight_and_attributes():
     expected_result = (
         '<pre class="pre1" pa="pv">'
-        '<code class="code1 python" ca="cv">\na\nb\n</code>'
+        '<code class="code1 block-highlight python" ca="cv">\na\nb\n</code>'
         "</pre>"
     )
     result = code_block(
@@ -146,11 +141,6 @@ def test_code_block__with_syntax_highlight_and_attributes():
         syntax_highlight="python",
     )
     assert result == expected_result
-
-
-def test_code_block__unsupported_syntax_highlight():
-    with pytest.raises(ValueError):
-        code_block("a", "b", sep="\n", syntax_highlight="my_new_lang")
 
 
 def test_div():

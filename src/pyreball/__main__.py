@@ -231,9 +231,11 @@ def _insert_js_and_css_links(
 ) -> str:
     groups_of_links_to_add = set()
     add_jquery = False
-    if _contains_class(
-        html_text=html_content, class_name="inline-highlight"
-    ) or _contains_class(html_text=html_content, class_name="pyreball-code-wrapper"):
+    if (
+        _contains_class(html_text=html_content, class_name="inline-highlight")
+        or _contains_class(html_text=html_content, class_name="block-highlight")
+        or _contains_class(html_text=html_content, class_name="pyreball-code-wrapper")
+    ):
         add_jquery = True
         groups_of_links_to_add.add("highlight_js")
     if _contains_class(html_text=html_content, class_name="pyreball-table-wrapper"):
