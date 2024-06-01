@@ -2,6 +2,7 @@
 
 ## 2.1.2 (2024-06-01)
 
+- Version of installed `bokeh` package is now used to create matching JavaScript links.  
 - Fixed invalid link in Configuration page of documentation.
 
 ## 2.1.1 (2024-06-01)

@@ -96,6 +96,9 @@ added to the HTML `<head>` element.
 Some libraries, e.g. [DataTables](https://datatables.net/), require also [jQuery](https://jquery.com/), which is listed
 separately in `external_links.ini`.
 
+All links in `external_links.ini` are fixed except for Bokeh links.
+Bokeh links contain placeholder `{BOKEH_VERSION}`, which is replaced by the version of installed `bokeh` package during report generation by Pyreball.
+
 ### config.ini File
 
 `config.ini` file controls behaviour of Pyreball as well as how various elements should be displayed in the final HTML.

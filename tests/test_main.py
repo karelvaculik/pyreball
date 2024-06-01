@@ -1,12 +1,14 @@
 import os
+import sys
 import textwrap
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
 from pyreball.__main__ import (
     _contains_class,
+    _fill_bokeh_version_in_external_links,
     _get_config_directory,
     _get_output_dir_and_file_stem,
     _insert_heading_title_and_toc,
@@ -368,6 +370,55 @@ def test__insert_heading_title_and_toc__without_headings(include_toc, title_set)
 )
 def test__contains_class(html_text, class_name, expected_result):
     assert _contains_class(html_text, class_name) == expected_result
+
+
+@pytest.mark.parametrize(
+    "external_links,expected",
+    [
+        (
+            {},
+            {},
+        ),
+        (
+            {"something": ["else"]},
+            {"something": ["else"]},
+        ),
+        (
+            {
+                "bokeh": [
+                    (
+                        '<script src="https://cdn.bokeh.org/bokeh/release/bokeh'
+                        '-{BOKEH_VERSION}.min.js" crossorigin="anonymous"></script>'
+                    ),
+                    (
+                        '<script src="https://cdn.bokeh.org/bokeh/release/bokeh-'
+                        'widgets-{BOKEH_VERSION}.min.js" crossorigin="anonymous">'
+                        "</script>"
+                    ),
+                ]
+            },
+            {
+                "bokeh": [
+                    (
+                        '<script src="https://cdn.bokeh.org/bokeh/release/bokeh'
+                        '-1.2.3.min.js" crossorigin="anonymous"></script>'
+                    ),
+                    (
+                        '<script src="https://cdn.bokeh.org/bokeh/release/bokeh-'
+                        'widgets-1.2.3.min.js" crossorigin="anonymous">'
+                        "</script>"
+                    ),
+                ]
+            },
+        ),
+    ],
+)
+def test__fill_bokeh_version_in_external_links(external_links, expected):
+    bokeh_package_mock = Mock()
+    bokeh_package_mock.__version__ = "1.2.3"
+    with patch.dict(sys.modules, {"bokeh": bokeh_package_mock}):
+        _fill_bokeh_version_in_external_links(external_links)
+        assert external_links == expected
 
 
 @pytest.mark.parametrize(
