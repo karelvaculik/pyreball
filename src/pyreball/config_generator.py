@@ -1,4 +1,5 @@
 import argparse
+import logging
 import shutil
 from pathlib import Path
 
@@ -9,9 +10,8 @@ from pyreball.constants import (
     LINKS_INI_FILENAME,
     STYLES_TEMPLATE_FILENAME,
 )
-from pyreball.utils.logger import get_logger
 
-logger = get_logger()
+logger = logging.getLogger(__name__)
 
 
 def copy_config_files(output_directory: Path) -> None:

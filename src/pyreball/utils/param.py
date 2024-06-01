@@ -1,6 +1,7 @@
 import argparse
 import configparser
 import json
+import logging
 import os
 import re
 import shutil
@@ -9,11 +10,9 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
-from pyreball.utils.logger import get_logger
-
 ParametersType = Dict[str, Optional[Union[str, int]]]
 
-logger = get_logger()
+logger = logging.getLogger(__name__)
 
 _parameter_cache = {}
 
