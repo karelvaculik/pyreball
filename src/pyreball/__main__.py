@@ -226,6 +226,27 @@ def _contains_class(html_text: str, class_name: str) -> bool:
     return re.search(pattern, html_text) is not None
 
 
+def _fill_bokeh_version_in_external_links(external_links: Dict[str, List[str]]) -> None:
+    """Fill-in version of installed bokeh package into external links.
+
+    The links are updated inplace.
+
+    Args:
+        external_links: Dictionary with external links.
+    """
+    if "bokeh" in external_links:
+        try:
+            import bokeh
+
+            bokeh_version = bokeh.__version__
+        except ImportError:
+            bokeh_version = "3.2.2"
+        external_links["bokeh"] = [
+            link.replace("{BOKEH_VERSION}", bokeh_version)
+            for link in external_links["bokeh"]
+        ]
+
+
 def _insert_js_and_css_links(
     html_content: str, external_links: Dict[str, List[str]]
 ) -> str:
@@ -721,6 +742,7 @@ def main() -> None:
         filename=LINKS_INI_FILENAME,
         directory=config_directory,
     )
+    _fill_bokeh_version_in_external_links(external_links=external_links)
 
     parameters = merge_parameter_dictionaries(
         primary_parameters=cli_parameters,

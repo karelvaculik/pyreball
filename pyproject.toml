@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyreball"
-version = "2.1.1"
+version = "2.1.2"
 description = "Python reporting tool."
 authors = ["Karel Vaculik <vaculik.dev@gmail.com>"]
 license = "Apache-2.0"
