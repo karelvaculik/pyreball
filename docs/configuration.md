@@ -101,7 +101,7 @@ separately in `external_links.ini`.
 `config.ini` file controls behaviour of Pyreball as well as how various elements should be displayed in the final HTML.
 The default `config.ini` looks like this:
 
-{{ inline_source("pyreball/cfg/config.ini", "cfg") }}
+{{ inline_source("src/pyreball/cfg/config.ini", "cfg") }}
 
 Detailed description is provided in
 section [config.ini vs. CLI arguments vs. function arguments](#configini-vs-cli-arguments-vs-function-arguments).
