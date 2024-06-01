@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import os
 import re
 import sys
@@ -17,7 +18,6 @@ from pyreball.constants import (
     LINKS_INI_FILENAME,
     STYLES_TEMPLATE_FILENAME,
 )
-from pyreball.utils.logger import get_logger
 from pyreball.utils.param import (
     ChoiceParameter,
     IntegerParameter,
@@ -32,7 +32,7 @@ from pyreball.utils.param import (
 )
 from pyreball.utils.template import get_css, get_html
 
-logger = get_logger()
+logger = logging.getLogger(__name__)
 
 
 def _replace_ids(lines: List[str]) -> List[str]:

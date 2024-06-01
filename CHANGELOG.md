@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.1 (2024-06-01)
+
+- Fixed logging by replacing custom logger creation with standard `getLogger` call. The
+  logging won't break user's logging configuration anymore.
+
 ## 2.1.0 (2024-04-15)
 
 - Added support for Python 3.12.

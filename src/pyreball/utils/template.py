@@ -1,11 +1,10 @@
+import logging
 import re
 import sys
 from pathlib import Path
 from typing import Tuple
 
-from pyreball.utils.logger import get_logger
-
-logger = get_logger()
+logger = logging.getLogger(__name__)
 
 
 def get_html(template_path: Path, title: str, css_definitions: str) -> Tuple[str, str]:
