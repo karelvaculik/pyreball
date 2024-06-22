@@ -1,8 +1,12 @@
 # Changelog
 
+## 2.2.0 (2024-06-22)
+
+- Added support for Seaborn's `PairGrid`, `FacetGrid`, `JointGrid`, and `ClusterGrid`.
+
 ## 2.1.2 (2024-06-01)
 
-- Version of installed `bokeh` package is now used to create matching JavaScript links.  
+- Version of installed `bokeh` package is now used to create matching JavaScript links.
 - Fixed invalid link in Configuration page of documentation.
 
 ## 2.1.1 (2024-06-01)

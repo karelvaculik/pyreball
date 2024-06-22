@@ -40,6 +40,9 @@ if TYPE_CHECKING:
     # noinspection PyPackageRequirements
     import plotly  # type: ignore[unused-ignore]
 
+    # noinspection PyPackageRequirements
+    import seaborn  # type: ignore[unused-ignore]
+
 AltairFigType = Union[
     "altair.vegalite.v5.api.Chart",
     "altair.vegalite.v5.api.ConcatChart",
@@ -51,6 +54,10 @@ AltairFigType = Union[
 ]
 FigType = Union[
     "matplotlib.figure.Figure",
+    "seaborn.axisgrid.PairGrid",
+    "seaborn.axisgrid.FacetGrid",
+    "seaborn.axisgrid.JointGrid",
+    "seaborn.matrix.ClusterGrid",
     "plotly.graph_objs._figure.Figure",
     "altair.vegalite.v5.api.Chart",
     "altair.vegalite.v5.api.ConcatChart",
@@ -1038,6 +1045,16 @@ def _prepare_bokeh_image_element(fig: "bokeh.plotting._figure.figure") -> str:
     return f"<div>{div}{script}</div>"
 
 
+def _is_seaborn_figure_level_type(fig: FigType) -> bool:
+    return (
+        type(fig).__name__ in ["PairGrid", "FacetGrid", "JointGrid"]
+        and type(fig).__module__ == "seaborn.axisgrid"
+    ) or (
+        type(fig).__name__ in ["ClusterGrid"]
+        and type(fig).__module__ == "seaborn.matrix"
+    )
+
+
 def _prepare_image_element(
     fig: FigType,
     fig_index: int,
@@ -1048,9 +1065,7 @@ def _prepare_image_element(
     # (if we checked type of fig, we would have to add the libraries to requirements)
     if (
         type(fig).__name__ == "Figure" and type(fig).__module__ == "matplotlib.figure"
-    ) or (
-        type(fig).__name__ == "PairGrid" and type(fig).__module__ == "seaborn.axisgrid"
-    ):
+    ) or _is_seaborn_figure_level_type(fig):
         img_element = _prepare_matplotlib_image_element(
             fig=fig,
             fig_index=fig_index,
@@ -1079,7 +1094,7 @@ def _prepare_image_element(
         "bokeh.plotting.figure",
         "bokeh.plotting._figure",
     ]:
-        img_element = _prepare_bokeh_image_element(fig=fig)
+        img_element = _prepare_bokeh_image_element(fig=fig)  # type: ignore[arg-type]
         img_type = "bokeh"
     else:
         raise ValueError(f"Unknown figure type {type(fig)}.")
@@ -1105,7 +1120,11 @@ def _print_figure(
         ]:
             from bokeh.plotting import show
 
-            show(fig)
+            show(fig)  # type: ignore[arg-type]
+        elif _is_seaborn_figure_level_type(fig):
+            from matplotlib import pyplot as plt
+
+            plt.show()
         else:
             fig.show()
     else:
