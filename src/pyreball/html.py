@@ -1094,7 +1094,9 @@ def _prepare_image_element(
         "bokeh.plotting.figure",
         "bokeh.plotting._figure",
     ]:
-        img_element = _prepare_bokeh_image_element(fig=fig)  # type: ignore[arg-type]
+        img_element = _prepare_bokeh_image_element(
+            fig=fig  # type: ignore[arg-type,unused-ignore]
+        )
         img_type = "bokeh"
     else:
         raise ValueError(f"Unknown figure type {type(fig)}.")
@@ -1120,7 +1122,7 @@ def _print_figure(
         ]:
             from bokeh.plotting import show
 
-            show(fig)  # type: ignore[arg-type]
+            show(fig)  # type: ignore[arg-type,unused-ignore]
         elif _is_seaborn_figure_level_type(fig):
             from matplotlib import pyplot as plt
 
