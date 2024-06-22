@@ -4,7 +4,9 @@ Pyreball currently supports plotting figures created
 by [Matplotlib](https://matplotlib.org/), [Seaborn](https://seaborn.pydata.org/), [Vega-Altair](https://altair-viz.github.io/index.html),
 [Plotly](https://plotly.com/), and [Bokeh](https://bokeh.org/).
 
-There is a single function [`print_figure()`](../api/pyreball_html/#pyreball.html.print_figure) for all these libraries.
+There is a single
+function [`print_figure()`](../api/pyreball_html/#pyreball.html.print_figure) for all
+these libraries.
 Similarly to [`print_table()`](../api/pyreball_html/#pyreball.html.print_table), it uses
 parameters `caption`, `align`, `caption_position` and `numbered` with the same meaning.
 In contrast to table captions, the default position of figure captions is `bottom`.
@@ -14,22 +16,29 @@ In contrast to table captions, the default position of figure captions is `botto
 When plotting with Matplotlib, it is necessary to create a figure object and pass it
 to [`print_figure()`](../api/pyreball_html/#pyreball.html.print_figure).
 
-In case of Matplotlib, a user can select the format of the figure via `matplotlib_format` parameter: either `"png"`
+In case of Matplotlib, a user can select the format of the figure
+via `matplotlib_format` parameter: either `"png"`
 or `"svg"`.
-In case of `"svg"`, it is also possible to choose whether the figure should be embedded into the HTML file 
-or saved into a separate file and referenced in the HTML file by setting `embedded` accordingly.
+In case of `"svg"`, it is also possible to choose whether the figure should be embedded
+into the HTML file
+or saved into a separate file and referenced in the HTML file by setting `embedded`
+accordingly.
 Figures in `"png"` format cannot be embedded into the HTML file.
 
-When the figure is stored into a file, the file is saved in a directory with name equal to the filename stem of the HTML
-file. For example, for HTML file `report.html`, the image file will be stored in directory `report`.
+When the figure is stored into a file, the file is saved in a directory with name equal
+to the filename stem of the HTML
+file. For example, for HTML file `report.html`, the image file will be stored in
+directory `report`.
 
-The following code shows an example of a bar chart created with Matplotlib and stored in a `"png"` format.
+The following code shows an example of a bar chart created with Matplotlib and stored in
+a `"png"` format.
 
 {{ inline_source("docs/examples/plotting_matplotlib_png.py") }}
 
 <iframe style="border:2px solid;" src="../examples/plotting_matplotlib_png.html" height="540" width="100%" title="Iframe Example"></iframe>
 
-The next example shows the same chart, but embedded directly into the HTML document in `"svg"` format.
+The next example shows the same chart, but embedded directly into the HTML document
+in `"svg"` format.
 
 {{ inline_source("docs/examples/plotting_matplotlib_svg.py") }}
 
@@ -37,23 +46,43 @@ The next example shows the same chart, but embedded directly into the HTML docum
 
 ## Seaborn
 
-Seaborn is based on Matplotlib and therefore the code is very similar. It is also necessary to create a figure,
-which is then passed to Pyreball. It is also possible to use parameters `matplotlib_format` and `embedded`.
+Seaborn is based on Matplotlib and therefore the code is very similar.
+Seaborn functions are either _axes-level_ or _figure-level_,
+see [documentation](https://seaborn.pydata.org/tutorial/function_overview.html#figure-level-vs-axes-level-functions).
+For axes-level functions, one can create a `Figure` and `Axes` objects as with
+Matplotlib:
 
 {{ inline_source("docs/examples/plotting_seaborn.py") }}
 
 <iframe style="border:2px solid;" src="../examples/plotting_seaborn.html" height="540" width="100%" title="Iframe Example"></iframe>
 
+On the other hand, _figure-level_ functions
+(e.g., [lmplot](https://seaborn.pydata.org/generated/seaborn.lmplot.html)) don't
+use `ax` parameter and return an object of type `PairGrid`, `FacetGrid`, `JointGrid`,
+or `ClusterGrid`.
+In such a case, the object can be also passed
+to [`print_figure()`](../api/pyreball_html/#pyreball.html.print_figure).
+Here are a few examples borrowed from Seaborn's documentation:
+
+{{ inline_source("docs/examples/plotting_seaborn_figure_level.py") }}
+
+<iframe style="border:2px solid;" src="../examples/plotting_seaborn_figure_level.html" height="800" width="100%" title="Iframe Example"></iframe>
+
+As can be seen from examples above, it is also possible to use
+parameters `matplotlib_format` and `embedded` with Seaborn plots.
+
 ## Vega-Altair
 
-For Vega-Altair charts, Pyreball does not offer any special parameters like for Matplotlib and Seaborn charts.
+For Vega-Altair charts, Pyreball does not offer any special parameters like for
+Matplotlib and Seaborn charts.
 The charts are always embedded into the HTML and kept interactive.
 
 {{ inline_source("docs/examples/plotting_vega_altair.py") }}
 
 <iframe style="border:2px solid;" src="../examples/plotting_vega_altair.html" height="540" width="100%" title="Iframe Example"></iframe>
 
-The previous example used `altair.Chart` object, but other types of charts are also supported,
+The previous example used `altair.Chart` object, but other types of charts are also
+supported,
 e.g. `altair.ConcatChart`, `altair.HConcatChart`.
 
 ## Plotly
