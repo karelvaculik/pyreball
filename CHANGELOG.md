@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.1 (2025-10-10)
+
+- Fix parsing of headings when constructing the table of contents, so heading tags
+  inside regular content (e.g., table cells) are ignored.
+- Add tests for Python 3.13.
+
 ## 2.2.0 (2024-06-22)
 
 - Added support for Seaborn's `PairGrid`, `FacetGrid`, `JointGrid`, and `ClusterGrid`.

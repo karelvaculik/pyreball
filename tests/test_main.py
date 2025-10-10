@@ -155,6 +155,7 @@ def test__replace_ids(lines, expected_result):
             (3, "some_id", "Whatever text - also code and bold emphasis - 999"),
         ),
         ("<div>paragraph</div>", None),
+        ("  <h2>heading not at the line beginning</h2>", None),
     ],
 )
 def test_parse_heading_info(test_input, expected_result):

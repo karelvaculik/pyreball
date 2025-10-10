@@ -122,7 +122,9 @@ def _get_node_text(node: xml.dom.minidom.Element) -> str:
 
 
 def _parse_heading_info(line: str) -> Optional[Tuple[int, str, str]]:
-    heading_pattern = r"<h(\d).+</h(\d)>"
+    # parse headings at the beginning of a line as there can be heading tags
+    # within the actual content
+    heading_pattern = r"^<h(\d).+</h(\d)>"
     m = re.search(heading_pattern, line)
     if m:
         heading_level = m.group(1)
