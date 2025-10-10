@@ -56,9 +56,9 @@ ruff-lsp = "^0.0.53"
 tox = "^4.14.2"
 
 [tool.poetry.group.docs.dependencies]
-mkdocs-material = "^9.5.17"
-mkdocstrings = {extras = ["python"], version = "^0.24.3"}
-mkdocs-macros-plugin = "^1.0.5"
+mkdocs-material = "^9.6.21"
+mkdocstrings = { extras = ["python"], version = ">=0.26" }
+mkdocs-macros-plugin = "^1.4.0"
 
 [tool.poetry.extras]
 examples = [
