@@ -2,7 +2,7 @@
 
 <p style="text-align: center">
 
-![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)
+![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)
 [![pypi](https://img.shields.io/pypi/v/pyreball.svg)](https://pypi.python.org/pypi/pyreball)
 [![Tests](https://github.com/karelvaculik/pyreball/actions/workflows/tests.yml/badge.svg)](https://github.com/karelvaculik/pyreball/actions/workflows/tests.yml)
 
